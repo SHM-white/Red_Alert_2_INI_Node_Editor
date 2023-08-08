@@ -26,12 +26,11 @@
     <ClInclude Include="graphicscontrol_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="GraphicsControl.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClCompile Include="GraphicsControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-
+    <ClInclude Include="GraphicsControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

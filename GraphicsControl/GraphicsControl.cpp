@@ -1,5 +1,6 @@
 ﻿#include "GraphicsControl.h"
 
-GraphicsControl::GraphicsControl()
+GraphicsControl::GraphicsControl(QGraphicsView* view) 
 {
+	_view = view;
 }
