@@ -55,8 +55,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <ExternalIncludePath>D:\Documents\source\repos\Red_Alert_2_INI_Node_Editor\20230625\INIBrowser;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <ExternalIncludePath>D:\Documents\source\repos\Red_Alert_2_INI_Node_Editor\20230625\INIBrowser;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -95,9 +97,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Node_List.cpp" />
     <ClInclude Include="graphicscontrol_global.h" />
     <ClInclude Include="GraphicsControl.h" />
     <ClCompile Include="GraphicsControl.cpp" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="Node_List.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\20230625\INIBrowser\INIBrowser\INIBrowser.vcxproj">
+      <Project>{e722f3e0-3535-4b3b-bc9b-511750d2c0b5}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

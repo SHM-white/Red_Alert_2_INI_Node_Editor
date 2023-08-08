@@ -1,6 +1,11 @@
 ﻿#pragma once
 
 #include <QtCore/qglobal.h>
+#include "qgraphicsitem.h"
+#include <qwidget.h>
+#include "qgraphicsview.h"
+#include <INIBrowser/IBFront.h>
+#include <vector>
 
 #ifndef BUILD_STATIC
 # if defined(GRAPHICSCONTROL_LIB)

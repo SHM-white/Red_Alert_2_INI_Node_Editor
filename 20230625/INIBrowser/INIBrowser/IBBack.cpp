@@ -1,4 +1,4 @@
-
+ï»¿
 #include "FromEngine/Include.h"
 #include "FromEngine/global_tool_func.h"
 #include "IBBack.h"
@@ -315,7 +315,7 @@ ReadFileHeader IBB_RSetting
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("µ÷ÓÃÁËIBB_RSetting.ActionÀ´¶ÁÈëÉèÖÃ¡£");
+            GlobalLogB.AddLog("è°ƒç”¨äº†IBB_RSetting.Actionæ¥è¯»å…¥è®¾ç½®ã€‚");
         }
         (void)Length;
         if (FVersion > 200)
@@ -335,7 +335,7 @@ WriteFileHeader IBB_WSetting
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("µ÷ÓÃÁËIBB_WSetting.Action¡£");
+            GlobalLogB.AddLog("è°ƒç”¨äº†IBB_WSetting.Actionã€‚");
         }*/
         return WriteSettingFileGen(File, 0);
      }
@@ -409,7 +409,7 @@ IBB_SettingTypeList::IBB_SettingTypeList()
     Types = {
         {
             IBB_SettingType::IntA,
-                u8"Ö¡ÂÊÏŞÖÆ", u8"ÏŞÖÆÊ¹ÓÃµÄÖ¡ÂÊÒÔ½ÚÔ¼CPU\n·¶Î§15~2000\nÊäÈë-1Ôò²»ÏŞÖÆ\nÄ¬ÈÏ25",
+                u8"å¸§ç‡é™åˆ¶", u8"é™åˆ¶ä½¿ç”¨çš„å¸§ç‡ä»¥èŠ‚çº¦CPU\nèŒƒå›´15~2000\nè¾“å…¥-1åˆ™ä¸é™åˆ¶\né»˜è®¤25",
                 (void*)&Pack.FrameRateLimit,
             {
                 (const void*)&IBG_SettingPack::____FrameRateLimit_Def,
@@ -419,7 +419,7 @@ IBB_SettingTypeList::IBB_SettingTypeList()
         },
         {
             IBB_SettingType::IntA,
-                u8"×ÖÌå´óĞ¡",u8"Ê¹ÓÃµÄ×ÖºÅ\n·¶Î§12~28\nÄ¬ÈÏ16",
+                u8"å­—ä½“å¤§å°",u8"ä½¿ç”¨çš„å­—å·\nèŒƒå›´12~28\né»˜è®¤16",
                 (void*)&Pack.FontSize,
             {
                 (const void*)&IBG_SettingPack::____FontSize_Def,
@@ -428,7 +428,7 @@ IBB_SettingTypeList::IBB_SettingTypeList()
         },
         {
             IBB_SettingType::IntA,
-                u8"²Ëµ¥Ã¿Ò³ÌõÄ¿",u8"·­Ò³²Ëµ¥Ã¿Ò³µÄÌõÄ¿Êı\n·¶Î§5~¡Ş\nÄ¬ÈÏ10",
+                u8"èœå•æ¯é¡µæ¡ç›®",u8"ç¿»é¡µèœå•æ¯é¡µçš„æ¡ç›®æ•°\nèŒƒå›´5~âˆ\né»˜è®¤10",
                 (void*)&Pack.MenuLinePerPage,
             {
                 (const void*)&IBG_SettingPack::____MenuLinePerPage_Def,
@@ -454,7 +454,7 @@ void IBB_SetGlobalSetting(const IBG_SettingPack& Pack)
 }
 
 /*
-°æ±¾ÍØÕ¹£º
+ç‰ˆæœ¬æ‹“å±•ï¼š
 
 ReadFileHeader IBB_RSetting2
 {
@@ -541,7 +541,7 @@ struct IBB_IniLine_Data_Int : public IBB_IniLine_Data_Base
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_IniLine_Data_Int::SetValue £º std::stoi : invalid_argument");
+                GlobalLogB.AddLog("IBB_IniLine_Data_Int::SetValue ï¼š std::stoi : invalid_argument");
             }
             _Empty = true;
             return false;
@@ -552,7 +552,7 @@ struct IBB_IniLine_Data_Int : public IBB_IniLine_Data_Base
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_IniLine_Data_Int::SetValue £º std::stoi : out_of_range");
+                GlobalLogB.AddLog("IBB_IniLine_Data_Int::SetValue ï¼š std::stoi : out_of_range");
             }
             _Empty = true;
             return false;
@@ -607,7 +607,7 @@ struct IBB_IniLine_Data_Double : public IBB_IniLine_Data_Base
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_IniLine_Data_Double::SetValue £º std::stod : invalid_argument");
+                GlobalLogB.AddLog("IBB_IniLine_Data_Double::SetValue ï¼š std::stod : invalid_argument");
             }
             _Empty = true;
             return false;
@@ -618,7 +618,7 @@ struct IBB_IniLine_Data_Double : public IBB_IniLine_Data_Base
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_IniLine_Data_Double::SetValue £º std::stod : out_of_range");
+                GlobalLogB.AddLog("IBB_IniLine_Data_Double::SetValue ï¼š std::stod : out_of_range");
             }
             _Empty = true;
             return false;
@@ -695,7 +695,7 @@ void IBB_IniLine_AllocationMap_Destroy()
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog(("IBB_IniLine_AllocationMap_Destroy £º ²¶»ñÁË" + std::to_string(i) + "¸öÎ´»ØÊÕIniLine¡£").c_str());
+        GlobalLogB.AddLog(("IBB_IniLine_AllocationMap_Destroy ï¼š æ•è·äº†" + std::to_string(i) + "ä¸ªæœªå›æ”¶IniLineã€‚").c_str());
     }
 };
 
@@ -754,7 +754,7 @@ bool IBB_IniLine_Default::Load(JsonObject FromJson)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            sprintf_s(LogBufB, "IBB_IniLine_Default::Load £º IniLine \"%s\" µÄProperty.TypeÊ¹ÓÃÁË²»´æÔÚµÄÀàĞÍ \"%s\"¡£"
+            sprintf_s(LogBufB, "IBB_IniLine_Default::Load ï¼š IniLine \"%s\" çš„Property.Typeä½¿ç”¨äº†ä¸å­˜åœ¨çš„ç±»å‹ \"%s\"ã€‚"
                 , Name.c_str(), Property.Type.c_str());
             GlobalLogB.AddLog(LogBufB);
         }
@@ -806,7 +806,7 @@ bool IBB_DefaultTypeList::LoadAfterParse()
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_DefaultTypeList::LoadAfterParse £º JSON¶ÁÈ¡¹ÊÕÏ¡£");
+            GlobalLogB.AddLog("IBB_DefaultTypeList::LoadAfterParse ï¼š JSONè¯»å–æ•…éšœã€‚");
         }
         return false;
     }
@@ -840,9 +840,9 @@ bool IBB_DefaultTypeList::LoadAfterParse()
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadAfterParse £º JSON¶ÁÈ¡Íê±Ï¡£");
+        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadAfterParse ï¼š JSONè¯»å–å®Œæ¯•ã€‚");
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadAfterParse £º ·µ»Ø", false);
+        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadAfterParse ï¼š è¿”å›", false);
         GlobalLogB.AddLog(IBD_BoolStr(Ret));
     }
 
@@ -854,7 +854,7 @@ bool IBB_DefaultTypeList::LoadFromString(const std::string& FromString)
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadFromString £º JSON¿ªÊ¼¶ÁÈ¡¡£");
+        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadFromString ï¼š JSONå¼€å§‹è¯»å–ã€‚");
     }
 
     RootJson.Clear();
@@ -868,7 +868,7 @@ bool IBB_DefaultTypeList::LoadFromFile(const std::string& FromFile)
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadFromFile £º JSON¿ªÊ¼¶ÁÈ¡¡£");
+        GlobalLogB.AddLog("IBB_DefaultTypeList::LoadFromFile ï¼š JSONå¼€å§‹è¯»å–ã€‚");
     }
 
     RootJson.Clear();
@@ -887,13 +887,13 @@ bool operator<(const IBB_Section_Desc& A, const IBB_Section_Desc& B) { return (A
 
 IBB_Ini* IBB_Project_Index::GetIni(IBB_Project& Proj)
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni £ºFunc I Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni ï¼šFunc I Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, true, [](const IBB_Ini& F) {return F.Name; });
     return (Iter == Proj.Inis.end()) ? nullptr : std::addressof(*Iter);
 }
 IBB_Section* IBB_Project_Index::GetSec(IBB_Project& Proj)
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec £ºFunc I Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec ï¼šFunc I Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, true, [](const IBB_Ini& F) {return F.Name; });
     if (Iter == Proj.Inis.end())return nullptr;
     auto Iter1 = Section.Search(Iter->Secs, true, false);
@@ -901,13 +901,13 @@ IBB_Section* IBB_Project_Index::GetSec(IBB_Project& Proj)
 }
 IBB_Ini* IBB_Project_Index::GetIni(IBB_Project& Proj) const
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni £ºFunc II Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni ï¼šFunc II Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, [](const IBB_Ini& F) {return F.Name; });
     return (Iter == Proj.Inis.end()) ? nullptr : std::addressof(*Iter);
 }
 IBB_Section* IBB_Project_Index::GetSec(IBB_Project& Proj) const
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec £ºFunc II Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec ï¼šFunc II Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, [](const IBB_Ini& F) {return F.Name; });
     if (Iter == Proj.Inis.end())return nullptr;
     auto Iter1 = Section.Search(Iter->Secs, true);
@@ -915,13 +915,13 @@ IBB_Section* IBB_Project_Index::GetSec(IBB_Project& Proj) const
 }
 const IBB_Ini* IBB_Project_Index::GetIni(const IBB_Project& Proj)
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni £ºFunc III Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni ï¼šFunc III Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, true, [](const IBB_Ini& F) {return F.Name; });
     return (Iter == Proj.Inis.end()) ? nullptr : std::addressof(*Iter);
 }
 const IBB_Section* IBB_Project_Index::GetSec(const IBB_Project& Proj)
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec £ºFunc III Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec ï¼šFunc III Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, true, [](const IBB_Ini& F) {return F.Name; });
     if (Iter == Proj.Inis.end())return nullptr;
     auto Iter1 = Section.Search(Iter->Secs, true, false);
@@ -929,13 +929,13 @@ const IBB_Section* IBB_Project_Index::GetSec(const IBB_Project& Proj)
 }
 const IBB_Ini* IBB_Project_Index::GetIni(const IBB_Project& Proj) const
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni £ºFunc IV Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetIni ï¼šFunc IV Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, [](const IBB_Ini& F) {return F.Name; });
     return (Iter == Proj.Inis.end()) ? nullptr : std::addressof(*Iter);
 }
 const IBB_Section* IBB_Project_Index::GetSec(const IBB_Project& Proj) const
 {
-    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec £ºFunc IV Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
+    if (EnableLogEx) { GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("IBB_Project_Index::GetSec ï¼šFunc IV Idx=", false); GlobalLogB.AddLog(GetText().c_str()); }
     auto Iter = Ini.Search<IBB_Ini>(Proj.Inis, true, [](const IBB_Ini& F) {return F.Name; });
     if (Iter == Proj.Inis.end())return nullptr;
     auto Iter1 = Section.Search(Iter->Secs, true);
@@ -1092,7 +1092,7 @@ IBB_Section* IBB_Project::AddNewSectionEx(const IBB_Section_NameType& Paragraph)
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Project::AddNewSection £ºÎŞ·¨Ìí¼ÓINI¡£");
+                GlobalLogB.AddLog("IBB_Project::AddNewSection ï¼šæ— æ³•æ·»åŠ INIã€‚");
             }
             return nullptr;
         }
@@ -1102,7 +1102,7 @@ IBB_Section* IBB_Project::AddNewSectionEx(const IBB_Section_NameType& Paragraph)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_Project::AddNewSection £ºCreateSection´´½¨Ê§°Ü¡£");
+            GlobalLogB.AddLog("IBB_Project::AddNewSection ï¼šCreateSectionåˆ›å»ºå¤±è´¥ã€‚");
         }
         return nullptr;
     }
@@ -1113,7 +1113,7 @@ IBB_Section* IBB_Project::AddNewSectionEx(const IBB_Section_NameType& Paragraph)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_Project::AddNewSection £ºÎŞ·¨Ìí¼Ó×Ö¶Î¡£");
+            GlobalLogB.AddLog("IBB_Project::AddNewSection ï¼šæ— æ³•æ·»åŠ å­—æ®µã€‚");
         }
         return nullptr;
     }
@@ -1135,7 +1135,7 @@ IBB_Section* IBB_Project::CreateNewSection(const IBB_Section_Desc& Desc)
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Project::CreateNewSection £ºÎŞ·¨Ìí¼ÓINI¡£");
+                GlobalLogB.AddLog("IBB_Project::CreateNewSection ï¼šæ— æ³•æ·»åŠ INIã€‚");
             }
             return nullptr;
         }
@@ -1145,7 +1145,7 @@ IBB_Section* IBB_Project::CreateNewSection(const IBB_Section_Desc& Desc)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_Project::CreateNewSection £ºCreateSection´´½¨Ê§°Ü¡£");
+            GlobalLogB.AddLog("IBB_Project::CreateNewSection ï¼šCreateSectionåˆ›å»ºå¤±è´¥ã€‚");
         }
         return nullptr;
     }
@@ -1155,7 +1155,7 @@ IBB_Section* IBB_Project::CreateNewSection(const IBB_Section_Desc& Desc)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_Project::CreateNewSection £ºÎŞ·¨Ìí¼Ó×Ö¶Î¡£");
+            GlobalLogB.AddLog("IBB_Project::CreateNewSection ï¼šæ— æ³•æ·»åŠ å­—æ®µã€‚");
         }
         return nullptr;
     }
@@ -1174,7 +1174,7 @@ bool IBB_Project::AddNewLinkToLinkGroup(const IBB_Section_Desc& From, const IBB_
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Project::AddNewLinkToLinkGroup £ºÎŞ·¨Ìí¼ÓFrom×Ö¶Î¡£");
+                GlobalLogB.AddLog("IBB_Project::AddNewLinkToLinkGroup ï¼šæ— æ³•æ·»åŠ Fromå­—æ®µã€‚");
             }
             return false;
         }
@@ -1189,7 +1189,7 @@ bool IBB_Project::AddNewLinkToLinkGroup(const IBB_Section_Desc& From, const IBB_
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Project::AddNewLinkToLinkGroup £ºÎŞ·¨Ìí¼ÓFrom×Ö¶Î¡£");
+                GlobalLogB.AddLog("IBB_Project::AddNewLinkToLinkGroup ï¼šæ— æ³•æ·»åŠ Fromå­—æ®µã€‚");
             }
             return false;
         }
@@ -1242,7 +1242,7 @@ bool IBB_Project::AddModule(const IBB_Module& Module)
                 if (EnableLog)
                 {
                     GlobalLogB.AddLog_CurTime(false);
-                    sprintf_s(LogBufB, "IBB_Project::AddModule £º×Ö¶Î %s -> %s ²»´æÔÚ¡£", TgType.c_str(), Name.c_str());
+                    sprintf_s(LogBufB, "IBB_Project::AddModule ï¼šå­—æ®µ %s -> %s ä¸å­˜åœ¨ã€‚", TgType.c_str(), Name.c_str());
                     GlobalLogB.AddLog(LogBufB);
                 }
                 Ret = false;
@@ -1258,7 +1258,7 @@ bool IBB_Project::AddModule(const IBB_Module& Module)
     return Ret;
 }
 
-//ÎÒÒ²²»Ì«È·¶¨¾ÍÕâÂğ
+//æˆ‘ä¹Ÿä¸å¤ªç¡®å®šå°±è¿™å—
 bool IBB_Project::UpdateAll()
 {
     if (EnableLogEx)
@@ -1273,7 +1273,7 @@ bool IBB_Project::UpdateAll()
         for (auto& ss : sp.second.SubSecs)ss.LinkTo.clear();
     }
     for (auto& Ini : Inis)if (!Ini.UpdateAll())Ret = false;
-    GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("¡ª¡ªIBB_Project::UpdateAll¡ª¡ª");//BREAKPOINT
+    GlobalLogB.AddLog_CurTime(false); GlobalLogB.AddLog("â€”â€”IBB_Project::UpdateAllâ€”â€”");//BREAKPOINT
     for (auto& Ini : Inis)for (auto& sp : Ini.Secs)
     {
         if (sp.second.IsLinkGroup)
@@ -1350,7 +1350,7 @@ void IBB_Project::PackModule(IBB_Module& Module)const
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog(("IBB_Project::PackModule £º " + Reg.IniType + " -> " + Reg.Type).c_str());
+            GlobalLogB.AddLog(("IBB_Project::PackModule ï¼š " + Reg.IniType + " -> " + Reg.Type).c_str());
         }
         Module.AttachedRegister.push_back(/*std::move*/(Reg.GetNameType()));
     }
@@ -1399,7 +1399,7 @@ std::string IBB_RegisterList::GetText(bool PrintExtraData) const
     int i = 1;
     for (auto ptr : List)
     {
-        //if(ptr==nullptr) Ôİ²»Ğè¼ì²é
+        //if(ptr==nullptr) æš‚ä¸éœ€æ£€æŸ¥
         Text += std::to_string(i) + "=" + ptr->Name; Text.push_back('\n');
         i++;
     }
@@ -1435,7 +1435,7 @@ bool IBB_Ini::Merge(const IBB_Ini& Another, bool IsDuplicate)
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Ini::Merge £ºÓĞÃû×ÖµÄ×Ö¶ÎÀíÓ¦´æÔÚ¡£");
+                GlobalLogB.AddLog("IBB_Ini::Merge ï¼šæœ‰åå­—çš„å­—æ®µç†åº”å­˜åœ¨ã€‚");
             }
             Ret = false;
         }
@@ -1469,7 +1469,7 @@ bool IBB_IniLine::Merge(const std::string& Another, const std::string& Mode)
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_IniLine::Merge £ºData²»ÄÜ±»·ÖÅä¡£");
+                GlobalLogB.AddLog("IBB_IniLine::Merge ï¼šDataä¸èƒ½è¢«åˆ†é…ã€‚");
             }
             return false;
         }
@@ -1491,7 +1491,7 @@ bool IBB_IniLine::Merge(const std::string& Another, const std::string& Mode)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            sprintf_s(LogBufB, "IBB_IniLine::Merge £ºLine \"%s\"ºÏ²¢Ä£Ê½\"%s\"²»´æÔÚ¡£", Default->Name.c_str(), Mode.c_str());
+            sprintf_s(LogBufB, "IBB_IniLine::Merge ï¼šLine \"%s\"åˆå¹¶æ¨¡å¼\"%s\"ä¸å­˜åœ¨ã€‚", Default->Name.c_str(), Mode.c_str());
             GlobalLogB.AddLog(LogBufB);
         }
         return false;
@@ -1515,7 +1515,7 @@ bool IBB_IniLine::Generate(const std::string& Value, IBB_IniLine_Default* Def)
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_IniLine::Generate £ºData²»ÄÜ±»·ÖÅä¡£");
+            GlobalLogB.AddLog("IBB_IniLine::Generate ï¼šDataä¸èƒ½è¢«åˆ†é…ã€‚");
         }
         return false;
     }
@@ -1559,7 +1559,7 @@ IBB_IniLine::~IBB_IniLine()
     if (ShouldDestroy && Data != nullptr && Default != nullptr && Default->Property.Proc != nullptr)
     {
         //Default->Property.Proc->Destroy(Data);
-        //TODO:È·ÈÏÕâÖÖÊµÏÖÃ»ÎÊÌâ
+        //TODO:ç¡®è®¤è¿™ç§å®ç°æ²¡é—®é¢˜
         Data = nullptr;
     }
 }
@@ -1684,7 +1684,7 @@ std::string IBB_SubSec::GetText(bool PrintExtraData) const
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog(("IBB_SubSec::GetText £ºSubSec" + sn + "ÓĞÃû×Ö¶øÎŞ¶ÔÓ¦µÄÄÚÈİ¡£").c_str());
+                GlobalLogB.AddLog(("IBB_SubSec::GetText ï¼šSubSec" + sn + "æœ‰åå­—è€Œæ— å¯¹åº”çš„å†…å®¹ã€‚").c_str());
             }
         auto& L = It->second;
         Text += sn;Text.push_back('=');
@@ -1716,7 +1716,7 @@ std::vector<std::string> IBB_SubSec::GetKeys(bool PrintExtraData) const
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog(("IBB_SubSec::GetKeys £ºSubSec" + sn + "ÓĞÃû×Ö¶øÎŞ¶ÔÓ¦µÄÄÚÈİ¡£").c_str());
+                GlobalLogB.AddLog(("IBB_SubSec::GetKeys ï¼šSubSec" + sn + "æœ‰åå­—è€Œæ— å¯¹åº”çš„å†…å®¹ã€‚").c_str());
             }
         Ret.push_back(sn);
     }
@@ -1738,7 +1738,7 @@ IBB_VariableList IBB_SubSec::GetLineList(bool PrintExtraData) const
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog(("IBB_SubSec::GetLineList £ºSubSec" + sn + "ÓĞÃû×Ö¶øÎŞ¶ÔÓ¦µÄÄÚÈİ¡£").c_str());
+                GlobalLogB.AddLog(("IBB_SubSec::GetLineList ï¼šSubSec" + sn + "æœ‰åå­—è€Œæ— å¯¹åº”çš„å†…å®¹ã€‚").c_str());
             }
         auto& L = It->second;
         if (L.Default == nullptr)Ret.Value[sn] = "MISSING Line Default";
@@ -1856,7 +1856,7 @@ bool IBB_Ini::AddSection(const IBB_Section& Section, bool IsDuplicate)
         return Is->second.Merge(Section, "Merge", IsDuplicate);
     }
 }
-//TODO:Ë¢ĞÂLink£¬²»¹ı²»×Å¼±£¬±Ï¾¹AddSectionÊµ¼ÊÖ»»áÔÚAddModuleÊ±µ÷ÓÃ£¬¶ø²»»áµ¼ÖÂÔ­ÓĞLinkµÄ¸Ä¶¯
+//TODO:åˆ·æ–°Linkï¼Œä¸è¿‡ä¸ç€æ€¥ï¼Œæ¯•ç«ŸAddSectionå®é™…åªä¼šåœ¨AddModuleæ—¶è°ƒç”¨ï¼Œè€Œä¸ä¼šå¯¼è‡´åŸæœ‰Linkçš„æ”¹åŠ¨
 
 /*
 bool IBB_Ini::DeleteSection(const std::string& Tg)
@@ -1911,7 +1911,7 @@ std::string IBB_Ini::GetText(bool PrintExtraData) const
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog(("IBB_Ini::GetText £º×Ö¶Î"+ sn +"ÓĞÃû×Ö¶øÎŞ¶ÔÓ¦µÄÄÚÈİ¡£").c_str());
+                GlobalLogB.AddLog(("IBB_Ini::GetText ï¼šå­—æ®µ"+ sn +"æœ‰åå­—è€Œæ— å¯¹åº”çš„å†…å®¹ã€‚").c_str());
             }
         auto& Sec = It->second;
         Text += "[" + Sec.Name + "]\n" + Sec.GetText(PrintExtraData);
@@ -2003,7 +2003,7 @@ void IBB_Link::DynamicCheck_Legal(const IBB_Project& Proj)
         IBB_Link* pl;
         while (pt == nullptr && it != pt->LinkGroup_LinkTo.end()) { pl = &(*it); pt = Proj.GetSec(it->To); ++it; }
         if(pt == nullptr) { Dynamic.Legal = IBB_Link::_Dynamic::Incomplete; return; }
-        //ÔİÇÒÕâÃ´¸É
+        //æš‚ä¸”è¿™ä¹ˆå¹²
         ToChange.push_back(pl);
         for (auto l : pt->LinkedBy)if (l == *pl)ToChange.push_back(&l);
     }
@@ -2014,7 +2014,7 @@ void IBB_Link::DynamicCheck_Legal(const IBB_Project& Proj)
         IBB_Link* pl;
         while (pf == nullptr && it != pf->LinkedBy.end()) { pl = &(*it); pf = Proj.GetSec(it->From); ++it; }
         if (pf == nullptr) { Dynamic.Legal = IBB_Link::_Dynamic::Incomplete; return; }
-        //ÔİÇÒÕâÃ´¸É
+        //æš‚ä¸”è¿™ä¹ˆå¹²
         ToChange.push_back(pl);
         for (auto l : pt->GetLinkTo())if (l == *pl)ToChange.push_back(&l);
     }
@@ -2299,7 +2299,7 @@ bool IBB_Section::Generate(const IBB_Section_NameType& Par)
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Section::Generate £º ´íÎó£ºSection×÷ÎªÒ»¸öLinkGroupÈ´¾ßÓĞ·Ç¿ÕµÄLines¡£");
+                GlobalLogB.AddLog("IBB_Section::Generate ï¼š é”™è¯¯ï¼šSectionä½œä¸ºä¸€ä¸ªLinkGroupå´å…·æœ‰éç©ºçš„Linesã€‚");
             }
             return false;
         }
@@ -2643,7 +2643,7 @@ bool IBB_DefaultModuleList::LoadAfterParse()
         if (EnableLog)
         {
             GlobalLogB.AddLog_CurTime(false);
-            GlobalLogB.AddLog("IBB_DefaultModuleList::LoadAfterParse £º JSON¶ÁÈ¡¹ÊÕÏ¡£");
+            GlobalLogB.AddLog("IBB_DefaultModuleList::LoadAfterParse ï¼š JSONè¯»å–æ•…éšœã€‚");
         }
         return false;
     }
@@ -2661,9 +2661,9 @@ bool IBB_DefaultModuleList::LoadAfterParse()
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultTypeList::Load £º JSON¶ÁÈ¡Íê±Ï¡£");
+        GlobalLogB.AddLog("IBB_DefaultTypeList::Load ï¼š JSONè¯»å–å®Œæ¯•ã€‚");
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultTypeList::Load £º ·µ»Ø", false);
+        GlobalLogB.AddLog("IBB_DefaultTypeList::Load ï¼š è¿”å›", false);
         GlobalLogB.AddLog(IBD_BoolStr(Ret));
     }
 
@@ -2675,7 +2675,7 @@ bool IBB_DefaultModuleList::LoadFromString(const std::string& FromString)
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultModuleList::LoadFromString £º JSON¿ªÊ¼¶ÁÈ¡¡£");
+        GlobalLogB.AddLog("IBB_DefaultModuleList::LoadFromString ï¼š JSONå¼€å§‹è¯»å–ã€‚");
     }
 
     RootJson.Clear();
@@ -2689,7 +2689,7 @@ bool IBB_DefaultModuleList::LoadFromFile(const std::string& FromFile)
     if (EnableLog)
     {
         GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("IBB_DefaultModuleList::LoadFromFile £º JSON¿ªÊ¼¶ÁÈ¡¡£");
+        GlobalLogB.AddLog("IBB_DefaultModuleList::LoadFromFile ï¼š JSONå¼€å§‹è¯»å–ã€‚");
     }
 
     RootJson.Clear();
@@ -2818,7 +2818,7 @@ IBB_Module_Default::_NameType IBB_Module_Default::_NameType::CutMergeName(const 
     }
     return Ret;
 }
-std::string IBB_Module_Default::_NameType::FillIn_NotList(const std::string& Name) const//Èç¹û²»ÊÇList£¬¿ìËÙÌî³ä²ÎÊı
+std::string IBB_Module_Default::_NameType::FillIn_NotList(const std::string& Name) const//å¦‚æœä¸æ˜¯Listï¼Œå¿«é€Ÿå¡«å……å‚æ•°
 {
     static BufString Buf;
     if (IsList)return "";
@@ -3027,7 +3027,7 @@ bool IBB_Module_Default::_MergeParagraph::Load(JsonObject FromJson)
                 if (EnableLog)
                 {
                     GlobalLogB.AddLog_CurTime(false);
-                    GlobalLogB.AddLog("IBB_Module_Default::_MergeParagraph::Load £º²»Ó¦×ßÈë Pair.second.empty() == false && switch(Pair.second.back())->Default µÄ·ÖÖ§£¬MergeParagraphµÄParagraphConst³öÏÖºó×º´íÎó¡£");
+                    GlobalLogB.AddLog("IBB_Module_Default::_MergeParagraph::Load ï¼šä¸åº”èµ°å…¥ Pair.second.empty() == false && switch(Pair.second.back())->Default çš„åˆ†æ”¯ï¼ŒMergeParagraphçš„ParagraphConstå‡ºç°åç¼€é”™è¯¯ã€‚");
                 }
                 Paragraph.back().Value.Type = u8"Replace"; break;
             }
@@ -3178,7 +3178,7 @@ void IBB_Module::Write(const ExtFileClass& File)const
         MergeParagraph.Write(File);
         MergeType.Write(File);
     }
-    //´Àµ½±¬Õ¨¤Îbug£ºWriteVectorµÄlambda²ÎÊı±ØĞëconst auto&·ñÔòµ¼ÖÂ×ÊÔ´µÄ²»µ±Îö¹¹£¡£¡
+    //è ¢åˆ°çˆ†ç‚¸ã®bugï¼šWriteVectorçš„lambdaå‚æ•°å¿…é¡»const auto&å¦åˆ™å¯¼è‡´èµ„æºçš„ä¸å½“ææ„ï¼ï¼
     //File.WriteLabel("<AttachedRegister>");
     //::MessageBoxA(NULL, "66B", "Title", MB_OK);
     ::MessageBoxA(NULL, std::to_string(AttachedRegister.size()).c_str() , "Title SB Size=", MB_OK);
@@ -3319,7 +3319,7 @@ const std::string& IBB_Module_ParagraphList::GetParamEx(int N, bool Random)
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                GlobalLogB.AddLog("IBB_Module_ParagraphList::GetParam £º²»Ó¦×ßÈë Random == false && N == -1 µÄ·ÖÖ§£¬¶øÓ¦¸ÃÌáÇ°´¦Àí¡£");
+                GlobalLogB.AddLog("IBB_Module_ParagraphList::GetParam ï¼šä¸åº”èµ°å…¥ Random == false && N == -1 çš„åˆ†æ”¯ï¼Œè€Œåº”è¯¥æå‰å¤„ç†ã€‚");
             }
             return Null;
         }
@@ -3330,7 +3330,7 @@ const std::string& IBB_Module_ParagraphList::GetParamEx(int N, bool Random)
 
 IBB_DefaultTypeList::_Query::_Query()
 {
-    IniLine_Default_Special_FunctionList = {};//ÓĞÊ²Ã´SpecialÀàĞÍÔÙÌí¼Ó¡£
+    IniLine_Default_Special_FunctionList = {};//æœ‰ä»€ä¹ˆSpecialç±»å‹å†æ·»åŠ ã€‚
 }
 
 bool IBB_DefaultTypeList::BuildQuery()
@@ -3349,7 +3349,7 @@ bool IBB_DefaultTypeList::BuildQuery()
             if (EnableLog)
             {
                 GlobalLogB.AddLog_CurTime(false);
-                sprintf_s(LogBufB, "IBB_DefaultTypeList::BuildQuery £ºIniĞĞ\"%s\"µÄLimit.Type=\"%s\"²»ÊôÓÚÈÎºÎÒÑÖªÀàĞÍ¡£",
+                sprintf_s(LogBufB, "IBB_DefaultTypeList::BuildQuery ï¼šIniè¡Œ\"%s\"çš„Limit.Type=\"%s\"ä¸å±äºä»»ä½•å·²çŸ¥ç±»å‹ã€‚",
                     p.second.Name.c_str(), p.second.Limit.Type.c_str());
                 GlobalLogB.AddLog(LogBufB);
             }

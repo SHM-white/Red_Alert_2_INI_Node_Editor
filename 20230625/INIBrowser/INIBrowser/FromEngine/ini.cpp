@@ -1,4 +1,4 @@
-#include"ini.h"
+Ôªø#include"ini.h"
 
 #include"external_file.h"
 
@@ -43,7 +43,7 @@ namespace Ini
 			memset(buf0, 0, sizeof(buf0));
 			sf.GetStr(buf0, MAX_LINE_LENGTH);
 			buf = buf0;
-			buf = RemoveFrontSpace(buf0);//SECTION / KEY æ˘»Á¥À¥¶¿Ì 
+			buf = RemoveFrontSpace(buf0);//SECTION / KEY ÂùáÂ¶ÇÊ≠§Â§ÑÁêÜ 
 			RemoveBackSpace(buf);
 			int buf_len = strlen(buf);
 			if (buf_len < 2)continue;
@@ -53,7 +53,7 @@ namespace Ini
 				cmt_start_pos = buf + buf_len;
 				has_cmt = false;
 			}
-			*cmt_start_pos = 0;//‘› ±Ωÿ∂œ 
+			*cmt_start_pos = 0;//ÊöÇÊó∂Êà™Êñ≠ 
 			if (cmt_start_pos == buf)//;COMMENT
 			{
 				if (has_cmt)*cmt_start_pos = ';';
