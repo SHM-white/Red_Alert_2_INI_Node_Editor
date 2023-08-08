@@ -7,7 +7,7 @@ class GRAPHICSCONTROL_EXPORT GraphicsControl
 {
 public:
     GraphicsControl(QGraphicsView* view);    
-    void Rander(IBF_Setting& setting);
+    void Render(IBF_Setting& setting);
 private:
     QGraphicsView* _view;
 };

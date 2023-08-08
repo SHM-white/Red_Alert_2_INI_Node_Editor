@@ -7,7 +7,8 @@ class Node_List
 {
 public:
 	std::vector<Node> m_nodes;
-private:
 	std::string m_title;
+	QGraphicsItemGroup* item;
+
 };
 
