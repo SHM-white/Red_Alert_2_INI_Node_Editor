@@ -26,7 +26,8 @@ RineMainWindow::RineMainWindow(QWidget *parent)
 
     //GraphicsView背景
     node_scene *scene=new node_scene(this);
-    control.m_scene = scene;
+    control = std::make_shared<GraphicsControl>(ui->graphicsView);
+    control->m_scene = scene;
     ui->graphicsView->setScene(scene);
 
     //拖动

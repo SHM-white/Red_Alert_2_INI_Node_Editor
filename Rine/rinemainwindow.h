@@ -24,6 +24,6 @@ public:
     //void mouseDoubleClickEvent(QMouseEvent *event);
 private:
     Ui::RineMainWindow *ui;
-    GraphicsControl control;
+    std::shared_ptr<GraphicsControl> control;
 };
 #endif // RINEMAINWINDOW_H
