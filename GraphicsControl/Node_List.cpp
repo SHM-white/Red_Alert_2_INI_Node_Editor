@@ -18,8 +18,11 @@ QGraphicsItemGroup* Node_List::operator()(void) const
 	//todo:add effect to title to display section
 	for (int i = 0; i < m_nodes.size();++i) {
 		auto* itemNode = (*m_nodes[i])();
+		auto* itemRect = new QGraphicsRectItem();
+		itemRect->setRect(0, NodeSize.height() * (i + 1), NodeSize.width(), NodeSize.height());
 		itemNode->setPos(0, NodeSize.height() * (i + 1));
 		item->addToGroup(itemNode);
+		item->addToGroup(itemRect);
 	}
 	return item.get();
 }

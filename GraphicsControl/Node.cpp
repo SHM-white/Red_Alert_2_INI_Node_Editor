@@ -44,13 +44,13 @@ Node* Node::GetChild()
 
 QGraphicsItemGroup* Node::operator()(void) const
 {
-    auto item_key = std::make_shared<QGraphicsTextItem>(m_key);
+    auto item_key = new QGraphicsTextItem(m_key);
     item_key->setPos(0, 0);
-    m_item->addToGroup(item_key.get());
+    m_item->addToGroup(item_key);
 
-    auto item_value = std::make_shared<QGraphicsTextItem>(m_value);
+    auto item_value = new QGraphicsTextItem(m_value);
     item_value->setPos((int)(NodeSize.width() / 2), 0);
-    m_item->addToGroup(item_value.get());
+    m_item->addToGroup(item_value);
     return m_item.get();
 }
 
