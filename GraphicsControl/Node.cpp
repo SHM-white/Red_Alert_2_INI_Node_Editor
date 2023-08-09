@@ -19,3 +19,12 @@ Node* Node::GetChild()
 {
     return nullptr;
 }
+
+QGraphicsItemGroup* Node::operator()(void)
+{
+    auto* item_str = new QGraphicsLineItem;
+    item_str->setLine
+
+    return &item;
+}
+

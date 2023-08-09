@@ -4,12 +4,14 @@ class Node
 {
 public:
 	std::string key;
-	//value
+	std::string value;
 	bool hasChild();
 	bool hasParent();
 	Node* GetParent();
 	Node* GetChild();
+	QGraphicsItemGroup* operator()(void);
 private:
+	QGraphicsItemGroup item;
 	bool m_hasParent;
 	bool m_hasChild;
 	Node* m_pParent;

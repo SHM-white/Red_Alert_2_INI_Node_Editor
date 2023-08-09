@@ -6,8 +6,8 @@
 class GRAPHICSCONTROL_EXPORT GraphicsControl
 {
 public:
-    GraphicsControl(QGraphicsView* view);    
-    void Render(IBF_Setting& setting);
+    GraphicsControl(QGraphicsView* view);
+    //void Render(IBF_Setting& setting);//与后台对接
 private:
-    QGraphicsView* _view;
+    QGraphicsView* m_view;
 };

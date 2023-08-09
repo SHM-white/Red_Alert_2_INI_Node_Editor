@@ -55,10 +55,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <ExternalIncludePath>D:\Documents\source\repos\Red_Alert_2_INI_Node_Editor\20230625\INIBrowser;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>.\20230625\INIBrowser;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <ExternalIncludePath>D:\Documents\source\repos\Red_Alert_2_INI_Node_Editor\20230625\INIBrowser;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>.\20230625\INIBrowser;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

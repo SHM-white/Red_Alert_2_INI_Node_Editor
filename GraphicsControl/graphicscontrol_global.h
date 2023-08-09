@@ -4,7 +4,7 @@
 #include "qgraphicsitem.h"
 #include <qwidget.h>
 #include "qgraphicsview.h"
-#include <INIBrowser/IBFront.h>
+//#include <INIBrowser/IBFront.h>
 #include <vector>
 
 #ifndef BUILD_STATIC
