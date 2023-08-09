@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>.\INI_Editor_Core\cJSON\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>.\INI_Editor_Core\cJSON\include;$(ExternalIncludePath);..\..;..\..\backends;..\libs\glfw\include;%(AdditionalIncludeDirectories)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>.\INI_Editor_Core\cJSON\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>.\INI_Editor_Core\cJSON\include;$(ExternalIncludePath);..\..;..\..\backends;..\libs\glfw\include;%(AdditionalIncludeDirectories)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -118,6 +118,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/D _CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,6 +138,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/D _CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,8 +164,8 @@
     <ClInclude Include="FromEngine\types.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="IBBack.h" />
-    <ClInclude Include="IBFront.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="SaveFile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -174,13 +176,13 @@
     <ClCompile Include="FromEngine\RFBump.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="IBBack.cpp" />
-    <ClCompile Include="IBFront.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SaveFile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

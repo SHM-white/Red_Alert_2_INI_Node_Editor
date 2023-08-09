@@ -156,13 +156,13 @@ bool IsTrueString(const std::string& s1)
     return s1 == "true" || s1 == "yes" || s1 == "1" || s1 == "T" || s1 == "True" || s1 == "Yes" || s1 == "t" || s1 == "Y" || s1 == "y";
 }
 
-std::string RandStr(int i)
-{
-    static const char Pool[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-    std::string ss; ss.reserve(i + 1);
-    for (int p = 0; p < i; p++)ss.push_back(Pool[GlobalRnd() % 62]);
-    return ss;
-}
+//std::string RandStr(int i)
+//{
+//    static const char Pool[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+//    std::string ss; ss.reserve(i + 1);
+//    for (int p = 0; p < i; p++)ss.push_back(Pool[GlobalRnd() % 62]);
+//    return ss;
+//}
 
 
 
@@ -365,111 +365,111 @@ std::string GetStringFromFile(const char* FileName)
     return LoadStr;
 }
 
-void JsonFile::Parse(std::string Str)
-{
-    if (EnableLogEx)
-    {
-        GlobalLogB.AddLog_CurTime(false);
-        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- std::string Str=%s", Str.c_str()); GlobalLogB.AddLog(LogBufB);
-    }
-    cJSON_Minify(Str.data());
-    Clear();
-    File = cJSON_Parse(Str.data());
-}
-void JsonFile::ParseWithOpts(std::string Str, const char** ReturnParseEnd, int RequireNullTerminated)
-{
-    if (EnableLogEx)
-    {
-        GlobalLogB.AddLog_CurTime(false);
-        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- std::string Str=%s, int RequireNullTerminated=%d", Str.c_str(), RequireNullTerminated); GlobalLogB.AddLog(LogBufB);
-    }
-    cJSON_Minify(Str.data());
-    Clear();
-    File = cJSON_ParseWithOpts(Str.data(), ReturnParseEnd, RequireNullTerminated);
-}
+//void JsonFile::Parse(std::string Str)
+//{
+//    if (EnableLogEx)
+//    {
+//        GlobalLogB.AddLog_CurTime(false);
+//        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- std::string Str=%s", Str.c_str()); GlobalLogB.AddLog(LogBufB);
+//    }
+//    cJSON_Minify(Str.data());
+//    Clear();
+//    File = cJSON_Parse(Str.data());
+//}
+//void JsonFile::ParseWithOpts(std::string Str, const char** ReturnParseEnd, int RequireNullTerminated)
+//{
+//    if (EnableLogEx)
+//    {
+//        GlobalLogB.AddLog_CurTime(false);
+//        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- std::string Str=%s, int RequireNullTerminated=%d", Str.c_str(), RequireNullTerminated); GlobalLogB.AddLog(LogBufB);
+//    }
+//    cJSON_Minify(Str.data());
+//    Clear();
+//    File = cJSON_ParseWithOpts(Str.data(), ReturnParseEnd, RequireNullTerminated);
+//}
 
-void JsonFile::ParseFromFile(const char* FileName)
-{
-    if (EnableLogEx)
-    {
-        GlobalLogB.AddLog_CurTime(false);
-        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- char* FileName=%s",FileName); GlobalLogB.AddLog(LogBufB);
-    }
-    Clear();
+//void JsonFile::ParseFromFile(const char* FileName)
+//{
+//    if (EnableLogEx)
+//    {
+//        GlobalLogB.AddLog_CurTime(false);
+//        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- char* FileName=%s",FileName); GlobalLogB.AddLog(LogBufB);
+//    }
+//    Clear();
+//
+//    ExtFileClass Fp;
+//    if (!Fp.Open(FileName, "r"))return;
+//    Fp.Seek(0, SEEK_END);
+//    int Pos = Fp.Position();
+//    char* FileStr;
+//    FileStr = new char[Pos + 50];
+//    if (FileStr == nullptr)return;
+//    Fp.Seek(0, SEEK_SET);
+//    Fp.Read(FileStr, 1, Pos);
+//    FileStr[Pos] = 0;
+//    Fp.Close();
+//
+//    int iPos = 0;
+//    while (FileStr[iPos] != '{' && iPos < Pos)iPos++;
+//    if (iPos == Pos) { delete[]FileStr; return; }
+//
+//    cJSON_Minify(FileStr + iPos);
+//    File = cJSON_Parse(FileStr + iPos);
+//
+//    if (EnableLogEx)
+//    {
+//        GlobalLogB.AddLog_CurTime(false);
+//        GlobalLogB.AddLog("JsonFile::ParseFromFile ： JSON文本：");
+//        GlobalLogB.AddLog_CurTime(false);
+//        GlobalLogB.AddLog("\"", false);
+//        GlobalLogB.AddLog(UTF8toMBCS(FileStr + iPos).c_str(), false);
+//        GlobalLogB.AddLog("\"");
+//    }
+//
+//    delete[]FileStr;
+//}
 
-    ExtFileClass Fp;
-    if (!Fp.Open(FileName, "r"))return;
-    Fp.Seek(0, SEEK_END);
-    int Pos = Fp.Position();
-    char* FileStr;
-    FileStr = new char[Pos + 50];
-    if (FileStr == nullptr)return;
-    Fp.Seek(0, SEEK_SET);
-    Fp.Read(FileStr, 1, Pos);
-    FileStr[Pos] = 0;
-    Fp.Close();
-
-    int iPos = 0;
-    while (FileStr[iPos] != '{' && iPos < Pos)iPos++;
-    if (iPos == Pos) { delete[]FileStr; return; }
-
-    cJSON_Minify(FileStr + iPos);
-    File = cJSON_Parse(FileStr + iPos);
-
-    if (EnableLogEx)
-    {
-        GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("JsonFile::ParseFromFile ： JSON文本：");
-        GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("\"", false);
-        GlobalLogB.AddLog(UTF8toMBCS(FileStr + iPos).c_str(), false);
-        GlobalLogB.AddLog("\"");
-    }
-
-    delete[]FileStr;
-}
-
-void JsonFile::ParseFromFileWithOpts(const char* FileName, int RequireNullTerminated)
-{
-    if (EnableLogEx)
-    {
-        GlobalLogB.AddLog_CurTime(false);
-        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- char* FileName=%s, int RequireNullTerminated=%d", FileName, RequireNullTerminated); GlobalLogB.AddLog(LogBufB);
-    }
-    Clear();
-
-    ExtFileClass Fp;
-    if (!Fp.Open(FileName, "r"))return;
-    Fp.Seek(0, SEEK_END);
-    int Pos = Fp.Position();
-    char* FileStr;
-    FileStr = new char[Pos + 50];
-    if (FileStr == nullptr)return;
-    Fp.Seek(0, SEEK_SET);
-    Fp.Read(FileStr, 1, Pos);
-    FileStr[Pos] = 0;
-    Fp.Close();
-
-    int iPos = 0;
-    while (FileStr[iPos] != '{' && iPos < Pos)iPos++;
-    if (iPos == Pos) { delete[]FileStr; return; }
-
-    const char* ReturnParseEnd;
-    cJSON_Minify(FileStr + iPos);
-    File = cJSON_ParseWithOpts(FileStr + iPos, &ReturnParseEnd, RequireNullTerminated);
-
-    if (EnableLogEx)
-    {
-        GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("JsonFile::ParseFromFileWithOpts ： JSON文本：");
-        GlobalLogB.AddLog_CurTime(false);
-        GlobalLogB.AddLog("\"", false);
-        GlobalLogB.AddLog(UTF8toMBCS(FileStr + iPos).c_str(), false);
-        GlobalLogB.AddLog("\"");
-    }
-
-    delete[]FileStr;
-}
+//void JsonFile::ParseFromFileWithOpts(const char* FileName, int RequireNullTerminated)
+//{
+//    if (EnableLogEx)
+//    {
+//        GlobalLogB.AddLog_CurTime(false);
+//        sprintf_s(LogBufB, "JsonFile::ParseFromFile <- char* FileName=%s, int RequireNullTerminated=%d", FileName, RequireNullTerminated); GlobalLogB.AddLog(LogBufB);
+//    }
+//    Clear();
+//
+//    ExtFileClass Fp;
+//    if (!Fp.Open(FileName, "r"))return;
+//    Fp.Seek(0, SEEK_END);
+//    int Pos = Fp.Position();
+//    char* FileStr;
+//    FileStr = new char[Pos + 50];
+//    if (FileStr == nullptr)return;
+//    Fp.Seek(0, SEEK_SET);
+//    Fp.Read(FileStr, 1, Pos);
+//    FileStr[Pos] = 0;
+//    Fp.Close();
+//
+//    int iPos = 0;
+//    while (FileStr[iPos] != '{' && iPos < Pos)iPos++;
+//    if (iPos == Pos) { delete[]FileStr; return; }
+//
+//    const char* ReturnParseEnd;
+//    cJSON_Minify(FileStr + iPos);
+//    File = cJSON_ParseWithOpts(FileStr + iPos, &ReturnParseEnd, RequireNullTerminated);
+//
+//    if (EnableLogEx)
+//    {
+//        GlobalLogB.AddLog_CurTime(false);
+//        GlobalLogB.AddLog("JsonFile::ParseFromFileWithOpts ： JSON文本：");
+//        GlobalLogB.AddLog_CurTime(false);
+//        GlobalLogB.AddLog("\"", false);
+//        GlobalLogB.AddLog(UTF8toMBCS(FileStr + iPos).c_str(), false);
+//        GlobalLogB.AddLog("\"");
+//    }
+//
+//    delete[]FileStr;
+//}
 
 bool RegexFull_Nothrow(const std::string& Str, const std::string& Regex) throw()
 {

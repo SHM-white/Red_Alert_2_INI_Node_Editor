@@ -27,9 +27,6 @@
     <ClInclude Include="IBBack.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IBFront.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="FromEngine\Csf.h">
       <Filter>FromEngine</Filter>
     </ClInclude>
@@ -66,6 +63,9 @@
     <ClInclude Include="Global.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SaveFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -75,9 +75,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="IBBack.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="IBFront.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FromEngine\Csf.cpp">
@@ -96,6 +93,9 @@
       <Filter>FromEngine</Filter>
     </ClCompile>
     <ClCompile Include="Global.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "IBFront.h"
+//#include "IBFront.h"
 //#include "IBRender.h"
 #include "FromEngine/RFBump.h"
 #include <atomic>
@@ -24,14 +24,14 @@ extern const int VersionRelease;
 extern const int VersionN;
 extern const std::string VersionNStr;
 extern const char* _TEXT_UTF8 AppName;
-extern const char* _TEXT_ANSI AppNameA;
+//extern const char* _TEXT_ANSI AppNameA;
 extern const wchar_t* AppNameW;
 
 //统一的文件头
 extern const int32_t SaveFileHeaderSign;
 
 //设置的实例
-extern IBF_Setting IBF_Inst_Setting;
+//extern IBF_Setting IBF_Inst_Setting;
 //extern IBR_Setting IBR_Inst_Setting;
 
 //设置的标识
@@ -40,9 +40,9 @@ extern std::atomic<bool> SettingSaveComplete;
 extern const wchar_t* SettingFileName;
 
 //日志
-extern LogClass GlobalLog;
-extern LogClass GlobalLogB;
-extern BufString LogBuf, LogBufB;
+//extern LogClass GlobalLog;
+//extern LogClass GlobalLogB;
+//extern BufString LogBuf, LogBufB;
 extern bool EnableLog;//LOG
 extern bool EnableLogEx;//EXTRA LOG
 
@@ -51,28 +51,28 @@ extern IBRF_Bump IBRF_CoreBump;
 #define IBD_RInterruptF(x) IBG_RInterruptF_RangeLock __IBD_RInterruptF_VariableA_##x{ IBRF_CoreBump };
 #define IBD_FInterruptR(x) IBG_FInterruptR_RangeLock __IBD_FInterruptR_VariableA_##x{ IBRF_CoreBump };
 extern uint64_t ShellLoopLastTime;
-extern DWORD BackThreadID;
+//extern DWORD BackThreadID;
 
 //设置内容
 extern int KeyPerPage;
 extern int FontHeight;
 extern int WindowSizeAdjustX, WindowSizeAdjustY;
 extern bool IsProjectOpen;
-extern HWND MainWindowHandle;
+//extern HWND MainWindowHandle;
 extern int RScrX, RScrY, ScrX, ScrY;
 
 //格式类型表
-extern IBF_DefaultTypeList IBF_Inst_DefaultTypeList;
-extern IBF_DefaultModuleList IBF_Inst_DefaultModuleList;
-extern IBF_Project IBF_Inst_Project;
+//extern IBF_DefaultTypeList IBF_Inst_DefaultTypeList;
+//extern IBF_DefaultModuleList IBF_Inst_DefaultModuleList;
+//extern IBF_Project IBF_Inst_Project;
 //extern IBR_Project IBR_Inst_Project;
-extern IBS_Project IBS_Inst_Project;
+//extern IBS_Project IBS_Inst_Project;
 
 //调试
 //extern IBR_Debug IBR_Inst_Debug;
 
 //随机种子
-extern std::default_random_engine GlobalRnd;
+//extern std::default_random_engine GlobalRnd;
 extern const int ModuleRandomParameterLength;
 
 //prelink

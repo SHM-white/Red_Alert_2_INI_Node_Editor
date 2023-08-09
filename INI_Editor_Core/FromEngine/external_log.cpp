@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "external_log.h"
 #include "global_tool_func.h"
 
