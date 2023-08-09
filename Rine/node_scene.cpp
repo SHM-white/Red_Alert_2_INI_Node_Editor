@@ -1,4 +1,4 @@
-#include "node_scene.h"
+﻿#include "node_scene.h"
 
 node_scene::node_scene(QWidget *parent){
     //this->gridsize

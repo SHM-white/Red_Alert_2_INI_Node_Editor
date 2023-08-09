@@ -1,4 +1,4 @@
-#include <QGraphicsScene>
+﻿#include <QGraphicsScene>
 #include <QWheelEvent>
 #include <QRectF>
 #include <QLine>

@@ -1,9 +1,11 @@
-#ifndef RINEMAINWINDOW_H
+﻿#ifndef RINEMAINWINDOW_H
 #define RINEMAINWINDOW_H
 
 #include <QMainWindow>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include "GraphicsControl.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class RineMainWindow; }
@@ -22,5 +24,6 @@ public:
     //void mouseDoubleClickEvent(QMouseEvent *event);
 private:
     Ui::RineMainWindow *ui;
+    std::shared_ptr<GraphicsControl> control;
 };
 #endif // RINEMAINWINDOW_H
