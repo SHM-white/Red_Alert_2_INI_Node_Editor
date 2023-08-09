@@ -21,12 +21,42 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="IBBack.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IBFront.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IBRender.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IBSave.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IBBack.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IBFront.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IBRender.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IBSave.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

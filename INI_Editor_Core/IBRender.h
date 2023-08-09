@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "IBFront.h"
 #include "FromEngine/RFBump.h"
 #include "IBSave.h"
@@ -60,12 +60,12 @@ struct IBR_Debug
 #define _PROJ_CMD_CAN_UNDO
 #define _PROJ_CMD_WRITE
 #define _PROJ_CMD_READ
-#define _PROJ_CMD_NOINTERRUPT //´Ë²Ù×÷²»¹ÒÆğºó¶ËÏß³Ì
+#define _PROJ_CMD_NOINTERRUPT //æ­¤æ“ä½œä¸æŒ‚èµ·åç«¯çº¿ç¨‹
 #define _PROJ_CMD_BACK_CONST
 
 #define _CALL_CMD
 
-#define _RETURN_BACK_DATA //Ê¹ÓÃÏàÓ¦·µ»ØÖµÊ±ÇëÏÈRInterruptFËø×¡ºó¶ËÏß³ÌÔÙ¶ÁĞ´
+#define _RETURN_BACK_DATA //ä½¿ç”¨ç›¸åº”è¿”å›å€¼æ—¶è¯·å…ˆRInterruptFé”ä½åç«¯çº¿ç¨‹å†è¯»å†™
 
 
 
@@ -96,13 +96,13 @@ struct IBR_Section
 {
     IBR_Project* Root;
     uint64_t ID;
-    //¸Ä¶¯ÆäÖĞ´æ´¢ÄÚÈİÓ¦ĞŞ¸ÄIBR_Project::GetSection
+    //æ”¹åŠ¨å…¶ä¸­å­˜å‚¨å†…å®¹åº”ä¿®æ”¹IBR_Project::GetSection
 
     
     _RETURN_BACK_DATA IBB_Section* _PROJ_CMD_READ GetBack() ;
     _RETURN_BACK_DATA const IBB_Section* _PROJ_CMD_READ GetBack() _PROJ_CMD_BACK_CONST const;
 
-    //ÈôSec²»´æÔÚ¸øFunction´«Èënullptr
+    //è‹¥Secä¸å­˜åœ¨ç»™Functionä¼ å…¥nullptr
     template<typename T>
     T _PROJ_CMD_READ _PROJ_CMD_WRITE OperateBackData(const std::function<T(IBB_Section*)>& Function);
     /*template<typename T>
@@ -112,7 +112,7 @@ struct IBR_Section
 
     const IBB_Section_Desc& _PROJ_CMD_NOINTERRUPT GetSectionDesc() _PROJ_CMD_BACK_CONST const;
 
-    //´ËSecÊÇ·ñ´æÔÚ
+    //æ­¤Secæ˜¯å¦å­˜åœ¨
     bool _PROJ_CMD_READ HasBack() const;
 
     _RETURN_BACK_DATA IBB_VariableList* _PROJ_CMD_READ GetVarList() _PROJ_CMD_BACK_CONST const;
@@ -121,16 +121,16 @@ struct IBR_Section
 
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE SetVarList(const IBB_VariableList& NewList);
 
-    //²»½¨Òé¿çINIÀàĞÍ¸´ÖÆ£¬³ı·ÇÄãÈ·¶¨ÄãÔÚ×öÊ²Ã´£¬²¢ÇÒÎª×Ö¶ÎÉèÖÃÕıÈ·µÄ±äÁ¿±í£¬ÒÔ·ûºÏÄ£°åµÄÕûÌåÔ¼¶¨
+    //ä¸å»ºè®®è·¨INIç±»å‹å¤åˆ¶ï¼Œé™¤éä½ ç¡®å®šä½ åœ¨åšä»€ä¹ˆï¼Œå¹¶ä¸”ä¸ºå­—æ®µè®¾ç½®æ­£ç¡®çš„å˜é‡è¡¨ï¼Œä»¥ç¬¦åˆæ¨¡æ¿çš„æ•´ä½“çº¦å®š
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE DuplicateSection(const IBB_Section_Desc& NewDesc) _PROJ_CMD_BACK_CONST const;
     IBR_Section  _PROJ_CMD_READ _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE DuplicateSectionAndBack(const IBB_Section_Desc& NewDesc) _PROJ_CMD_BACK_CONST const;
 
-    //Èç¹ûÃû×Ö³åÍ»ÔòÉ¶Ò²²»¸É²¢·µ»Øfalse
+    //å¦‚æœåå­—å†²çªåˆ™å•¥ä¹Ÿä¸å¹²å¹¶è¿”å›false
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE Rename(const std::string& NewName);
 
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO Register(const std::string& Name, const std::string& IniName) _PROJ_CMD_BACK_CONST const;
 
-    IBR_SectionData* _PROJ_CMD_READ _PROJ_CMD_NOINTERRUPT GetSectionData() const;//¿ÉÄÜÎª¿Õ
+    IBR_SectionData* _PROJ_CMD_READ _PROJ_CMD_NOINTERRUPT GetSectionData() const;//å¯èƒ½ä¸ºç©º
 
 private:
     IBB_Section_Desc* _PROJ_CMD_NOINTERRUPT GetDesc() const;
@@ -140,7 +140,7 @@ private:
 struct IBR_Project
 {
     typedef uint64_t id_t;
-    id_t MaxID{ 0 };//TODO:Äã»¹ÄÜÊ¹ÓÃ³¬¹ıULL_MAX¸öID£¿ÒªÊÇÕæµÄÈç´ËÄÇ¾ÍĞŞÒ»ĞŞ
+    id_t MaxID{ 0 };//TODO:ä½ è¿˜èƒ½ä½¿ç”¨è¶…è¿‡ULL_MAXä¸ªIDï¼Ÿè¦æ˜¯çœŸçš„å¦‚æ­¤é‚£å°±ä¿®ä¸€ä¿®
     std::map<id_t, IBR_SectionData> IBR_SectionMap;
     std::map<IBB_Section_Desc, id_t> IBR_Rev_SectionMap;
 
@@ -166,22 +166,22 @@ struct IBR_Project
 
     //bool _PROJ_CMD_READ WriteTextToFolder();
 
-    //ËüÊÇUTF8´¿´âÊÇÒòÎª·½±ãÍ³Ò»INI´æ´¢¸ñÊ½
+    //å®ƒæ˜¯UTF8çº¯ç²¹æ˜¯å› ä¸ºæ–¹ä¾¿ç»Ÿä¸€INIå­˜å‚¨æ ¼å¼
     _TEXT_UTF8 std::string _PROJ_CMD_READ GetText(bool PrintExtraData) _PROJ_CMD_BACK_CONST;
 
-    //Õâ¸ö¶«Î÷Ã»É¶¿ªÏú£¬³ıÁË¸´ÖÆÒ»·İDesc £» ²»±£Ö¤ÊÇ·ñ´æÔÚ
+    //è¿™ä¸ªä¸œè¥¿æ²¡å•¥å¼€é”€ï¼Œé™¤äº†å¤åˆ¶ä¸€ä»½Desc ï¼› ä¸ä¿è¯æ˜¯å¦å­˜åœ¨
     IBR_Section _PROJ_CMD_NOINTERRUPT _PROJ_CMD_READ GetSection(const IBB_Section_Desc& Desc) _PROJ_CMD_BACK_CONST;
 
-    //²»½¨Òé£¬»áÈ±ÉÙÄ£°åÀïÃæÔ¼¶¨µÄÒ»²¿·ÖVariable£¨°üÀ¨ÀàĞÍ±ê¼Ç£©
+    //ä¸å»ºè®®ï¼Œä¼šç¼ºå°‘æ¨¡æ¿é‡Œé¢çº¦å®šçš„ä¸€éƒ¨åˆ†Variableï¼ˆåŒ…æ‹¬ç±»å‹æ ‡è®°ï¼‰
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE CreateSection(const IBB_Section_Desc& Desc);
     IBR_Section _PROJ_CMD_READ _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE CreateSectionAndBack(const IBB_Section_Desc& Desc);
 
-    //Í¬GetSectionµÄHasBack
+    //åŒGetSectionçš„HasBack
     bool _PROJ_CMD_READ HasSection(const IBB_Section_Desc& Desc) _PROJ_CMD_BACK_CONST;
 
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE DeleteSection(const IBB_Section_Desc& Desc);
 
-    //²»±£Ö¤IDÓĞĞ§
+    //ä¸ä¿è¯IDæœ‰æ•ˆ
     inline IBR_Section _PROJ_CMD_NOINTERRUPT _PROJ_CMD_READ GetSectionFromID(id_t id) _PROJ_CMD_BACK_CONST { return { this,id }; }
 
     std::optional<id_t> _PROJ_CMD_NOINTERRUPT _PROJ_CMD_READ GetSectionID(const IBB_Section_Desc& Desc) _PROJ_CMD_BACK_CONST;
@@ -209,7 +209,7 @@ namespace IBR_UICondition
     bool UpdateWindowTitle();
 }
 
-//°´Å¥ÓĞÌØ±ğµÄÑùÊ½
+//æŒ‰é’®æœ‰ç‰¹åˆ«çš„æ ·å¼
 struct IBR_MainMenu
 {
     struct _Item
@@ -236,7 +236,7 @@ struct IBG_UndoStack
         std::function<std::any()> Extra;
     };
     std::vector<_Item> Stack;
-    //Ö±½Ó¸³ÖµµÃÍ¬Ê±¸ÄCursor
+    //ç›´æ¥èµ‹å€¼å¾—åŒæ—¶æ”¹Cursor
     int Cursor{ -1 };
     bool Undo();
     bool Redo();
@@ -335,7 +335,7 @@ namespace IBR_EditFrame
 
 namespace IBR_Color
 {
-    static const ImColor BackgroundColor(253, 241, 157, 255);//±³¾°É«
+    static const ImColor BackgroundColor(253, 241, 157, 255);//èƒŒæ™¯è‰²
     static const ImColor FocusWindowColor(170, 204, 244, 255);
     static const ImColor ClipFrameLineColor(108, 255, 45, 255);
     static const ImColor CenterCrossColor(255, 5, 5, 255);
@@ -404,7 +404,7 @@ namespace IBR_HintManager
     void Clear();
     void RenderUI();
     void SetHint(const _TEXT_UTF8 std::string& Str, int TimeLimitMillis = -1);
-    void SetHintCustom(const std::function<bool(_TEXT_UTF8 std::string&)>& Fn);//·µ»Øtrue¼ÌĞø£¬falseÍ£Ö¹²¢Clear
+    void SetHintCustom(const std::function<bool(_TEXT_UTF8 std::string&)>& Fn);//è¿”å›trueç»§ç»­ï¼Œfalseåœæ­¢å¹¶Clear
     const std::string& GetHint();
     void Load();
 }

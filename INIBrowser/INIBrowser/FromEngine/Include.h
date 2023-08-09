@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "external_file.h"
 #include "external_log.h"
