@@ -17,6 +17,7 @@ void GraphicsControl::Render(std::map<QString, const std::map<QString, QString>>
 		listItem->setPos((NodeSize.width() + 20) * count, 0);
 		listItem->setFlags(QGraphicsItem::GraphicsItemFlag::ItemIsMovable);
 		scene->addItem(listItem);
+		++count;
 	}
 	m_view->setScene(scene);
 	m_view->show();
