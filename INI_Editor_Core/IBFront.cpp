@@ -11,11 +11,11 @@ void IBF_Thr_FrontLoop()
 {
     BackThreadID = GetCurrentThreadId();
     uint64_t TimeWait = GetSysTimeMicros();
-    //if (EnableLog)
-    //{
-    //    GlobalLogB.AddLog_CurTime(false);
-    //    GlobalLogB.AddLog("启动了IBF_Thr_FrontLoop。");
-    //}
+    if (EnableLog)
+    {
+        GlobalLogB.AddLog_CurTime(false);
+        GlobalLogB.AddLog("启动了IBF_Thr_FrontLoop。");
+    }
     while (1)
     {
         int FrameRateLim = 50;
@@ -34,11 +34,11 @@ void IBF_Thr_FrontLoop()
 
 bool IBF_Setting::ReadSetting(const wchar_t* Name)
 {
-    //if (EnableLog)
-    //{
-    //    GlobalLogB.AddLog_CurTime(false);
-    //    GlobalLogB.AddLog("调用了IBF_Setting::ReadSetting。");
-    //}
+    if (EnableLog)
+    {
+        GlobalLogB.AddLog_CurTime(false);
+        GlobalLogB.AddLog("调用了IBF_Setting::ReadSetting。");
+    }
     IBB_SettingRegisterRW(SettingFile);
     List.PackSetDefault();
     bool Ret = SettingFile.Read(Name);

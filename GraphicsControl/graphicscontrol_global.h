@@ -4,6 +4,9 @@
 #include "qgraphicsitem.h"
 #include <qwidget.h>
 #include "qgraphicsview.h"
+#include "qrect.h"
+#include "qsize.h"
+#include "qpoint.h"
 //#include <INIBrowser/IBFront.h>
 #include <vector>
 
@@ -16,3 +19,5 @@
 #else
 # define GRAPHICSCONTROL_EXPORT
 #endif
+
+

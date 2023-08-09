@@ -4,6 +4,7 @@
 //#include "IBRender.h"
 #include "FromEngine/RFBump.h"
 #include <atomic>
+#include "FromEngine/external_log.h"
 
 #define IBD_ShutDownDestructor(x) x##_ShutDownDestructor
 #define IBD_Inst_ShutDownDestructor(x) x##_Inst_ShutDownDestructor
@@ -40,8 +41,8 @@ extern std::atomic<bool> SettingSaveComplete;
 extern const wchar_t* SettingFileName;
 
 //日志
-//extern LogClass GlobalLog;
-//extern LogClass GlobalLogB;
+extern LogClass GlobalLog;
+extern LogClass GlobalLogB;
 //extern BufString LogBuf, LogBufB;
 extern bool EnableLog;//LOG
 extern bool EnableLogEx;//EXTRA LOG

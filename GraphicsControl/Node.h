@@ -1,17 +1,20 @@
 ﻿#pragma once
 #include "graphicscontrol_global.h"
+#include "GraphicsControl.h"
+
 class Node
 {
 public:
-	std::string key;
-	std::string value;
+	Node(const QString key, const QString value);
+	QString m_key;
+	QString m_value;
 	bool hasChild();
 	bool hasParent();
 	Node* GetParent();
 	Node* GetChild();
-	QGraphicsItemGroup* operator()(void);
+	QGraphicsItemGroup* operator()(void) const;
 private:
-	QGraphicsItemGroup item;
+	std::shared_ptr<QGraphicsItemGroup> m_item;
 	bool m_hasParent;
 	bool m_hasChild;
 	Node* m_pParent;
