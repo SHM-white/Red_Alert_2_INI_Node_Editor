@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="FromEngine">
+      <UniqueIdentifier>{957af812-48a4-4aee-a09c-0d98fb03dcb3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,13 +30,40 @@
     <ClInclude Include="IBFront.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IBRender.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="FromEngine\Csf.h">
+      <Filter>FromEngine</Filter>
     </ClInclude>
-    <ClInclude Include="IBSave.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="FromEngine\external_file.h">
+      <Filter>FromEngine</Filter>
     </ClInclude>
-    <ClInclude Include="SaveFile.h">
+    <ClInclude Include="FromEngine\external_log.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\global_timer.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\global_tool_func.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\Include.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\InfoStack.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\ini.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\RFBump.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\SpIni.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="FromEngine\types.h">
+      <Filter>FromEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,13 +80,22 @@
     <ClCompile Include="IBFront.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="IBRender.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="FromEngine\Csf.cpp">
+      <Filter>FromEngine</Filter>
     </ClCompile>
-    <ClCompile Include="IBSave.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="FromEngine\external_log.cpp">
+      <Filter>FromEngine</Filter>
     </ClCompile>
-    <ClCompile Include="SaveFile.cpp">
+    <ClCompile Include="FromEngine\global_tool_func.cpp">
+      <Filter>FromEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="FromEngine\ini.cpp">
+      <Filter>FromEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="FromEngine\RFBump.cpp">
+      <Filter>FromEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

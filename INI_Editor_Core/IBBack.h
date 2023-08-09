@@ -1,7 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
 #include "FromEngine/Include.h"
-#include "cjson/cJSON.h"
+#include "cJSON/include/cjson/cJSON.h"
 
 #ifndef _TEXT_UTF8
 #define _TEXT_UTF8
@@ -9,9 +9,9 @@
 
 
 /*
-Ò»¸ö×Ü¸Ù£º
-back²»¸ºÔğWriteºÍUpdateµÄ×ÛºÏ
-¶øÓÉFrontÍ³Óù£¡
+ä¸€ä¸ªæ€»çº²ï¼š
+backä¸è´Ÿè´£Writeå’ŒUpdateçš„ç»¼åˆ
+è€Œç”±Frontç»Ÿå¾¡ï¼
 */
 
 struct IBG_SettingPack;
@@ -154,7 +154,7 @@ template<typename T> IBB_IniLine_Process IBB_GetDefaultIniLineProcess();
 
 struct IBB_IniLine_Default
 {
-    struct _Limit//°´ÕÕÊ²Ã´Æ¥Åä
+    struct _Limit//æŒ‰ç…§ä»€ä¹ˆåŒ¹é…
     {
         /*
         enum _Type
@@ -166,7 +166,7 @@ struct IBB_IniLine_Default
         std::string Lim;
     };
 
-    struct _Property//´æ´¢µÄÊÇÊ²Ã´
+    struct _Property//å­˜å‚¨çš„æ˜¯ä»€ä¹ˆ
     {
         /*
         enum _Type
@@ -184,7 +184,7 @@ struct IBB_IniLine_Default
         JsonObject Lim;
     };
 
-    struct _Require//¶ÔÆäËûĞĞµÄÒªÇó
+    struct _Require//å¯¹å…¶ä»–è¡Œçš„è¦æ±‚
     {
         std::vector<std::string> RequiredNames;
         std::vector<std::string> ForbiddenNames;
@@ -244,7 +244,7 @@ struct IBB_IniLine
     IBB_IniLine(const IBB_IniLine& F) { Default = F.Default; Data = F.Data; ShouldDestroy = false; }
     IBB_IniLine(IBB_IniLine&& F); 
 
-    IBB_IniLine Duplicate() const;//Õâ¸ö²ÅÊÇÉî¸´ÖÆ£¬¼øÓÚÉî¸´ÖÆÓÃ´¦Ô¶µÍÇ³¸´ÖÆ£¬¹ÊÄ¬ÈÏÇ³¸´ÖÆ
+    IBB_IniLine Duplicate() const;//è¿™ä¸ªæ‰æ˜¯æ·±å¤åˆ¶ï¼Œé‰´äºæ·±å¤åˆ¶ç”¨å¤„è¿œä½æµ…å¤åˆ¶ï¼Œæ•…é»˜è®¤æµ…å¤åˆ¶
 
     ~IBB_IniLine();
 };
@@ -258,7 +258,7 @@ struct IBB_SubSec
     std::vector<std::string> Lines_ByName;//KeyName
     std::unordered_map<std::string, IBB_IniLine> Lines;//<KeyName,LineData>
     std::vector<IBB_Link> LinkTo;
-    //Key¸´ÖÆÁË2±é£ºLines_ByName / Lines.find(x)->first
+    //Keyå¤åˆ¶äº†2éï¼šLines_ByName / Lines.find(x)->first
 
     IBB_SubSec() {}
     IBB_SubSec(IBB_SubSec_Default* D,IBB_Section* R) : Default(D), Root(R) {}
@@ -268,12 +268,12 @@ struct IBB_SubSec
     bool Merge(const IBB_SubSec& Another, const IBB_VariableList& MergeType, bool IsDuplicate);
     bool Merge(const IBB_SubSec& Another, const std::string& Mode, bool IsDuplicate);
 
-    std::string GetText(bool PrintExtraData) const;//RARELY USED Õâ¸öGetText×Ô´ø»»ĞĞ·û
+    std::string GetText(bool PrintExtraData) const;//RARELY USED è¿™ä¸ªGetTextè‡ªå¸¦æ¢è¡Œç¬¦
     std::vector<std::string> GetKeys(bool PrintExtraData) const;//RARELY USED
     IBB_VariableList GetLineList(bool PrintExtraData) const;//RARELY USED
     std::string GetFullVariable(const std::string& Name) const;
-    IBB_SubSec Duplicate() const;//Õâ¸ö²ÅÊÇÉî¸´ÖÆ£¬¼øÓÚÉî¸´ÖÆÓÃ´¦Ô¶µÍÇ³¸´ÖÆ£¬¹ÊÄ¬ÈÏÇ³¸´ÖÆ
-    void GenerateAsDuplicate(const IBB_SubSec& Src);//´ÓSrcÉî¸´ÖÆ
+    IBB_SubSec Duplicate() const;//è¿™ä¸ªæ‰æ˜¯æ·±å¤åˆ¶ï¼Œé‰´äºæ·±å¤åˆ¶ç”¨å¤„è¿œä½æµ…å¤åˆ¶ï¼Œæ•…é»˜è®¤æµ…å¤åˆ¶
+    void GenerateAsDuplicate(const IBB_SubSec& Src);//ä»Srcæ·±å¤åˆ¶
 
     bool UpdateAll();
 
@@ -289,7 +289,7 @@ struct IBB_Link_Default
         LinkFromForbidden,
         LinkToRequired,
         LinkToForbidden;
-    std::string Name;//Á´½ÓÃ»ÓĞDesc
+    std::string Name;//é“¾æ¥æ²¡æœ‰Desc
 
     bool Load(JsonObject FromJson);
 };
@@ -343,7 +343,7 @@ struct IBB_Link_NameType
     void Write(const ExtFileClass& File)const;
 };
 
-//TODO:ËüµÄÎö¹¹ËÆºõÓĞÄªÃûµÄÎÊÌâ£¬¿ÉÄÜµ¼ÖÂ±ÀÀ£,µ«ÊÇÖÁ½ñÎ´Ôø¸´ÏÖ¡£¡£
+//TODO:å®ƒçš„ææ„ä¼¼ä¹æœ‰è«åçš„é—®é¢˜ï¼Œå¯èƒ½å¯¼è‡´å´©æºƒ,ä½†æ˜¯è‡³ä»Šæœªæ›¾å¤ç°ã€‚ã€‚
 struct IBB_Link
 {
     IBB_Link_Default* Default{ nullptr };
@@ -375,7 +375,7 @@ struct IBB_Link
     void DynamicCheck_UpdateNewLink(const IBB_Project& Proj);
     bool ChangeAddress();
 
-    std::string GetText(const IBB_Project& Proj) const;//Õâ¸öGetText×Ô´ø»»ĞĞ·û
+    std::string GetText(const IBB_Project& Proj) const;//è¿™ä¸ªGetTextè‡ªå¸¦æ¢è¡Œç¬¦
     IBB_Link_NameType GetNameType() const;
 };
 
@@ -394,8 +394,8 @@ struct IBB_VariableList
     std::string GetText(bool ConsiderUpValue) const;
     void Flatten(IBB_VariableList& Target) const;
 
-    void Read(const ExtFileClass& File);//²»¹ÜUpValue
-    void Write(const ExtFileClass& File)const;//²»¹ÜUpValue
+    void Read(const ExtFileClass& File);//ä¸ç®¡UpValue
+    void Write(const ExtFileClass& File)const;//ä¸ç®¡UpValue
 };
 
 
@@ -419,7 +419,7 @@ struct IBB_Section
     std::vector<IBB_SubSec> SubSecs;
     std::vector<IBB_Link> LinkedBy;
     IBB_VariableList VarList;
-    IBB_VariableList UnknownLines;//²»¹éÊôÓÚÈÎÒ»SubSec
+    IBB_VariableList UnknownLines;//ä¸å½’å±äºä»»ä¸€SubSec
 
     bool IsLinkGroup;//no subsec varlist unklines
     std::vector<IBB_Link> LinkGroup_LinkTo;
@@ -429,7 +429,7 @@ struct IBB_Section
         bool Selected{ false };
     }Dynamic;
 
-    //ÔöÉ¾¸ÄÊ±ÏàÓ¦ĞŞ¸ÄÒÆ¶¯¹¹Ôìº¯Êı
+    //å¢åˆ æ”¹æ—¶ç›¸åº”ä¿®æ”¹ç§»åŠ¨æ„é€ å‡½æ•°
 
     // MergeType is unused to a LinkGroup
     bool Merge(const IBB_Section& Another, const IBB_VariableList& MergeType, bool IsDuplicate);
@@ -448,9 +448,9 @@ struct IBB_Section
 
     bool ChangeRoot(const IBB_Ini* NewRoot);
     IBB_Section& ChangeRootAndBack(const IBB_Ini* R) { ChangeRoot(R); return *this; }
-    bool Rename(const std::string& NewName);//ÎŞĞ§»¯Ö¸ÏòËüµÄËùÓĞIBB_Section_Desc
-    bool ChangeAddress();//ÓÃÓÚ²»¸Ä±äÄÚÈİµ«ÊÇ¸Ä±ä´æ´¢Î»ÖÃÊ±,¹©ÒÆ¶¯¹¹Ôì
-    bool Isolate();//ÇĞ¶ÏËùÓĞLink
+    bool Rename(const std::string& NewName);//æ— æ•ˆåŒ–æŒ‡å‘å®ƒçš„æ‰€æœ‰IBB_Section_Desc
+    bool ChangeAddress();//ç”¨äºä¸æ”¹å˜å†…å®¹ä½†æ˜¯æ”¹å˜å­˜å‚¨ä½ç½®æ—¶,ä¾›ç§»åŠ¨æ„é€ 
+    bool Isolate();//åˆ‡æ–­æ‰€æœ‰Link
 
     IBB_Project_Index GetThisIndex() const;
     std::vector<IBB_Link> GetLinkTo() const;//RARELY USED
@@ -458,9 +458,9 @@ struct IBB_Section
     IBB_VariableList GetLineList(bool PrintExtraData) const;//RARELY USED
     IBB_VariableList GetSimpleLines() const;//RARELY USED
     std::string GetText(bool PrintExtraData) const;//RARELY USED
-    std::string GetFullVariable(const std::string& Name) const;//Èç¹û¶ÔÆäÊ¹ÓÃ_SECTION_NAMEÔò·µ»Ø×Ö¶ÎÃû
-    std::vector<size_t> GetRegisteredPosition() const;//ProjectµÄRegListĞòºÅ
-    std::vector<std::pair<size_t, size_t>> GetRegisteredPositionAlt() const;//pair<ProjectµÄRegListĞòºÅ,RegListµÄSec*ĞòºÅ>
+    std::string GetFullVariable(const std::string& Name) const;//å¦‚æœå¯¹å…¶ä½¿ç”¨_SECTION_NAMEåˆ™è¿”å›å­—æ®µå
+    std::vector<size_t> GetRegisteredPosition() const;//Projectçš„RegListåºå·
+    std::vector<std::pair<size_t, size_t>> GetRegisteredPositionAlt() const;//pair<Projectçš„RegListåºå·,RegListçš„Sec*åºå·>
     IBB_Section_NameType GetNameType() const;
 };
 
@@ -481,7 +481,7 @@ struct IBB_Ini
     bool Merge(const IBB_Ini& Another, bool IsDuplicate);
     bool CreateSection(const _TEXT_ANSI std::string& _Name);
     bool AddSection(const IBB_Section& Section, bool IsDuplicate);
-    bool DeleteSection(const _TEXT_ANSI std::string& Tg);//°üº¬Update
+    bool DeleteSection(const _TEXT_ANSI std::string& Tg);//åŒ…å«Update
 
     std::string GetText(bool PrintExtraData) const;
 
@@ -525,7 +525,7 @@ struct IBB_RegisterList
 struct IBB_Project
 {
     std::wstring ProjName;//Name or Path ? Unsure.
-    std::wstring Path;//¾ø¶ÔÂ·¾¶
+    std::wstring Path;//ç»å¯¹è·¯å¾„
     bool IsNewlyCreated{ false };
     bool ChangeAfterSave{ false };
     std::vector<IBB_RegisterList> RegisterLists;
@@ -547,7 +547,7 @@ struct IBB_Project
     IBB_Section* CreateNewSection(const IBB_Section_Desc& Desc);
     bool AddNewLinkToLinkGroup(const IBB_Section_Desc& From, const IBB_Section_Desc& To);
 
-    IBB_RegisterList& GetRegisterList(const std::string& Name, const std::string& IniName);//ÕÒ²»µ½¾Í·µ»ØÒ»¸öĞÂ½¨µÄ
+    IBB_RegisterList& GetRegisterList(const std::string& Name, const std::string& IniName);//æ‰¾ä¸åˆ°å°±è¿”å›ä¸€ä¸ªæ–°å»ºçš„
     bool RegisterSection(const std::string& Name, const std::string& IniName, const IBB_Section& Section);
     bool RegisterSection(size_t RegListID, const IBB_Section& Section);
 
@@ -571,7 +571,7 @@ public:
     // std::unordered_map<Name, Object>
     std::unordered_map<std::string, JsonObject> Require_Default;
     std::unordered_map<std::string, IBB_IniLine_Default> IniLine_Default;
-    std::unordered_map<std::string, IBB_SubSec_Default> SubSec_Default;//Ò»¸öIniLineÖ»ÄÜÊôÓÚÒ»¸öSubSec
+    std::unordered_map<std::string, IBB_SubSec_Default> SubSec_Default;//ä¸€ä¸ªIniLineåªèƒ½å±äºä¸€ä¸ªSubSec
     std::unordered_map<std::string, IBB_Link_Default> Link_Default;
 
     struct _Query
@@ -633,20 +633,20 @@ struct IBB_Module_Default
 
         bool IsList;
         
-        bool UseAutoParameter{ false };//ÊÇ·ñ²ÎÊıÊÇ×Ô¶¯Éú³ÉµÄ£¨RandStr£©
+        bool UseAutoParameter{ false };//æ˜¯å¦å‚æ•°æ˜¯è‡ªåŠ¨ç”Ÿæˆçš„ï¼ˆRandStrï¼‰
         _TEXT_UTF8 std::string Data;
-        int ParamN;//µ±Ö»ÓĞÒ»¸ö²ÎÊıÊ±, ÊäÈë-1ÎªÎŞ²ÎÊı
+        int ParamN;//å½“åªæœ‰ä¸€ä¸ªå‚æ•°æ—¶, è¾“å…¥-1ä¸ºæ— å‚æ•°
 
         std::vector<uint8_t> UseAutoParameterList;
         std::vector<_TEXT_UTF8 std::string> DataList;
-        std::vector<int> ParamNList;//ÊÇÒ»ÁĞ²ÎÊıÊ±
+        std::vector<int> ParamNList;//æ˜¯ä¸€åˆ—å‚æ•°æ—¶
 
         bool Load(JsonObject FromJson);
         bool Load(const _TEXT_UTF8 std::string& FromStr);
 
         std::string GetString(IBB_Module_ParagraphList& Param) const;
-        std::string FillIn_NotList(const _TEXT_UTF8 std::string& Name) const;//Èç¹û²»ÊÇList£¬¿ìËÙÌî³ä²ÎÊı
-        _NameType CutMergeName(const _TEXT_UTF8 std::string& Name) const;//²»»á¸Ä±ä×ÔÉíµÄÖµ
+        std::string FillIn_NotList(const _TEXT_UTF8 std::string& Name) const;//å¦‚æœä¸æ˜¯Listï¼Œå¿«é€Ÿå¡«å……å‚æ•°
+        _NameType CutMergeName(const _TEXT_UTF8 std::string& Name) const;//ä¸ä¼šæ”¹å˜è‡ªèº«çš„å€¼
     };
 
     struct _Paragraph
@@ -671,7 +671,7 @@ struct IBB_Module_Default
     {
         struct _MergeType
         {
-            _TEXT_UTF8 std::string Type;//Replace Merge Reserve Ä¬ÈÏ"Replace"
+            _TEXT_UTF8 std::string Type;//Replace Merge Reserve é»˜è®¤"Replace"
             _NameType Text;
         };
         struct _Line
@@ -712,13 +712,13 @@ struct IBB_Module_Default
     int ParamN;
     std::vector<_TEXT_UTF8 std::string> ParamDescShort, ParamDescLong;
 
-    _MergeParagraph MergeParagraph;//½öµ± MergeToSection=true Ê±ÓÃÀ´ºÏ²¢µ½Ô­ÓĞSection
+    _MergeParagraph MergeParagraph;//ä»…å½“ MergeToSection=true æ—¶ç”¨æ¥åˆå¹¶åˆ°åŸæœ‰Section
     std::vector<_LinkGroup> AttachedLinkGroup;
     std::vector<_Paragraph> AttachedParagraph;
     std::vector<_RegisterList> AttachedRegister;
 
     _TEXT_UTF8 std::string Name, DescShort, DescLong;
-    _TEXT_UTF8 std::string ListType;//·ÅÔÚÄ£¿éÁĞ±íÀïÃæµÄ·ÖÀà
+    _TEXT_UTF8 std::string ListType;//æ”¾åœ¨æ¨¡å—åˆ—è¡¨é‡Œé¢çš„åˆ†ç±»
     std::vector<_TEXT_UTF8 std::string> Platform;
 
     bool Load(JsonObject FromJson);
@@ -762,7 +762,7 @@ struct IBB_Module
     std::vector<IBB_Link_NameType> LinkGraph;
     std::vector<IBB_Section_NameType> AttachedParagraph;
 
-    //_MERGE_PARAGRAPH Õâ¸ö²ÎÊı±»É¾µôÁË
+    //_MERGE_PARAGRAPH è¿™ä¸ªå‚æ•°è¢«åˆ æ‰äº†
     bool Generate(const IBB_Module_Default& Module, const std::vector<_TEXT_UTF8 std::string>& Param,const IBB_Section_Desc& MergeDesc);
     void Read(const ExtFileClass& File);
     void Write(const ExtFileClass& File)const;

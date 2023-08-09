@@ -1,7 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
 #include "IBFront.h"
-#include "IBRender.h"
+//#include "IBRender.h"
 #include "FromEngine/RFBump.h"
 #include <atomic>
 
@@ -16,7 +16,7 @@ struct IBD_ShutDownDestructor(x)\
 
 #define IBD_BoolStr(v) ((v)?"true":"false")
 
-//ËùÓĞ°æ±¾ºÅÏà¹ØÊı¾İ
+//æ‰€æœ‰ç‰ˆæœ¬å·ç›¸å…³æ•°æ®
 extern const std::string Version;
 extern const int VersionMajor;
 extern const int VersionMinor;
@@ -27,33 +27,33 @@ extern const char* _TEXT_UTF8 AppName;
 extern const char* _TEXT_ANSI AppNameA;
 extern const wchar_t* AppNameW;
 
-//Í³Ò»µÄÎÄ¼şÍ·
+//ç»Ÿä¸€çš„æ–‡ä»¶å¤´
 extern const int32_t SaveFileHeaderSign;
 
-//ÉèÖÃµÄÊµÀı
+//è®¾ç½®çš„å®ä¾‹
 extern IBF_Setting IBF_Inst_Setting;
-extern IBR_Setting IBR_Inst_Setting;
+//extern IBR_Setting IBR_Inst_Setting;
 
-//ÉèÖÃµÄ±êÊ¶
+//è®¾ç½®çš„æ ‡è¯†
 extern std::atomic<bool> SettingLoadComplete;
 extern std::atomic<bool> SettingSaveComplete;
 extern const wchar_t* SettingFileName;
 
-//ÈÕÖ¾
+//æ—¥å¿—
 extern LogClass GlobalLog;
 extern LogClass GlobalLogB;
 extern BufString LogBuf, LogBufB;
 extern bool EnableLog;//LOG
 extern bool EnableLogEx;//EXTRA LOG
 
-//Ïß³ÌĞÅÏ¢½»»»
+//çº¿ç¨‹ä¿¡æ¯äº¤æ¢
 extern IBRF_Bump IBRF_CoreBump;
 #define IBD_RInterruptF(x) IBG_RInterruptF_RangeLock __IBD_RInterruptF_VariableA_##x{ IBRF_CoreBump };
 #define IBD_FInterruptR(x) IBG_FInterruptR_RangeLock __IBD_FInterruptR_VariableA_##x{ IBRF_CoreBump };
 extern uint64_t ShellLoopLastTime;
 extern DWORD BackThreadID;
 
-//ÉèÖÃÄÚÈİ
+//è®¾ç½®å†…å®¹
 extern int KeyPerPage;
 extern int FontHeight;
 extern int WindowSizeAdjustX, WindowSizeAdjustY;
@@ -61,24 +61,24 @@ extern bool IsProjectOpen;
 extern HWND MainWindowHandle;
 extern int RScrX, RScrY, ScrX, ScrY;
 
-//¸ñÊ½ÀàĞÍ±í
+//æ ¼å¼ç±»å‹è¡¨
 extern IBF_DefaultTypeList IBF_Inst_DefaultTypeList;
 extern IBF_DefaultModuleList IBF_Inst_DefaultModuleList;
 extern IBF_Project IBF_Inst_Project;
-extern IBR_Project IBR_Inst_Project;
+//extern IBR_Project IBR_Inst_Project;
 extern IBS_Project IBS_Inst_Project;
 
-//µ÷ÊÔ
-extern IBR_Debug IBR_Inst_Debug;
+//è°ƒè¯•
+//extern IBR_Debug IBR_Inst_Debug;
 
-//Ëæ»úÖÖ×Ó
+//éšæœºç§å­
 extern std::default_random_engine GlobalRnd;
 extern const int ModuleRandomParameterLength;
 
 //prelink
-namespace PreLink
-{
-    extern GLFWwindow* window;
-    extern HINSTANCE hInst;
-    extern ImFont* font;
-}
+//namespace PreLink
+//{
+//    extern GLFWwindow* window;
+//    extern HINSTANCE hInst;
+//    extern ImFont* font;
+//}
