@@ -98,27 +98,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="debug\moc_predefs.h.cbt">
-      <Filter>Generated Files</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="Rine_zh_CN.ts">
-      <Filter>Translation Files</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <QtUic Include="rinemainwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <None Include="debug\Rine_zh_CN.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="release\Rine_zh_CN.qm">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\copy.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -146,12 +130,6 @@
     <None Include="res\open.png">
       <Filter>Resource Files</Filter>
     </None>
-    <QtRcc Include="debug\qmake_qmake_qm_files.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
-    <QtRcc Include="release\qmake_qmake_qm_files.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
     <QtRcc Include="qss.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>

@@ -1,4 +1,4 @@
-#include "rinemainwindow.h"
+﻿#include "rinemainwindow.h"
 #include "ui_rinemainwindow.h"
 #include "node_scene.h"
 #include "node_view.h"
@@ -6,6 +6,8 @@
 #include <QPainter>
 #include <QRectF>
 #include <QGraphicsView>
+#include "GraphicsControl.h"
+
 
 RineMainWindow::RineMainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,6 +26,7 @@ RineMainWindow::RineMainWindow(QWidget *parent)
 
     //GraphicsView背景
     node_scene *scene=new node_scene(this);
+    control.m_scene = scene;
     ui->graphicsView->setScene(scene);
 
     //拖动
