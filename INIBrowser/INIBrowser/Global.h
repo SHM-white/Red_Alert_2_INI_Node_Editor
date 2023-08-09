@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 
 #include "IBFront.h"
 #include "IBRender.h"
@@ -16,7 +16,7 @@ struct IBD_ShutDownDestructor(x)\
 
 #define IBD_BoolStr(v) ((v)?"true":"false")
 
-//æ‰€æœ‰ç‰ˆæœ¬å·ç›¸å…³æ•°æ®
+//ËùÓĞ°æ±¾ºÅÏà¹ØÊı¾İ
 extern const std::string Version;
 extern const int VersionMajor;
 extern const int VersionMinor;
@@ -27,33 +27,33 @@ extern const char* _TEXT_UTF8 AppName;
 extern const char* _TEXT_ANSI AppNameA;
 extern const wchar_t* AppNameW;
 
-//ç»Ÿä¸€çš„æ–‡ä»¶å¤´
+//Í³Ò»µÄÎÄ¼şÍ·
 extern const int32_t SaveFileHeaderSign;
 
-//è®¾ç½®çš„å®ä¾‹
+//ÉèÖÃµÄÊµÀı
 extern IBF_Setting IBF_Inst_Setting;
 extern IBR_Setting IBR_Inst_Setting;
 
-//è®¾ç½®çš„æ ‡è¯†
+//ÉèÖÃµÄ±êÊ¶
 extern std::atomic<bool> SettingLoadComplete;
 extern std::atomic<bool> SettingSaveComplete;
 extern const wchar_t* SettingFileName;
 
-//æ—¥å¿—
+//ÈÕÖ¾
 extern LogClass GlobalLog;
 extern LogClass GlobalLogB;
 extern BufString LogBuf, LogBufB;
 extern bool EnableLog;//LOG
 extern bool EnableLogEx;//EXTRA LOG
 
-//çº¿ç¨‹ä¿¡æ¯äº¤æ¢
+//Ïß³ÌĞÅÏ¢½»»»
 extern IBRF_Bump IBRF_CoreBump;
 #define IBD_RInterruptF(x) IBG_RInterruptF_RangeLock __IBD_RInterruptF_VariableA_##x{ IBRF_CoreBump };
 #define IBD_FInterruptR(x) IBG_FInterruptR_RangeLock __IBD_FInterruptR_VariableA_##x{ IBRF_CoreBump };
 extern uint64_t ShellLoopLastTime;
 extern DWORD BackThreadID;
 
-//è®¾ç½®å†…å®¹
+//ÉèÖÃÄÚÈİ
 extern int KeyPerPage;
 extern int FontHeight;
 extern int WindowSizeAdjustX, WindowSizeAdjustY;
@@ -61,17 +61,17 @@ extern bool IsProjectOpen;
 extern HWND MainWindowHandle;
 extern int RScrX, RScrY, ScrX, ScrY;
 
-//æ ¼å¼ç±»å‹è¡¨
+//¸ñÊ½ÀàĞÍ±í
 extern IBF_DefaultTypeList IBF_Inst_DefaultTypeList;
 extern IBF_DefaultModuleList IBF_Inst_DefaultModuleList;
 extern IBF_Project IBF_Inst_Project;
 extern IBR_Project IBR_Inst_Project;
 extern IBS_Project IBS_Inst_Project;
 
-//è°ƒè¯•
+//µ÷ÊÔ
 extern IBR_Debug IBR_Inst_Debug;
 
-//éšæœºç§å­
+//Ëæ»úÖÖ×Ó
 extern std::default_random_engine GlobalRnd;
 extern const int ModuleRandomParameterLength;
 

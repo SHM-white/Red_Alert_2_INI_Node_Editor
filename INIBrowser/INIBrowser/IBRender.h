@@ -101,6 +101,7 @@ struct IBR_Section
     
     _RETURN_BACK_DATA IBB_Section* _PROJ_CMD_READ GetBack() ;
     _RETURN_BACK_DATA const IBB_Section* _PROJ_CMD_READ GetBack() _PROJ_CMD_BACK_CONST const;
+    _RETURN_BACK_DATA const IBB_Section* _PROJ_CMD_NOINTERRUPT _PROJ_CMD_READ GetBack_Unsafe() const;
 
     //若Sec不存在给Function传入nullptr
     template<typename T>
@@ -143,6 +144,13 @@ struct IBR_Project
     id_t MaxID{ 0 };//TODO:你还能使用超过ULL_MAX个ID？要是真的如此那就修一修
     std::map<id_t, IBR_SectionData> IBR_SectionMap;
     std::map<IBB_Section_Desc, id_t> IBR_Rev_SectionMap;
+
+    struct _Plink
+    {
+        ImVec2 BeginL,BeginR;
+        IBB_Section_Desc Dest;
+    };
+    std::vector<_Plink> LinkList;
 
     bool _PROJ_CMD_WRITE _PROJ_CMD_CAN_UNDO _PROJ_CMD_UPDATE AddModule(
         const std::string& ModuleName,
@@ -341,6 +349,7 @@ namespace IBR_Color
     static const ImColor CenterCrossColor(255, 5, 5, 255);
     static const ImColor ForegroundCoverColor(0, 145, 255, 35);
     static const ImColor ForegroundMarkColor(0, 100, 255, 255);
+    static const ImColor LegalLineColor(255, 138, 5, 255);
     static const ImColor LinkingLineColor(255, 168, 21, 255);
     static const ImColor IllegalLineColor(255, 45, 45, 255);
     static const ImColor ErrorTextColor(255, 45, 45, 255);

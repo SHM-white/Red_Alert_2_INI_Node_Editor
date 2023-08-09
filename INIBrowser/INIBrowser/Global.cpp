@@ -1,60 +1,60 @@
-ï»¿
+
 #include "Global.h"
 
-//æ‰€æœ‰ç‰ˆæœ¬å·ç›¸å…³æ•°æ®
+//ËùÓĞ°æ±¾ºÅÏà¹ØÊı¾İ
 const std::string Version = u8"0.2b1";
 const int VersionMajor = 0;
 const int VersionMinor = 2;
 const int VersionRelease = 1;
 const int VersionN = VersionMajor * 10000 + VersionMinor * 100 + VersionRelease;
 const std::string VersionNStr = u8"000201";
-const char* AppName = u8"INIæµè§ˆå™¨";
-const char* AppNameA = "INIæµè§ˆå™¨";
-const wchar_t* AppNameW = L"INIæµè§ˆå™¨";
+const char* AppName = u8"INIä¯ÀÀÆ÷";
+const char* AppNameA = "INIä¯ÀÀÆ÷";
+const wchar_t* AppNameW = L"INIä¯ÀÀÆ÷";
 
-//ç»Ÿä¸€çš„æ–‡ä»¶å¤´
+//Í³Ò»µÄÎÄ¼şÍ·
 const int32_t SaveFileHeaderSign = 0x00114514;
 
-//è®¾ç½®çš„å®ä¾‹
+//ÉèÖÃµÄÊµÀı
 IBF_Setting IBF_Inst_Setting;
 IBR_Setting IBR_Inst_Setting;
 
-//è®¾ç½®çš„æ ‡è¯†
+//ÉèÖÃµÄ±êÊ¶
 std::atomic<bool> SettingLoadComplete{ false };
 std::atomic<bool> SettingSaveComplete{ false };
 const wchar_t* SettingFileName = L"./Resources/Setting.hex";
 
-//æ—¥å¿—
+//ÈÕÖ¾
 LogClass GlobalLog{ "browser.log" };
 LogClass GlobalLogB{ "backend.log" };
 BufString LogBuf, LogBufB;
 bool EnableLog = true;
 bool EnableLogEx = false;
 
-//çº¿ç¨‹ä¿¡æ¯äº¤æ¢
+//Ïß³ÌĞÅÏ¢½»»»
 IBRF_Bump IBRF_CoreBump;
 uint64_t ShellLoopLastTime;
 DWORD BackThreadID{ INT_MAX };
 
-//è®¾ç½®å†…å®¹
+//ÉèÖÃÄÚÈİ
 int KeyPerPage = 10;
 int FontHeight = 24;
 int WindowSizeAdjustX = 15, WindowSizeAdjustY = 5;
-bool IsProjectOpen = false;//TODO:æ‰“å¼€é¡¹ç›®
+bool IsProjectOpen = false;//TODO:´ò¿ªÏîÄ¿
 HWND MainWindowHandle = 0;
 int RScrX, RScrY, ScrX, ScrY;
 
-//æ ¼å¼ç±»å‹è¡¨
+//¸ñÊ½ÀàĞÍ±í
 IBF_DefaultTypeList IBF_Inst_DefaultTypeList;
 IBF_DefaultModuleList IBF_Inst_DefaultModuleList;
 IBF_Project IBF_Inst_Project;
 IBR_Project IBR_Inst_Project;
 IBS_Project IBS_Inst_Project;
 
-//è°ƒè¯•
+//µ÷ÊÔ
 IBR_Debug IBR_Inst_Debug;
 
-//éšæœºç§å­
+//Ëæ»úÖÖ×Ó
 std::default_random_engine GlobalRnd;
 const int ModuleRandomParameterLength = 16;
 

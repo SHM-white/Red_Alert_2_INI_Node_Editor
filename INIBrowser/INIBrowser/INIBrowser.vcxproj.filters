@@ -131,6 +131,9 @@
     <ClCompile Include="IBSave.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="IGTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico">

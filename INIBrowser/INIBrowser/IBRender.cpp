@@ -329,6 +329,10 @@ const IBB_Section* _PROJ_CMD_READ IBR_Section::GetBack() const
     IBD_RInterruptF(x);
     return GetBack_Inl();
 }
+const IBB_Section* _PROJ_CMD_NOINTERRUPT _PROJ_CMD_READ IBR_Section::GetBack_Unsafe() const
+{
+    return GetBack_Inl();
+}
 template<typename T>
 T _PROJ_CMD_READ _PROJ_CMD_WRITE IBR_Section::OperateBackData(const std::function<T(IBB_Section*)>& Function)
 {
@@ -1013,7 +1017,7 @@ void ControlPanel_ListView()
                 {
                     ImGui::Checkbox((u8"##" + sec.second.Name).c_str(), &sec.second.Dynamic.Selected);
                     ImGui::SameLine();
-                    ImGui::Text(MBCStoUTF8(sec.second.Name).c_str());
+                    ImGui::Text(/*MBCStoUTF8(*/sec.second.Name.c_str());
                     ImGui::SameLine();
                     ImGui::SetCursorPosX(std::max(ImGui::GetCursorPosX(), ImGui::GetWindowWidth() - FontHeight * 2.0f));//4.5¸ö×Ö·ûÊÇÓÒ²àÄÚÈÝµÄÔ¤Áô¿Õ¼ä
                     if (ImGui::ArrowButton((sec.second.Name + "_ub_arr").c_str(), ImGuiDir_Right))
@@ -1563,8 +1567,12 @@ namespace IBR_WorkSpace
         if (!IsProjectOpen)return;
         auto vu = ExtSetPos.GetCopyAndClear();
 
+        IBR_Inst_Project.LinkList.clear();
+
         for (auto& sp : IBR_Inst_Project.IBR_SectionMap)
         {
+            if (!IBR_Inst_Project.GetSectionFromID(sp.first).HasBack())continue;
+
             auto& sd = sp.second;
             CurOnRender = &sd;
             _RenderUI_OnRender = sd.Desc;
@@ -1579,6 +1587,8 @@ namespace IBR_WorkSpace
             }
 
             for (auto& p : vu)p();
+
+            
 
             ImGui::Begin((sd.Desc.Ini + u8" - " + sd.Desc.Sec).c_str(), &sd.IsOpen, ImGuiWindowFlags_NoClamping);
             ImGui::SetWindowFontScale(IBR_FullView::Ratio);
@@ -1682,11 +1692,91 @@ namespace IBR_WorkSpace
             ImGui::End();
             if (!sd.IsOpen)IBRF_CoreBump.IBF_SendToR({ [=]() {IBR_Inst_Project.DeleteSection(sd.Desc); },nullptr });
         }
+
+        auto BList = ImGui::GetBackgroundDrawList();
+        for (const auto& Link : IBR_Inst_Project.LinkList)
+        {
+            auto Rsec = IBR_Inst_Project.GetSection(Link.Dest);
+            auto RSD = Rsec.GetSectionData();
+            if (RSD == nullptr || !Rsec.HasBack())
+            {
+                //::MessageBoxA(NULL, "Fuck!", "Title", MB_OK);
+                auto par = Link.BeginR;
+                par.x -= FontHeight * 0.5f;
+                BList->AddLine(par, dImVec2{ par.x + FontHeight * 3.0, par.y },
+                    IBR_Color::IllegalLineColor, FontHeight / 3.0f);
+            }
+            else
+            {
+                ImVec2 ReUL = EqPosToRePos(RSD->EqPos);//Test
+                ImVec2 EqUR = RSD->EqPos;
+                EqUR.x += RSD->EqSize.x;
+                ImVec2 ReUR = EqPosToRePos(EqUR);
+                {
+                    auto pal = Link.BeginL;
+                    auto par = Link.BeginR;
+                    auto pbl = ReUL;
+                    auto pbr = ReUR;
+                    pal.x += FontHeight * 0.5f;
+                    par.x -= FontHeight * 0.5f;
+                    pbl.x += FontHeight * 0.5f;
+                    pbl.y += FontHeight * 0.5f;
+                    pbr.x -= FontHeight * 0.5f;
+                    pbr.y += FontHeight * 0.5f;
+                    ImVec2 pa, pb;
+                    pa = pal.x >= pbr.x ? pal : par;
+                    pb = pbl.x >= par.x ? pbl : pbr;
+
+                    pa.y += FontHeight / 6.0f;
+                    BList->AddBezierCurve(pa, { (pa.x + 4 * pb.x) / 5,pa.y }, { (4 * pa.x + pb.x) / 5,pb.y }, pb,
+                        IBR_Color::LegalLineColor, FontHeight / 5.0f);
+                    pa.y -= FontHeight / 6.0f;
+                    BList->AddBezierCurve(pa, { (pa.x + 4 * pb.x) / 5,pa.y }, { (4 * pa.x + pb.x) / 5,pb.y }, pb,
+                        IBR_Color::LegalLineColor, FontHeight / 5.0f);
+                    pa.y -= FontHeight / 6.0f;
+                    BList->AddBezierCurve(pa, { (pa.x + 4 * pb.x) / 5,pa.y }, { (4 * pa.x + pb.x) / 5,pb.y }, pb,
+                        IBR_Color::LegalLineColor, FontHeight / 5.0f);
+                }
+            }
+        }
     }
 }
 
 void IBR_SectionData::RenderUI()
 {
+    auto Rsec = IBR_Inst_Project.GetSection(Desc);
+    {
+        IBD_RInterruptF(x);
+        auto Bsec = Rsec.GetBack_Unsafe();
+        if (Bsec == nullptr)
+        {
+            ImGui::TextColored(IBR_Color::ErrorTextColor, u8"×Ö¶Î´íÎóÁ´½Ó»òÎÞÁ´½Ó");
+        }
+        else
+        {
+            for (const auto& sub : Bsec->SubSecs)
+            {
+                for (const auto& lt : sub.LinkTo)
+                {
+                    ImGui::TextWrapped(u8"%s=%s   ", lt.FromKey.c_str(),lt.To.Section.GetText().c_str());
+                    ImGui::SameLine();
+                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - FontHeight * 2.0f);
+                    IBR_Inst_Project.LinkList.push_back({ ImGui::GetLineBeginPos(),ImGui::GetLineEndPos(),{lt.To.Ini.GetText(),lt.To.Section.GetText()} });
+                    if (ImGui::ArrowButton((lt.FromKey + u8"_WTF_" + lt.To.Section.GetText()).c_str(), ImGuiDir_Right))
+                    {
+                        auto rsc = IBR_Inst_Project.GetSection(IBB_Section_Desc{ lt.To.Ini.GetText(),lt.To.Section.GetText() });
+                        auto dat = rsc.GetSectionData();
+                        if (dat != nullptr)
+                        {
+                            IBR_EditFrame::SetActive(rsc.ID);
+                            IBRF_CoreBump.IBF_SendToR({ [=]() {IBR_FullView::EqCenter = dat->EqPos + (dat->EqSize / 2.0); } });
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
     //TODO
 }
 
@@ -2334,6 +2424,7 @@ namespace IBR_SelectMode
             {
                 for (auto& sp : IBR_Inst_Project.IBR_SectionMap)
                 {
+                    if (!IBR_Inst_Project.GetSectionFromID(sp.first).HasBack())continue;
                     auto ReUL = IBR_WorkSpace::EqPosToRePos(sp.second.EqPos), ReDR = IBR_WorkSpace::EqPosToRePos(sp.second.EqPos + sp.second.EqSize);
                     auto [ok, NUL, NDR] = RectangleCross(ReUL, ReDR, WUL, WDR);
                     if (ok)DList->AddRectFilled(NUL, NDR, IBR_Color::ForegroundCoverColor);

@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 
 #include"types.h"
 #include"..\cjson\cJSON.h"
@@ -35,17 +35,17 @@ T lcm(T a, T b)
 }
 
 
-// ANSIå­—ç¬¦é›†è½¬æ¢æˆUnicode
+// ANSI×Ö·û¼¯×ª»»³ÉUnicode
 std::wstring MBCStoUnicode(const std::string& MBCS);
-// UTF-8å­—ç¬¦é›†è½¬æ¢æˆUnicode
+// UTF-8×Ö·û¼¯×ª»»³ÉUnicode
 std::wstring UTF8toUnicode(const std::string& UTF8);
-// Unicodeå­—ç¬¦é›†è½¬æ¢æˆUTF-8
+// Unicode×Ö·û¼¯×ª»»³ÉUTF-8
 std::string UnicodetoUTF8(const std::wstring& Unicode);
-// Unicodeå­—ç¬¦é›†è½¬æ¢æˆANSI
+// Unicode×Ö·û¼¯×ª»»³ÉANSI
 std::string UnicodetoMBCS(const std::wstring& Unicode);
-// ANSIå­—ç¬¦é›†è½¬æ¢æˆUTF-8
+// ANSI×Ö·û¼¯×ª»»³ÉUTF-8
 std::string MBCStoUTF8(const std::string& MBCS);
-// UTF-8å­—ç¬¦é›†è½¬æ¢æˆANSI
+// UTF-8×Ö·û¼¯×ª»»³ÉANSI
 std::string UTF8toMBCS(const std::string& MBCS);
 
 uint64_t GetSysTimeMicros();
