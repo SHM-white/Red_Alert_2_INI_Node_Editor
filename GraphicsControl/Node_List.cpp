@@ -15,7 +15,7 @@ QGraphicsItemGroup* Node_List::operator()(void) const
 	auto* itemTitle = new QGraphicsTextItem(m_section);
 	itemTitle->setPos(0, 0);
 	item->addToGroup(itemTitle);
-	//todo:add effect to title to display section
+	//todo:edit style of title to display section
 	for (int i = 0; i < m_nodes.size();++i) {
 		auto* itemNode = (*m_nodes[i])();
 		auto* itemRect = new QGraphicsRectItem();

@@ -44,6 +44,7 @@ Node* Node::GetChild()
 
 QGraphicsItemGroup* Node::operator()(void) const
 {
+    //todo:edit style here
     auto item_key = new QGraphicsTextItem(m_key);
     item_key->setPos(0, 0);
     m_item->addToGroup(item_key);
