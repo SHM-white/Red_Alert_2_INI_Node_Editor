@@ -4,7 +4,7 @@
 
 Node_List::Node_List(QString section, const std::map<QString, QString>& key_value):m_section{section}
 {
-	item = std::make_shared<QGraphicsItemGroup>();
+	item = std::make_shared<GraphicsSectionList>();
 	for (const auto& i:key_value) {
 		m_nodes.push_back(std::make_shared<Node>(i.first, i.second));
 	}
@@ -33,4 +33,9 @@ Node* Node_List::operator[](size_t index)
 		throw std::logic_error("Out of range! At Node_List::operator[]");
 	}
 	return m_nodes[index].get();
+}
+
+int Node_List::size()
+{
+	return m_nodes.size();
 }

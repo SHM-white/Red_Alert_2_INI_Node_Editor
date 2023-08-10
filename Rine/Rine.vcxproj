@@ -253,10 +253,6 @@
     <None Include="res\stop.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\open.png" />
-    <None Include="res\save.png" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\GraphicsControl\GraphicsControl.vcxproj">
       <Project>{af2c7a86-f5a5-4c89-b870-ab42e286e2dd}</Project>
     </ProjectReference>

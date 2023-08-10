@@ -2,6 +2,7 @@
 
 #include "Node.h"
 #include "qgraphicsitem.h"
+#include "GraphicsTextEdit.h"
 
 Node::Node(const QString key, const QString value)
 {
@@ -49,7 +50,7 @@ QGraphicsItemGroup* Node::operator()(void) const
     item_key->setPos(0, 0);
     m_item->addToGroup(item_key);
 
-    auto item_value = new QGraphicsTextItem(m_value);
+    auto item_value = new GraphicsTextEdit(m_value);
     item_value->setPos((int)(NodeSize.width() / 2), 0);
     m_item->addToGroup(item_value);
     return m_item.get();

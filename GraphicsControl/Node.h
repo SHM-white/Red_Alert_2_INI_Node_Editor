@@ -2,7 +2,7 @@
 #include "graphicscontrol_global.h"
 #include "GraphicsControl.h"
 
-class Node
+class GRAPHICSCONTROL_EXPORT Node
 {
 public:
 	Node(const QString key, const QString value);
@@ -14,6 +14,7 @@ public:
 	Node* GetChild();
 	QGraphicsItemGroup* operator()(void) const;
 private:
+	friend class GraphicsControl;
 	std::shared_ptr<QGraphicsItemGroup> m_item;
 	bool m_hasParent;
 	bool m_hasChild;
