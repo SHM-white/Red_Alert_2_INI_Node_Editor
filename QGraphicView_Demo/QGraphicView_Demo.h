@@ -5,6 +5,7 @@
 #include "qgraphicsscene.h"
 #include "qgraphicsitem.h"
 #include "qgraphicsview.h"
+#include "GraphicsControl.h"
 
 class QGraphicView_Demo : public QWidget
 {
@@ -13,25 +14,11 @@ class QGraphicView_Demo : public QWidget
 public:
     QGraphicView_Demo(QWidget *parent = nullptr);
     ~QGraphicView_Demo();
+public slots:
+
+    void on_pushButton_clicked();
 
 private:
     Ui::QGraphicView_DemoClass ui;
-};
-
-class GraphicsItems {
-public:
-    GraphicsItems() {
-        group = new QGraphicsItemGroup();
-        QGraphicsRectItem* item2 = new QGraphicsRectItem();
-        item2->setRect(100, 20, 60, 20);
-        group->addToGroup(item2);
-
-        QGraphicsRectItem* item3 = new QGraphicsRectItem();
-        item3->setRect(100, 100, 60, 20);
-        group->addToGroup(item3);
-    }
-    QGraphicsItemGroup* group;
-    QGraphicsItemGroup* operator()() {
-        return group;
-    }
+    GraphicsControl m_control;
 };

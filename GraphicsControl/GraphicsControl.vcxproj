@@ -23,7 +23,7 @@
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -31,13 +31,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.5.1_msvc2019_64</QtInstall>
-    <QtModules>core;widgets;uitools;uiplugin</QtModules>
+    <QtInstall>6.4.3_msvc2019_64</QtInstall>
+    <QtModules>core;gui;widgets;uitools;uiplugin</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.5.1_msvc2019_64</QtInstall>
-    <QtModules>core;widgets;uitools;uiplugin</QtModules>
+    <QtInstall>6.7.2_msvc2019_64</QtInstall>
+    <QtModules>core;gui;widgets;uitools;uiplugin</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -97,17 +97,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicsSectionList.cpp" />
-    <ClCompile Include="GraphicsTextEdit.cpp" />
-    <ClCompile Include="Node.cpp" />
-    <ClCompile Include="Node_List.cpp" />
     <ClInclude Include="graphicscontrol_global.h" />
-    <ClInclude Include="GraphicsControl.h" />
+    <QtMoc Include="GraphicsControl.h" />
     <ClCompile Include="GraphicsControl.cpp" />
-    <ClInclude Include="GraphicsSectionList.h" />
-    <ClInclude Include="GraphicsTextEdit.h" />
-    <ClInclude Include="Node.h" />
-    <ClInclude Include="Node_List.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
