@@ -18,15 +18,14 @@
 #define NodeHeigth 20
 #define NodeWidth 200
 #define NodeTitleColor QColor(0, 255, 0, 100)
-#define NodeColor QColor(255, 255, 255, 100)
-#define NodeListColor QColor(0, 0, 0, 0)
+#define NodeColor QColor(0, 0, 255, 100)
+#define NodeListColor QColor(100, 0, 0, 100)
 static QSize NodeSize{ NodeWidth,NodeHeigth };
 class GRAPHICSCONTROL_EXPORT Connection;
 namespace GraphicsControls {
     class Node_List;
     class Node_Title;
     class Node;
-
     class GRAPHICSCONTROL_EXPORT Node_List : public QGraphicsObject
     {
         Q_OBJECT
@@ -50,17 +49,25 @@ namespace GraphicsControls {
         // 通过 QGraphicsObject 继承
         QRectF boundingRect() const override;
         void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-        void createConnections();
         std::vector<std::shared_ptr<Connection>> connections() const;
+        void add_connection(std::shared_ptr<Connection> connection);
+        QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     signals:
         void titleChanged();
         void nodesChanged();
         void rectChanged();
+
     private:
         std::shared_ptr<Node_Title> m_title;
         std::vector<std::shared_ptr<Node>> m_nodes;
         QRectF m_rect{ 0,0,NodeWidth,NodeHeigth };
         std::vector<std::shared_ptr<Connection>> m_connections;
+        QPointF m_dragStartPos;
+        bool m_dragging{ false };
+    protected slots:
+        void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+        void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+        void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     };
 
     class GRAPHICSCONTROL_EXPORT Node_Title : public QGraphicsObject
@@ -157,22 +164,25 @@ public:
     void SetView(QGraphicsView* view); // set pointer to QGraphicsView control
     void Render(); 
     void Init(const std::vector<ViewContent>& lists); // 初始化
+    void createConnections();
     QGraphicsScene* m_scene;
 private:
     QGraphicsView* m_view;
     std::vector<std::shared_ptr<GraphicsControls::Node_List>> m_nodeLists;
 };
+
 class GRAPHICSCONTROL_EXPORT Connection : public QGraphicsObject
 {
     Q_OBJECT
 public:
-    Connection(QGraphicsItem* startItem, QGraphicsItem* endItem, QColor color = Qt::black);
+    Connection(QGraphicsObject* startItem, QGraphicsObject* endItem, QColor color = Qt::black);
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-
+public slots:
+    void updatePosition();
 private:
-    QGraphicsItem* m_startItem;
-    QGraphicsItem* m_endItem;
+    QGraphicsObject* m_startItem;
+    QGraphicsObject* m_endItem;
     QColor m_color;
 };
 

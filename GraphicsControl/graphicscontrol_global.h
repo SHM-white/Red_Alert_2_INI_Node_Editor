@@ -2,6 +2,7 @@
 #define GRAPHICSCONTROL_GLOBAL_H
 
 #include <QtCore/qglobal.h>
+#include <qdebug.h>
 #include <QWidget>
 #include <map>
 #include <QString>

@@ -80,11 +80,27 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
             m_nodeLists.push_back(nodeList);
             m_scene->addItem(nodeList.get());
         }
-        xOffset += NodeSize.width() * 2;
+        xOffset += NodeSize.width();
         yOffset = 0;
     }
+    createConnections();
 }
 
+void GraphicsControl::createConnections()
+{
+    for (const auto& nodeList : m_nodeLists) {
+        for (const auto& nodelist2 : m_nodeLists) {
+            if (nodeList.get() == nodelist2.get()) {
+                continue;
+            }
+            for (const auto& node : nodeList->nodes()) {
+                if (node->name() == nodelist2->title()->title()) {
+                    nodelist2->add_connection(std::make_shared<Connection>(node.get(), nodelist2->title().get()));
+                }
+            }
+        }
+    }
+}
 
 void GraphicsControl::Render() {
     if (m_view == nullptr) {
@@ -102,7 +118,7 @@ void GraphicsControl::Render() {
     }
     m_view->setScene(m_scene);
 }
-   
+
 GraphicsControls::Node_Title::Node_Title(QString title, QColor color)
     : m_title(title), m_color(color)
 {
@@ -118,7 +134,7 @@ GraphicsControls::Node_Title::Node_Title()
 
 bool GraphicsControls::Node_Title::Init()
 {
-    return false;
+    return true;
 }
 
 QString GraphicsControls::Node_Title::title() const
@@ -147,7 +163,7 @@ GraphicsControls::Node::Node()
 
 bool GraphicsControls::Node::Init()
 {
-    return false;
+    return true;
 }
 
 QString GraphicsControls::Node::name() const
@@ -174,10 +190,8 @@ Node_List::Node_List(std::shared_ptr<Node_Title> title, std::vector<std::shared_
 bool GraphicsControls::Node_List::Init()
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
-    setFlag(QGraphicsItem::ItemIsMovable, true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     setAcceptHoverEvents(true);
-    createConnections();
     return true;
 }
 
@@ -201,27 +215,6 @@ void GraphicsControls::Node_List::remove_node(int index)
     m_nodes.erase(m_nodes.begin() + index);
 }
 
-std::shared_ptr<Node> GraphicsControls::Node_List::findParentNode(const QString& childNodeName) const
-{
-    for (const auto& node : m_nodes) {
-        if (node->name() == childNodeName) {
-            return node;
-        }
-    }
-    return nullptr;
-}
-
-std::vector<std::shared_ptr<Node>> GraphicsControls::Node_List::findChildNodes(const QString& parentNodeName) const
-{
-    std::vector<std::shared_ptr<Node>> children;
-    for (const auto& node : m_nodes) {
-        if (node->name() == parentNodeName) {
-            children.push_back(node);
-        }
-    }
-    return children;
-}
-
 void Node::setName(const QString &newName)
 {
     if (m_name == newName)
@@ -243,6 +236,7 @@ void Node::setRect(const QRectF &newRect)
     if (m_rect == newRect)
         return;
     m_rect = newRect;
+    setPos(newRect.topLeft());
     emit rectChanged();
 }
 
@@ -285,6 +279,7 @@ void Node_List::setRect(const QRectF &newRect)
     if (m_rect == newRect)
         return;
     m_rect = newRect;
+    setPos(newRect.topLeft());
     emit rectChanged();
 }
 
@@ -318,7 +313,6 @@ void Node_List::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
 
     // 绘制标题
     if (m_title) {
-        m_title->setPos(rect().topLeft());
         m_title->paint(painter, option, widget);
     }
 
@@ -328,19 +322,24 @@ void Node_List::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     }
 }
 
-void GraphicsControls::Node_List::createConnections()
-{
-    for (const auto& node : m_nodes) {
-        if (node->name() == m_title->title()) {
-            auto connection = std::make_shared<Connection>(m_title.get(), node.get());
-            m_connections.push_back(connection);
-        }
-    }
-}
-
 std::vector<std::shared_ptr<Connection>> GraphicsControls::Node_List::connections() const
 {
     return m_connections;
+}
+
+void GraphicsControls::Node_List::add_connection(std::shared_ptr<Connection> connection)
+{
+    m_connections.push_back(connection);
+}
+
+QVariant Node_List::itemChange(GraphicsItemChange change, const QVariant& value)
+{
+    if (change == QGraphicsItem::ItemPositionChange) {
+        for (const auto& connection : m_connections) {
+            connection->updatePosition();
+        }
+    }
+    return QGraphicsObject::itemChange(change, value);
 }
 
 QRectF GraphicsControls::Node::boundingRect() const
@@ -393,16 +392,20 @@ void Node_Title::setRect(const QRectF &newRect)
     if (m_rect == newRect)
         return;
     m_rect = newRect;
+    setPos(newRect.topLeft());
     emit rectChanged();
 }
-Connection::Connection(QGraphicsItem* startItem, QGraphicsItem* endItem, QColor color)
+Connection::Connection(QGraphicsObject* startItem, QGraphicsObject* endItem, QColor color)
     : m_startItem(startItem), m_endItem(endItem), m_color(color)
 {
+    connect(startItem, &QGraphicsObject::yChanged, this, &Connection::updatePosition);
+    connect(endItem, &QGraphicsObject::yChanged, this, &Connection::updatePosition);
+    updatePosition();
 }
 
 QRectF Connection::boundingRect() const
 {
-    return QRectF(m_startItem->pos(), m_endItem->pos()).normalized();
+    return QRectF(m_startItem->scenePos(), m_endItem->scenePos()).normalized().adjusted(-2, -2, 2, 2);
 }
 
 void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -411,5 +414,40 @@ void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     Q_UNUSED(widget);
 
     painter->setPen(QPen(m_color, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter->drawLine(m_startItem->pos(), m_endItem->pos());
+    painter->drawLine(m_startItem->scenePos(), m_endItem->scenePos());
+    qDebug() << m_startItem->scenePos() << "->" << m_endItem->scenePos();
+}
+
+void Connection::updatePosition()
+{
+    prepareGeometryChange();
+    update();
+}
+
+void GraphicsControls::Node_List::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (m_dragging) {
+        QPointF delta = event->scenePos() - m_dragStartPos;
+        setPos(scenePos() + delta);
+        m_dragStartPos = event->scenePos();
+        prepareGeometryChange(); // 确保几何形状变化通知
+        update(); // 确保重绘
+    }
+}
+
+void GraphicsControls::Node_List::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton) {
+        if (m_dragging == false) {
+            m_dragging = true;
+            m_dragStartPos = event->scenePos();
+        }
+    }
+}
+
+void GraphicsControls::Node_List::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton) {
+        m_dragging = false;
+    }
 }
