@@ -31,18 +31,6 @@ void ViewContent::setTitle(const QString& newTitle)
     m_title = newTitle;
 }
 
-QSize ViewContent::nodeSize() const
-{
-    return m_nodeSize;
-}
-
-void ViewContent::setNodeSize(const QSize& newNodeSize)
-{
-    if (m_nodeSize == newNodeSize)
-        return;
-    m_nodeSize = newNodeSize;
-}
-
 GraphicsControl::GraphicsControl(QGraphicsView* view) : m_view(view) {
     m_nodeLists.clear();
 }
@@ -64,20 +52,39 @@ void GraphicsControl::SetView(QGraphicsView* view)
 
 void GraphicsControl::Init(const std::vector<ViewContent>& lists)
 {
+    int xOffset = 0;
+    int yOffset = 0;
+    if (m_view == nullptr) {
+        return; // 确保视图已设置
+    }
+    if (m_scene == nullptr) {
+        m_scene = new QGraphicsScene();
+        m_view->setScene(m_scene);
+    }
+    // 清空现有的节点列表
+    m_nodeLists.clear();
+    // 根据传入的ViewContent列表初始化节点列表
     for (const auto& content : lists) {
-
-        auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), Qt::black);
+        auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), NodeTitleColor);
+        title->Init();
+        title->setRect(QRectF(xOffset, 0, NodeSize.width(), NodeSize.height()));
+        yOffset += NodeSize.height();
         std::vector<std::shared_ptr<GraphicsControls::Node>> nodes;
-        //Add title and nodes to nodelist
         for (const auto& item : content.content()) {
-            auto node = std::make_shared<GraphicsControls::Node>(item.first, Qt::blue, QRectF(0, 0, content.nodeSize().width(), content.nodeSize().height()));
-            nodes.push_back(node);
+            nodes.push_back(std::make_shared<GraphicsControls::Node>(item.first, item.second, NodeColor, QRectF(xOffset, yOffset, NodeSize.width(), NodeSize.height())));
+            yOffset += NodeSize.height();
         }
         auto nodeList = std::make_shared<GraphicsControls::Node_List>(title, nodes);
-        m_nodeLists.push_back(nodeList);
+        nodeList->setRect(QRectF(xOffset, 0, NodeSize.width(), yOffset));
+        if (nodeList->Init()) {
+            m_nodeLists.push_back(nodeList);
+            m_scene->addItem(nodeList.get());
+        }
+        xOffset += NodeSize.width() * 2;
+        yOffset = 0;
     }
-
 }
+
 
 void GraphicsControl::Render() {
     if (m_view == nullptr) {
@@ -86,23 +93,27 @@ void GraphicsControl::Render() {
     if (m_scene == nullptr) {
         m_scene = new QGraphicsScene();
     }
-    m_nodeLists.clear();
-    m_scene->clear();
-
-    
+        
+    for (const auto& nodeList : m_nodeLists) {
+        m_scene->addItem(nodeList.get());
+        for (const auto& connection : nodeList->connections()) {
+            m_scene->addItem(connection.get());
+        }
+    }
     m_view->setScene(m_scene);
 }
    
 GraphicsControls::Node_Title::Node_Title(QString title, QColor color)
+    : m_title(title), m_color(color)
 {
-    m_title = title;
-    m_color = color;
+    Init();
 }
 
 GraphicsControls::Node_Title::Node_Title()
 {
     m_title = QString("Untitled");
     m_color = QColor();
+    Init();
 }
 
 bool GraphicsControls::Node_Title::Init()
@@ -120,11 +131,10 @@ QColor GraphicsControls::Node_Title::color() const
     return m_color;
 }
 
-GraphicsControls::Node::Node(QString name, QColor color, QRectF rect)
+GraphicsControls::Node::Node(QString name, QString value, QColor color, QRectF rect)
+    : m_name(name), m_value(value), m_color(color), m_rect(rect)
 {
-    m_name = name;
-    m_color = color;
-    m_rect = rect;
+    Init();
 }
 
 GraphicsControls::Node::Node()
@@ -132,6 +142,7 @@ GraphicsControls::Node::Node()
     m_name = QString("Untitled");
     m_color = QColor();
     m_rect = QRectF();
+    Init();
 }
 
 bool GraphicsControls::Node::Init()
@@ -155,14 +166,19 @@ QRectF GraphicsControls::Node::rect() const
 }
 
 Node_List::Node_List(std::shared_ptr<Node_Title> title, std::vector<std::shared_ptr<Node>> nodes)
+    : m_title(title), m_nodes(nodes)
 {
-    m_title = title;
-    m_nodes = nodes;
+    Init();
 }
 
 bool GraphicsControls::Node_List::Init()
 {
-    return false;
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+    setAcceptHoverEvents(true);
+    createConnections();
+    return true;
 }
 
 std::shared_ptr<GraphicsControls::Node_Title> GraphicsControls::Node_List::title() const
@@ -286,4 +302,114 @@ void Node_Title::setColor(const QColor &newColor)
         return;
     m_color = newColor;
     emit colorChanged();
+}
+QRectF GraphicsControls::Node_List::boundingRect() const
+{
+    return m_rect;
+}
+void Node_List::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) 
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    // 绘制背景
+    painter->setBrush(NodeListColor);
+    painter->drawRect(boundingRect());
+
+    // 绘制标题
+    if (m_title) {
+        m_title->setPos(rect().topLeft());
+        m_title->paint(painter, option, widget);
+    }
+
+    // 绘制节点
+    for (const auto& node : m_nodes) {
+        node->paint(painter, option, widget);
+    }
+}
+
+void GraphicsControls::Node_List::createConnections()
+{
+    for (const auto& node : m_nodes) {
+        if (node->name() == m_title->title()) {
+            auto connection = std::make_shared<Connection>(m_title.get(), node.get());
+            m_connections.push_back(connection);
+        }
+    }
+}
+
+std::vector<std::shared_ptr<Connection>> GraphicsControls::Node_List::connections() const
+{
+    return m_connections;
+}
+
+QRectF GraphicsControls::Node::boundingRect() const
+{
+    return m_rect;
+}
+void Node::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) 
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    // 绘制背景
+    painter->setBrush(m_color);
+    painter->drawRect(boundingRect());
+
+    // 绘制名称
+    painter->setPen(Qt::black);
+    painter->drawText(QRectF(m_rect.left(), m_rect.top() + NodeSize.height() / 4, NodeSize.width() / 2, NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_name);
+
+    // 绘制值
+    painter->drawText(QRectF(m_rect.left() + NodeSize.width() / 2, m_rect.top() + NodeSize.height() / 4, NodeSize.width() / 2, NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_value);
+}
+
+QRectF GraphicsControls::Node_Title::boundingRect() const
+{
+    return m_rect;
+}
+void Node_Title::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) 
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    // 绘制背景
+    painter->setBrush(m_color);
+    painter->drawRect(boundingRect());
+
+    // 绘制文本
+    painter->setPen(Qt::black);
+    painter->drawText(boundingRect(), Qt::AlignCenter, m_title);
+}
+
+
+QRectF Node_Title::rect() const
+{
+    return m_rect;
+}
+
+void Node_Title::setRect(const QRectF &newRect)
+{
+    if (m_rect == newRect)
+        return;
+    m_rect = newRect;
+    emit rectChanged();
+}
+Connection::Connection(QGraphicsItem* startItem, QGraphicsItem* endItem, QColor color)
+    : m_startItem(startItem), m_endItem(endItem), m_color(color)
+{
+}
+
+QRectF Connection::boundingRect() const
+{
+    return QRectF(m_startItem->pos(), m_endItem->pos()).normalized();
+}
+
+void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    painter->setPen(QPen(m_color, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter->drawLine(m_startItem->pos(), m_endItem->pos());
 }

@@ -45,7 +45,9 @@ void QGraphicView_Demo::on_pushButton_clicked() {
         std::vector<ViewContent> lists;
         lists.push_back(std::move(content1));
         lists.push_back(std::move(content2));
-        m_control.Init(lists); // 使用成员变量 m_control
+
+        m_control.Init(lists); 
+        
         m_control.Render();
     }
     catch (std::exception& ex) {

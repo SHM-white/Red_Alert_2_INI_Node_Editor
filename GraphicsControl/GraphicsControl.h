@@ -15,12 +15,19 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDrag>
 
+#define NodeHeigth 20
+#define NodeWidth 200
+#define NodeTitleColor QColor(0, 255, 0, 100)
+#define NodeColor QColor(255, 255, 255, 100)
+#define NodeListColor QColor(0, 0, 0, 0)
+static QSize NodeSize{ NodeWidth,NodeHeigth };
+class GRAPHICSCONTROL_EXPORT Connection;
 namespace GraphicsControls {
     class Node_List;
     class Node_Title;
     class Node;
 
-    class GRAPHICSCONTROL_EXPORT Node_List : public QObject, public QGraphicsObject, public QGraphicsItemGroup
+    class GRAPHICSCONTROL_EXPORT Node_List : public QGraphicsObject
     {
         Q_OBJECT
     public:
@@ -40,6 +47,11 @@ namespace GraphicsControls {
         void setNodes(const std::vector<std::shared_ptr<Node> > &newNodes);
         QRectF rect() const;
         void setRect(const QRectF &newRect);
+        // 通过 QGraphicsObject 继承
+        QRectF boundingRect() const override;
+        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+        void createConnections();
+        std::vector<std::shared_ptr<Connection>> connections() const;
     signals:
         void titleChanged();
         void nodesChanged();
@@ -47,10 +59,11 @@ namespace GraphicsControls {
     private:
         std::shared_ptr<Node_Title> m_title;
         std::vector<std::shared_ptr<Node>> m_nodes;
-        QRectF m_rect;
+        QRectF m_rect{ 0,0,NodeWidth,NodeHeigth };
+        std::vector<std::shared_ptr<Connection>> m_connections;
     };
 
-    class GRAPHICSCONTROL_EXPORT Node_Title : public QObject, public QGraphicsObject, public QGraphicsItemGroup
+    class GRAPHICSCONTROL_EXPORT Node_Title : public QGraphicsObject
     {
         Q_OBJECT
     public:
@@ -59,23 +72,33 @@ namespace GraphicsControls {
         bool Init();
         Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
         Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged FINAL)
+        Q_PROPERTY(QRectF rect READ rect WRITE setRect NOTIFY rectChanged FINAL)
         QString title() const;
-        QColor color() const;;
+        QColor color() const;
         void setTitle(const QString &newTitle);
         void setColor(const QColor &newColor);
+        QRectF rect() const;
+        void setRect(const QRectF &newRect);
+        // 通过 QGraphicsObject 继承
+        QRectF boundingRect() const override;
+        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
     signals:
         void titleChanged();
         void colorChanged();
+        void rectChanged();
+
     private:
         QString m_title;
         QColor m_color;
+        QRectF m_rect{ 0,0,NodeWidth,NodeHeigth };
     };
 
-    class GRAPHICSCONTROL_EXPORT Node : public QObject, public QGraphicsObject, public QGraphicsItemGroup
+    class GRAPHICSCONTROL_EXPORT Node : public QGraphicsObject
     {
         Q_OBJECT
     public:
-        Node(QString name, QColor color, QRectF rect);
+        Node(QString name, QString value, QColor color, QRectF rect);
         Node();
         bool Init();
         Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
@@ -90,6 +113,10 @@ namespace GraphicsControls {
         void setRect(const QRectF &newRect);
         QString value() const;
         void setValue(const QString &newValue);
+        // 通过 QGraphicsObject 继承
+        QRectF boundingRect() const override;
+        void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
     signals:
         void nameChanged();
         void colorChanged();
@@ -98,8 +125,9 @@ namespace GraphicsControls {
     private:
         QString m_name;
         QColor m_color;
-        QRectF m_rect;
+        QRectF m_rect{ 0,0,NodeWidth,NodeHeigth };
         QString m_value;
+
     };
 }
 
@@ -108,16 +136,17 @@ class GRAPHICSCONTROL_EXPORT ViewContent
 public:
     ViewContent(const std::map<QString, QString>& content, const QString& title);
     ViewContent() = default;
+    ViewContent(const ViewContent& other) = default;
+    ViewContent& operator=(const ViewContent& other) = default;
+    ViewContent(ViewContent&& other) = default;
+    ViewContent& operator=(ViewContent&& other) = default;
     std::map<QString, QString> content() const;
     void setContent(const std::map<QString, QString>& newContent);
     QString title() const;
     void setTitle(const QString& newTitle);
-    QSize nodeSize() const;
-    void setNodeSize(const QSize& newNodeSize);
 private:
     std::map<QString, QString> m_content;
     QString m_title;
-    QSize m_nodeSize{ 200,20 };
 };
 
 class GRAPHICSCONTROL_EXPORT GraphicsControl
@@ -126,11 +155,25 @@ public:
     GraphicsControl(QGraphicsView* view); // get pointer to QGraphicsView control
     GraphicsControl();
     void SetView(QGraphicsView* view); // set pointer to QGraphicsView control
-    void Render(); // 与后台对接
+    void Render(); 
     void Init(const std::vector<ViewContent>& lists); // 初始化
     QGraphicsScene* m_scene;
 private:
     QGraphicsView* m_view;
     std::vector<std::shared_ptr<GraphicsControls::Node_List>> m_nodeLists;
 };
+class GRAPHICSCONTROL_EXPORT Connection : public QGraphicsObject
+{
+    Q_OBJECT
+public:
+    Connection(QGraphicsItem* startItem, QGraphicsItem* endItem, QColor color = Qt::black);
+    QRectF boundingRect() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
+private:
+    QGraphicsItem* m_startItem;
+    QGraphicsItem* m_endItem;
+    QColor m_color;
+};
+
 
