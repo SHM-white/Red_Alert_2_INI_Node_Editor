@@ -67,15 +67,18 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
     for (const auto& content : lists) {
         auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), NodeTitleColor);
         title->Init();
-        title->setRect(QRectF(xOffset, 0, NodeSize.width(), NodeSize.height()));
+        title->setPos(QPointF(xOffset, 0));
+        title->setRect(QRectF(0, 0, NodeSize.width(), NodeSize.height()));
         yOffset += NodeSize.height();
         std::vector<std::shared_ptr<GraphicsControls::Node>> nodes;
         for (const auto& item : content.content()) {
-            nodes.push_back(std::make_shared<GraphicsControls::Node>(item.first, item.second, NodeColor, QRectF(xOffset, yOffset, NodeSize.width(), NodeSize.height())));
+            nodes.push_back(std::make_shared<GraphicsControls::Node>(item.first, item.second, NodeColor, QRectF(0, yOffset, NodeSize.width(), NodeSize.height())));
+            nodes.back()->setPos(QPointF(xOffset,0));
             yOffset += NodeSize.height();
         }
         auto nodeList = std::make_shared<GraphicsControls::Node_List>(title, nodes);
-        nodeList->setRect(QRectF(xOffset, 0, NodeSize.width(), yOffset));
+        nodeList->setRect(QRectF(0, 0, NodeSize.width(), yOffset));
+        nodeList->setPos(xOffset, 0);
         if (nodeList->Init()) {
             m_nodeLists.push_back(nodeList);
             m_scene->addItem(nodeList.get());
@@ -300,7 +303,7 @@ void Node_Title::setColor(const QColor &newColor)
 }
 QRectF GraphicsControls::Node_List::boundingRect() const
 {
-    return m_rect;
+    return QRectF(0, 0, m_rect.width(), m_rect.height());
 }
 void Node_List::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) 
 {
@@ -414,7 +417,7 @@ void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     Q_UNUSED(widget);
 
     painter->setPen(QPen(m_color, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter->drawLine(m_startItem->scenePos(), m_endItem->scenePos());
+    painter->drawLine(m_startItem->pos(), m_endItem->pos());
     qDebug() << m_startItem->scenePos() << "->" << m_endItem->scenePos();
 }
 
@@ -428,7 +431,11 @@ void GraphicsControls::Node_List::mouseMoveEvent(QGraphicsSceneMouseEvent* event
 {
     if (m_dragging) {
         QPointF delta = event->scenePos() - m_dragStartPos;
-        setPos(scenePos() + delta);
+        setRect(QRectF(rect().topLeft() + delta, rect().size()));
+        m_title->setPos(m_title->pos() + delta);
+        for (const auto& node : m_nodes) {
+            node->setPos(node->pos() + delta);
+        }
         m_dragStartPos = event->scenePos();
         prepareGeometryChange(); // 确保几何形状变化通知
         update(); // 确保重绘

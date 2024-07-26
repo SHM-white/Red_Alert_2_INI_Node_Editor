@@ -15,6 +15,7 @@ QGraphicView_Demo::QGraphicView_Demo(QWidget *parent)
     connect(ui.pushButton, &QPushButton::clicked, this, &QGraphicView_Demo::on_pushButton_clicked);
     try
     {
+        on_pushButton_clicked();
         this->show();
     }
     catch (std::exception& ex) {
