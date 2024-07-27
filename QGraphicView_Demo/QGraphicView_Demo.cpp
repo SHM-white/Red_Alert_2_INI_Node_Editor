@@ -13,6 +13,7 @@ QGraphicView_Demo::QGraphicView_Demo(QWidget *parent)
     ui.setupUi(this);
     m_control.SetView(ui.graphicsView);
     connect(ui.pushButton, &QPushButton::clicked, this, &QGraphicView_Demo::on_pushButton_clicked);
+    connect(ui.pushButton_2, &QPushButton::clicked, this, &QGraphicView_Demo::on_pushButton2_clicked);
     try
     {
         on_pushButton_clicked();
@@ -25,6 +26,15 @@ QGraphicView_Demo::QGraphicView_Demo(QWidget *parent)
 
 QGraphicView_Demo::~QGraphicView_Demo()
 {}
+void QGraphicView_Demo::on_pushButton2_clicked()
+{
+    try {
+        auto a = m_control.save();
+    }
+    catch (std::exception& ex) {
+        QMessageBox::warning(this, "error", ex.what(), QMessageBox::Ok);
+    }
+}
 void QGraphicView_Demo::on_pushButton_clicked() {
     try
     {

@@ -65,25 +65,25 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
     m_nodeLists.clear();
     // 根据传入的ViewContent列表初始化节点列表
     for (const auto& content : lists) {
-        auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), NodeTitleColor);
+        auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), Settings::NodeTitleColor);
         title->Init();
         title->setPos(QPointF(xOffset, 0));
-        title->setRect(QRectF(0, 0, NodeSize.width(), NodeSize.height()));
-        yOffset += NodeSize.height();
+        title->setRect(QRectF(0, 0, Settings::NodeSize.width(), Settings::NodeSize.height()));
+        yOffset += Settings::NodeSize.height();
         std::vector<std::shared_ptr<GraphicsControls::Node>> nodes;
         for (const auto& item : content.content()) {
-            nodes.push_back(std::make_shared<GraphicsControls::Node>(item.first, item.second, NodeColor, QRectF(0, yOffset, NodeSize.width(), NodeSize.height())));
-            nodes.back()->setPos(QPointF(xOffset,0));
-            yOffset += NodeSize.height();
+            nodes.push_back(std::make_shared<GraphicsControls::Node>(item.first, item.second, Settings::NodeColor, QRectF(0, yOffset, Settings::NodeSize.width(), Settings::NodeSize.height())));
+            nodes.back()->setPos(QPointF(xOffset,yOffset));
+            yOffset += Settings::NodeSize.height();
         }
         auto nodeList = std::make_shared<GraphicsControls::Node_List>(title, nodes);
-        nodeList->setRect(QRectF(0, 0, NodeSize.width(), yOffset));
+        nodeList->setRect(QRectF(0, 0, Settings::NodeSize.width(), yOffset));
         nodeList->setPos(xOffset, 0);
         if (nodeList->Init()) {
             m_nodeLists.push_back(nodeList);
             m_scene->addItem(nodeList.get());
         }
-        xOffset += NodeSize.width();
+        xOffset += Settings::NodeSize.width()+20;
         yOffset = 0;
     }
     createConnections();
@@ -103,6 +103,19 @@ void GraphicsControl::createConnections()
             }
         }
     }
+}
+
+std::vector<ViewContent> GraphicsControl::save()
+{
+    std::vector<ViewContent> lists;
+    for (const auto& nodeList : m_nodeLists) {
+        std::map<QString, QString> content;
+        for (const auto& node : nodeList->nodes()) {
+            content[node->name()] = node->value();
+        }
+        lists.push_back(ViewContent(content, nodeList->title()->title()));
+    }
+    return lists;
 }
 
 void GraphicsControl::Render() {
@@ -311,7 +324,7 @@ void Node_List::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     Q_UNUSED(widget);
 
     // 绘制背景
-    painter->setBrush(NodeListColor);
+    painter->setBrush(Settings::NodeListColor);
     painter->drawRect(boundingRect());
 
     // 绘制标题
@@ -360,10 +373,10 @@ void Node::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
     // 绘制名称
     painter->setPen(Qt::black);
-    painter->drawText(QRectF(m_rect.left(), m_rect.top() + NodeSize.height() / 4, NodeSize.width() / 2, NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_name);
+    painter->drawText(QRectF(m_rect.left(), m_rect.top() + Settings::NodeSize.height() / 4, Settings::NodeSize.width() / 2, Settings::NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_name);
 
     // 绘制值
-    painter->drawText(QRectF(m_rect.left() + NodeSize.width() / 2, m_rect.top() + NodeSize.height() / 4, NodeSize.width() / 2, NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_value);
+    painter->drawText(QRectF(m_rect.left() + Settings::NodeSize.width() / 2, m_rect.top() + Settings::NodeSize.height() / 4, Settings::NodeSize.width() / 2, Settings::NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_value);
 }
 
 QRectF GraphicsControls::Node_Title::boundingRect() const
@@ -408,7 +421,20 @@ Connection::Connection(QGraphicsObject* startItem, QGraphicsObject* endItem, QCo
 
 QRectF Connection::boundingRect() const
 {
-    return QRectF(m_startItem->scenePos(), m_endItem->scenePos()).normalized().adjusted(-2, -2, 2, 2);
+    QPointF start = m_startItem->scenePos();
+    QPointF end = m_endItem->scenePos();
+    start.setY(start.y() + Settings::NodeSize.height() / 2);
+    end.setY(end.y() + Settings::NodeSize.height() / 2);
+    if (start.x() > end.x() + Settings::NodeSize.width()) {
+        return QRectF(start, QPointF(end.x() + Settings::NodeSize.width(), end.y())).normalized().adjusted(-2, -2, 2, 2);
+    }
+    else if (start.x() + Settings::NodeSize.width() < end.x()) {
+        return QRectF(QPointF(start.x() + Settings::NodeSize.width(), start.y()), end).normalized().adjusted(-2, -2, 2, 2);
+    }
+    else {
+        return QRectF(m_startItem->scenePos(), m_endItem->scenePos()).normalized().adjusted(-2, -2, 2, 2);
+    }
+
 }
 
 void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -417,7 +443,19 @@ void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     Q_UNUSED(widget);
 
     painter->setPen(QPen(m_color, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter->drawLine(m_startItem->pos(), m_endItem->pos());
+    QPointF start = m_startItem->scenePos();
+    QPointF end = m_endItem->scenePos();
+    start.setY(start.y() + Settings::NodeSize.height() / 2);
+    end.setY(end.y() + Settings::NodeSize.height() / 2);
+    if (start.x() > end.x() + Settings::NodeSize.width()) {
+        painter->drawLine(start, QPointF(end.x() + Settings::NodeSize.width(), end.y()));
+    }
+    else if (start.x() + Settings::NodeSize.width() < end.x()) {
+        painter->drawLine(QPointF(start.x() + Settings::NodeSize.width(), start.y()), end);
+    }
+    else {
+        //painter->drawLine(start, end);
+    }
     qDebug() << m_startItem->scenePos() << "->" << m_endItem->scenePos();
 }
 
@@ -431,7 +469,7 @@ void GraphicsControls::Node_List::mouseMoveEvent(QGraphicsSceneMouseEvent* event
 {
     if (m_dragging) {
         QPointF delta = event->scenePos() - m_dragStartPos;
-        setRect(QRectF(rect().topLeft() + delta, rect().size()));
+        setPos(pos() + delta);
         m_title->setPos(m_title->pos() + delta);
         for (const auto& node : m_nodes) {
             node->setPos(node->pos() + delta);
@@ -457,4 +495,10 @@ void GraphicsControls::Node_List::mouseReleaseEvent(QGraphicsSceneMouseEvent* ev
     if (event->button() == Qt::LeftButton) {
         m_dragging = false;
     }
+}
+
+void GraphicsControls::Node_List::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    Q_UNUSED(event);
+    qDebug() << "double click";
 }

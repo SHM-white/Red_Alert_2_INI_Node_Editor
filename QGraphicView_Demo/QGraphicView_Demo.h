@@ -17,6 +17,7 @@ public:
 public slots:
 
     void on_pushButton_clicked();
+    void on_pushButton2_clicked();
 
 private:
     Ui::QGraphicView_DemoClass ui;

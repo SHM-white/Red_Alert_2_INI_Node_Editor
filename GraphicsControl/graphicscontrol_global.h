@@ -34,18 +34,11 @@
 #include <QGraphicsSceneResizeEvent>
 #include <QGraphicsSceneHoverEvent>
 #include <QObject>
-#include <QString>
-#include <QColor>
 #include <QRectF>
 #include <memory>
 #include <vector>
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QGraphicsRectItem>
-#include <QGraphicsTextItem>
-#include <QGraphicsLineItem>
-#include <QGraphicsSceneMouseEvent>
 #include <QDrag>
+
 
 #if defined(GRAPHICSCONTROL_LIB)
 #  define GRAPHICSCONTROL_EXPORT Q_DECL_EXPORT
