@@ -460,6 +460,7 @@ void Connection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         //painter->drawLine(start, end);
     }
     qDebug() << m_startItem->scenePos() << "->" << m_endItem->scenePos();
+    setZValue(-1);
 }
 
 void Connection::updatePosition()

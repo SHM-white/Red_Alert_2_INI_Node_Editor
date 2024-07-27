@@ -17,15 +17,15 @@ namespace GraphicsControls {
     public:
         static inline QSize NodeTitleSize{ 200,50 };
         static inline QColor NodeTitleColor{ 0, 255, 0, 100 };
-        static inline QColor NodeColor{ 0, 0, 255, 100 };
-        static inline QColor NodeListColor{ 100, 0, 0, 100 };
+        static inline QColor NodeColor{ 0, 0, 0, 100 };
+        static inline QColor NodeListColor{ 100, 0, 0, 0 };
         static inline QSize NodeSize{ 200,30 };
         static inline QColor ConnectionColor{0,0,0,255};
         static inline int margin{ 40 };
         static inline QFont NodeTitleFont{ "Microsoft YaHei", 15, QFont::Bold };
         static inline QColor NodeTitleTextColor{ 0, 0, 0, 255 };
         static inline QFont NodeFont{ "Microsoft YaHei", 10, QFont::Normal };
-        static inline QColor NodeTextColor{ 0, 0, 0, 255 };
+        static inline QColor NodeTextColor{ 255, 255, 255, 255 };
         static inline void (*EditFunction)(Node_List*) {Settings::defaultEditFunction};
     };
 
