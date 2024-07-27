@@ -14,6 +14,7 @@ class QGraphicView_Demo : public QWidget
 public:
     QGraphicView_Demo(QWidget *parent = nullptr);
     ~QGraphicView_Demo();
+    static void edit(GraphicsControls::Node_List* node_list);
 public slots:
 
     void on_pushButton_clicked();

@@ -67,9 +67,9 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
     for (const auto& content : lists) {
         auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), Settings::NodeTitleColor);
         title->Init();
+        title->setRect(QRectF(0, 0, Settings::NodeTitleSize.width(), Settings::NodeTitleSize.height()));
         title->setPos(QPointF(xOffset, 0));
-        title->setRect(QRectF(0, 0, Settings::NodeSize.width(), Settings::NodeSize.height()));
-        yOffset += Settings::NodeSize.height();
+        yOffset += Settings::NodeTitleSize.height();
         std::vector<std::shared_ptr<GraphicsControls::Node>> nodes;
         for (const auto& item : content.content()) {
             nodes.push_back(std::make_shared<GraphicsControls::Node>(item.first, item.second, Settings::NodeColor, QRectF(0, yOffset, Settings::NodeSize.width(), Settings::NodeSize.height())));
@@ -83,7 +83,7 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
             m_nodeLists.push_back(nodeList);
             m_scene->addItem(nodeList.get());
         }
-        xOffset += Settings::NodeSize.width()+20;
+        xOffset += Settings::NodeSize.width() + Settings::margin;
         yOffset = 0;
     }
     createConnections();
@@ -372,10 +372,12 @@ void Node::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     painter->drawRect(boundingRect());
 
     // 绘制名称
-    painter->setPen(Qt::black);
+    painter->setPen(QPen(Settings::NodeTextColor));
+    painter->setFont(Settings::NodeFont);
     painter->drawText(QRectF(m_rect.left(), m_rect.top() + Settings::NodeSize.height() / 4, Settings::NodeSize.width() / 2, Settings::NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_name);
 
     // 绘制值
+
     painter->drawText(QRectF(m_rect.left() + Settings::NodeSize.width() / 2, m_rect.top() + Settings::NodeSize.height() / 4, Settings::NodeSize.width() / 2, Settings::NodeSize.height() / 2), Qt::AlignLeft | Qt::AlignVCenter, m_value);
 }
 
@@ -393,7 +395,8 @@ void Node_Title::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     painter->drawRect(boundingRect());
 
     // 绘制文本
-    painter->setPen(Qt::black);
+    painter->setPen(QPen(Settings::NodeTitleTextColor));
+    painter->setFont(Settings::NodeTitleFont);
     painter->drawText(boundingRect(), Qt::AlignCenter, m_title);
 }
 
@@ -426,13 +429,13 @@ QRectF Connection::boundingRect() const
     start.setY(start.y() + Settings::NodeSize.height() / 2);
     end.setY(end.y() + Settings::NodeSize.height() / 2);
     if (start.x() > end.x() + Settings::NodeSize.width()) {
-        return QRectF(start, QPointF(end.x() + Settings::NodeSize.width(), end.y())).normalized().adjusted(-2, -2, 2, 2);
+        return QRectF(start, QPointF(end.x() + Settings::NodeSize.width(), end.y())).normalized().adjusted(-4, -4, 4, 4);
     }
     else if (start.x() + Settings::NodeSize.width() < end.x()) {
-        return QRectF(QPointF(start.x() + Settings::NodeSize.width(), start.y()), end).normalized().adjusted(-2, -2, 2, 2);
+        return QRectF(QPointF(start.x() + Settings::NodeSize.width(), start.y()), end).normalized().adjusted(-4, -4, 4, 4);
     }
     else {
-        return QRectF(m_startItem->scenePos(), m_endItem->scenePos()).normalized().adjusted(-2, -2, 2, 2);
+        return QRectF(m_startItem->scenePos(), m_endItem->scenePos()).normalized().adjusted(-4, -4, 4, 4);
     }
 
 }
@@ -501,4 +504,5 @@ void GraphicsControls::Node_List::mouseDoubleClickEvent(QGraphicsSceneMouseEvent
 {
     Q_UNUSED(event);
     qDebug() << "double click";
+    Settings::EditFunction(this);
 }

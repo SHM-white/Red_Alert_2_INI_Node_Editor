@@ -28,11 +28,6 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsSceneContextMenuEvent>
-#include <QGraphicsSceneDragDropEvent>
-#include <QGraphicsSceneHelpEvent>
-#include <QGraphicsSceneMoveEvent>
-#include <QGraphicsSceneResizeEvent>
-#include <QGraphicsSceneHoverEvent>
 #include <QObject>
 #include <QRectF>
 #include <memory>

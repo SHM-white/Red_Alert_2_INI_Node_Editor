@@ -26,6 +26,10 @@ QGraphicView_Demo::QGraphicView_Demo(QWidget *parent)
 
 QGraphicView_Demo::~QGraphicView_Demo()
 {}
+void QGraphicView_Demo::edit(GraphicsControls::Node_List * node_list)
+{
+    qDebug()<<"edit";
+}
 void QGraphicView_Demo::on_pushButton2_clicked()
 {
     try {
@@ -38,6 +42,7 @@ void QGraphicView_Demo::on_pushButton2_clicked()
 void QGraphicView_Demo::on_pushButton_clicked() {
     try
     {
+        GraphicsControls::Settings::EditFunction = edit;
 
         ViewContent content1;
         content1.setTitle("test1");
