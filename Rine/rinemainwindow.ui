@@ -30,7 +30,7 @@
        </size>
       </property>
       <property name="tabPosition">
-       <enum>QTabWidget::South</enum>
+       <enum>QTabWidget::TabPosition::South</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -39,24 +39,14 @@
        <attribute name="title">
         <string>规则</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="2" column="0">
-         <widget class="QTreeView" name="treeView_G">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="sizeConstraint">
-           <enum>QLayout::SetMinimumSize</enum>
+           <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
           </property>
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QLineEdit" name="lineEdit_search_rule"/>
           </item>
           <item>
            <widget class="QPushButton" name="search_button_G">
@@ -67,45 +57,41 @@
           </item>
          </layout>
         </item>
+        <item>
+         <widget class="QTreeView" name="treeView_G">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
         <string>素材</string>
        </attribute>
-       <widget class="QPlainTextEdit" name="search_input_S">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>171</width>
-          <height>31</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QTreeView" name="treeView_S">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>50</y>
-          <width>211</width>
-          <height>611</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="search_button_S">
-        <property name="geometry">
-         <rect>
-          <x>180</x>
-          <y>10</y>
-          <width>41</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>搜索</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLineEdit" name="lineEdit_search_source"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="search_button_S">
+            <property name="text">
+             <string>搜索</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTreeView" name="treeView_S"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -706,7 +692,7 @@
      <x>0</x>
      <y>0</y>
      <width>1004</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_F">

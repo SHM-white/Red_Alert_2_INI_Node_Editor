@@ -65,6 +65,9 @@
       <Extensions>*</Extensions>
       <ParseFiles>false</ParseFiles>
     </Filter>
+    <Filter Include="Library">
+      <UniqueIdentifier>{f0fa94bd-f9b0-4b25-a534-da38008a217a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -78,23 +81,20 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="member.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="member_item.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="node_scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="rinemainwindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="section.h">
+    <ClInclude Include="mini\ini.h">
+      <Filter>Library</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="section_item.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,12 @@
-﻿#include <QGraphicsScene>
+﻿#ifndef NODE_SCENE_H
+#define NODE_SCENE_H
+
+#include "include.h"
+#include <QGraphicsScene>
 #include <QWheelEvent>
 #include <QRectF>
 #include <QLine>
-#include <QWidget>
-#include <QtCore>
-#include <QtGui>
-#include <QList>
 
-#ifndef NODE_SCENE_H
-#define NODE_SCENE_H
 class node_scene:public QGraphicsScene{
 public:
     node_scene(QWidget *parent = nullptr);

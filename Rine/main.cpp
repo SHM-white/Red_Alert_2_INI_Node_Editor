@@ -1,4 +1,6 @@
-#include "rinemainwindow.h"
+﻿#include "rinemainwindow.h"
+
+#include "include.h"
 
 #include <QApplication>
 #include <QLocale>

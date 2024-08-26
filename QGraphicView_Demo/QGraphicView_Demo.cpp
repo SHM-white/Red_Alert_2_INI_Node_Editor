@@ -55,6 +55,8 @@ void QGraphicView_Demo::on_pushButton_clicked() {
         items1.insert(items1.begin(), std::pair< QString, QString>(QString{ "test11" }, QString{ "test12" }));
         content1.setContent(items1);
 
+        
+
         ViewContent content2;
         content2.setTitle("test2");
         std::map<QString, QString> items2;
@@ -76,10 +78,20 @@ void QGraphicView_Demo::on_pushButton_clicked() {
         items3.insert(items3.begin(), std::pair< QString, QString>(QString{ "test9" }, QString{ "test10" }));
         content3.setContent(items3);
 
+        ViewContent content4;
+        content4.setTitle("test1");
+        std::map<QString, QString> items4;
+        items4.insert(items4.begin(), std::pair< QString, QString>(QString{ "test1" }, QString{ "test2" }));
+        items4.insert(items4.begin(), std::pair< QString, QString>(QString{ "test3" }, QString{ "test4" }));
+        items4.insert(items4.begin(), std::pair< QString, QString>(QString{ "test5" }, QString{ "test6" }));
+        items4.insert(items4.begin(), std::pair< QString, QString>(QString{ "test7" }, QString{ "test8" }));
+        content4.setContent(items4);
+
         std::vector<ViewContent> lists;
         lists.push_back(std::move(content1));
         lists.push_back(std::move(content2));
         lists.push_back(std::move(content3));
+        lists.push_back(std::move(content4));
 
         m_control.Init(lists); 
         

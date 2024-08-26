@@ -42,7 +42,6 @@ namespace GraphicsControls {
         std::vector<std::shared_ptr<Node>> nodes() const;
         void add_node(std::shared_ptr<Node> node);
         void remove_node(int index);
-        // 查找父节点和子节点
         void setTitle(const std::shared_ptr<Node_Title>& newTitle);
         void setNodes(const std::vector<std::shared_ptr<Node> >& newNodes);
         QRectF rect() const;
