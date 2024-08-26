@@ -12,11 +12,35 @@ class RineMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    RineMainWindow(QWidget *parent = nullptr);
+    RineMainWindow(QWidget* parent = nullptr);
     ~RineMainWindow();
 
+public slots:
+
+    bool loadINI(const std::string& path);
+    bool saveINI(const std::string& path);
+
+private slots:
+    void on_action_ini_E_triggered();
+
+    void on_action_Q_triggered();
+
+    void on_actionini_I_triggered();
+
+    void on_action_O_triggered();
+
+    void on_action_N_triggered();
+
+    void on_action_S_triggered();
+
+    void on_action_L_triggered();
+
 private:
-    Ui::RineMainWindow *ui;
+    Ui::RineMainWindow* ui;
     std::shared_ptr<GraphicsControl> control;
+    mINI::INIStructure m_ini;
+    std::string m_iniPath;
+    std::unique_ptr<mINI::INIFile> m_iniFile;
+    std::vector<std::string> m_operations;//TODO: Create operatoins class and save operatoins in this vector to be able to undo/redo operations
 };
 #endif // RINEMAINWINDOW_H

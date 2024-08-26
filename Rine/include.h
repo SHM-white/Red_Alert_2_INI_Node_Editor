@@ -18,13 +18,18 @@
 #include <QMainWindow>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include <qmessagebox.h>
+#include <qfiledialog.h>
+#include <filesystem>
 
 #ifdef QT_DEBUG
 #define DEBUG
 #endif
 
+
+
 class Utils
 {
 public:
-	static mINI::INIFile
+	
 };
