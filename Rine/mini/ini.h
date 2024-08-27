@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The MIT License (MIT)
  * Copyright (c) 2018 Danijel Durakovic
  *
@@ -309,6 +309,11 @@ namespace mINI
 				INIStringUtil::trim(key);
 				INIStringUtil::replace(key, "\\=", "=");
 				auto value = line.substr(equalsAt + 1);
+				auto commentAt = value.find_first_of(';');
+				if (commentAt != std::string::npos)
+				{
+					value = value.substr(0, commentAt);
+				}
 				INIStringUtil::trim(value);
 				parseData.first = key;
 				parseData.second = value;
@@ -345,7 +350,7 @@ namespace mINI
 					header[0] == static_cast<char>(0xEF) &&
 					header[1] == static_cast<char>(0xBB) &&
 					header[2] == static_cast<char>(0xBF)
-				);
+					);
 			}
 			else {
 				isBOM = false;
@@ -668,7 +673,7 @@ namespace mINI
 		bool prettyPrint = false;
 
 		INIWriter(std::string const& filename)
-		: filename(filename)
+			: filename(filename)
 		{
 		}
 		~INIWriter() { }

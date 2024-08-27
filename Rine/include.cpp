@@ -1,6 +1,6 @@
 ﻿#include "include.h"
 
-int VIEW_DISPLAY_DEPTH = 10;
+int VIEW_DISPLAY_DEPTH = 2;
 std::vector<ViewContent> Utils::GetRelatedContents(const ViewContent* content, const std::vector<ViewContent>& contents,int currentDepth)
 {
     std::vector<ViewContent> relatedContents;
@@ -9,7 +9,7 @@ std::vector<ViewContent> Utils::GetRelatedContents(const ViewContent* content, c
     if (currentDepth == 0) {
         for (auto& c : contents) {
             for (auto& i : c.content()) {
-                if (content->title() == i.first) {
+                if (content->title().toLower() == i.second.toLower()) {
                     relatedContents.push_back(c);
                     break;
                 }
@@ -19,7 +19,7 @@ std::vector<ViewContent> Utils::GetRelatedContents(const ViewContent* content, c
     //Find child
     for (auto& i : content->content()) {
         for (auto& c : contents) {
-            if (i.first == c.title()) {
+            if (i.second.toLower() == c.title().toLower()) {
                 relatedContents.push_back(c);
                 if (currentDepth < VIEW_DISPLAY_DEPTH) {
                     auto childRelatedContents = GetRelatedContents(&c, contents, currentDepth + 1);

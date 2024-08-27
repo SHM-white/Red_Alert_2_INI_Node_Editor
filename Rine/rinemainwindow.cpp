@@ -28,6 +28,7 @@ RineMainWindow::RineMainWindow(QWidget *parent)
     //Initialize GraphicsControl
     m_graphicsControl = new GraphicsControl(ui->graphicsView);
     updateAll();
+    GraphicsControls::Settings::CaseSensitive = false;
 };
 RineMainWindow::~RineMainWindow()
 {

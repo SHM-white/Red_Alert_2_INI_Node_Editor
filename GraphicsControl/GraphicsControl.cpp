@@ -93,13 +93,18 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
 
 void GraphicsControl::createConnections()
 {
+
     for (const auto& nodeList : m_nodeLists) {
         for (const auto& nodelist2 : m_nodeLists) {
             if (nodeList.get() == nodelist2.get()) {
                 continue;
             }
             for (const auto& node : nodeList->nodes()) {
-                if (node->name() == nodelist2->title()->title()) {
+                if (node->value() == nodelist2->title()->title())
+                {
+                    nodelist2->add_connection(std::make_shared<Connection>(node.get(), nodelist2->title().get()));
+                }
+                else if ((!Settings::CaseSensitive) && (node->value().toLower() == nodelist2->title()->title().toLower())) {
                     nodelist2->add_connection(std::make_shared<Connection>(node.get(), nodelist2->title().get()));
                 }
             }
@@ -421,6 +426,9 @@ Connection::Connection(QGraphicsObject* startItem, QGraphicsObject* endItem, QCo
 {
     connect(startItem, &QGraphicsObject::yChanged, this, &Connection::updatePosition);
     connect(endItem, &QGraphicsObject::yChanged, this, &Connection::updatePosition);
+    connect(startItem, &QGraphicsObject::xChanged, this, &Connection::updatePosition);
+    connect(endItem, &QGraphicsObject::xChanged, this, &Connection::updatePosition);
+
     updatePosition();
 }
 

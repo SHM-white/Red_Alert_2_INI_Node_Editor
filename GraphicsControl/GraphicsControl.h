@@ -15,6 +15,7 @@ namespace GraphicsControls {
             qDebug() << "Default Edit Function called";
         };
     public:
+        static inline bool CaseSensitive{ false };
         static inline QSize NodeTitleSize{ 200,50 };
         static inline QColor NodeTitleColor{ 0, 255, 0, 100 };
         static inline QColor NodeColor{ 0, 0, 0, 100 };
