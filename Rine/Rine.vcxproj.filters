@@ -79,6 +79,12 @@
     <ClCompile Include="rinemainwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Information.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="node_scene.h">
@@ -94,11 +100,14 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="rinemainwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="Information.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -161,5 +170,10 @@
     <None Include="res\save.png">
       <Filter>Distribution Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Information.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

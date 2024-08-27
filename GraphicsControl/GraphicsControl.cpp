@@ -31,7 +31,9 @@ void ViewContent::setTitle(const QString& newTitle)
     m_title = newTitle;
 }
 
-GraphicsControl::GraphicsControl(QGraphicsView* view) : m_view(view) {
+GraphicsControl::GraphicsControl(QGraphicsView* view) : m_view(view)
+{
+    m_scene = nullptr;
     m_nodeLists.clear();
 }
 
@@ -61,9 +63,9 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
         m_scene = new QGraphicsScene();
         m_view->setScene(m_scene);
     }
-    // 清空现有的节点列表
+
     m_nodeLists.clear();
-    // 根据传入的ViewContent列表初始化节点列表
+    // Initalize the scene
     for (const auto& content : lists) {
         auto title = std::make_shared<GraphicsControls::Node_Title>(content.title(), Settings::NodeTitleColor);
         title->Init();
@@ -80,8 +82,8 @@ void GraphicsControl::Init(const std::vector<ViewContent>& lists)
         nodeList->setRect(QRectF(0, 0, Settings::NodeSize.width(), yOffset));
         nodeList->setPos(xOffset, 0);
         if (nodeList->Init()) {
-            m_nodeLists.push_back(nodeList);
             m_scene->addItem(nodeList.get());
+            m_nodeLists.push_back(nodeList);
         }
         xOffset += Settings::NodeSize.width() + Settings::margin;
         yOffset = 0;

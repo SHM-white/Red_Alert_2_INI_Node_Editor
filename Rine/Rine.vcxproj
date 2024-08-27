@@ -61,8 +61,6 @@
     <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>release\</OutDir>
-    <IntDir>release\</IntDir>
     <TargetName>Rine</TargetName>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
@@ -211,12 +209,15 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include.cpp" />
+    <ClCompile Include="Information.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="node_scene.cpp" />
     <ClCompile Include="rinemainwindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include.h" />
+    <QtMoc Include="Information.h" />
     <ClInclude Include="mini\ini.h" />
     <ClInclude Include="node_scene.h" />
     <ClInclude Include="pch.h" />
@@ -224,6 +225,7 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="Information.ui" />
     <QtUic Include="rinemainwindow.ui">
     </QtUic>
   </ItemGroup>

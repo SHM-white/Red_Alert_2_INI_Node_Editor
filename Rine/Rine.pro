@@ -9,19 +9,24 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Information.cpp \
+    include.cpp \
     main.cpp \
     node_scene.cpp \
     rinemainwindow.cpp
 
 HEADERS += \
+    Information.h \
     member.h \
     member_item.h \
+    mini/ini.h \
     node_scene.h \
     rinemainwindow.h \
     section.h \
     section_item.h
 
 FORMS += \
+    Information.ui \
     rinemainwindow.ui
 
 TRANSLATIONS += \

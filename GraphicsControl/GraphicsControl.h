@@ -36,9 +36,9 @@ namespace GraphicsControls {
         Node_List(std::shared_ptr<Node_Title> title, std::vector<std::shared_ptr<Node>> nodes);
         bool Init();
         Q_PROPERTY(std::shared_ptr<Node_Title> title READ title WRITE setTitle NOTIFY titleChanged FINAL)
-            Q_PROPERTY(std::vector<std::shared_ptr<Node>> nodes READ nodes WRITE setNodes NOTIFY nodesChanged FINAL)
-            Q_PROPERTY(QRectF rect READ rect WRITE setRect NOTIFY rectChanged FINAL)
-            std::shared_ptr<Node_Title> title() const;
+        Q_PROPERTY(std::vector<std::shared_ptr<Node>> nodes READ nodes WRITE setNodes NOTIFY nodesChanged FINAL)
+        Q_PROPERTY(QRectF rect READ rect WRITE setRect NOTIFY rectChanged FINAL)
+        std::shared_ptr<Node_Title> title() const;
         std::vector<std::shared_ptr<Node>> nodes() const;
         void add_node(std::shared_ptr<Node> node);
         void remove_node(int index);
@@ -79,9 +79,9 @@ namespace GraphicsControls {
         Node_Title();
         bool Init();
         Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
-            Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged FINAL)
-            Q_PROPERTY(QRectF rect READ rect WRITE setRect NOTIFY rectChanged FINAL)
-            QString title() const;
+        Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged FINAL)
+        Q_PROPERTY(QRectF rect READ rect WRITE setRect NOTIFY rectChanged FINAL)
+        QString title() const;
         QColor color() const;
         void setTitle(const QString& newTitle);
         void setColor(const QColor& newColor);
