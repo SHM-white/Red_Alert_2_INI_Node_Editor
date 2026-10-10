@@ -6,7 +6,7 @@ The repository also contains the original Rine, GraphicsControl and ImGui/INIBro
 
 ## PR2 × PR3 UI / theme integration
 
-The integration branch preserves PR2's tested INI editing and raw source workflow, while adopting PR3's **three-pane desktop layout**: section explorer with type filter (left), graph plus source tab (center), and always-visible property inspector (right). The full UI and node cards use a consistent **12px rounded** visual system.
+The integration branch preserves PR2's tested INI editing and raw source workflow, while adopting PR3's **three-pane desktop layout**: section explorer with type filter (left), graph plus source tab (center), and always-visible property inspector (right). The UI now follows a **VS2022-inspired straight-edged, compact flat visual system**: zero corner radii, thin borders, subdued toolbar/panel surfaces, and square graph cards with slim category accents. (This is an inspiration, not a copy of Microsoft branding.)
 
 **Theme profiles** now include eight UI colors and eleven independently stored node-category colors. The toolbar theme selector switches the entire profile; its **Edit Theme** button opens a palette editor. Built-in themes are read-only templates: editing them creates a new custom copy. Use the Theme menu to import/export JSON, delete custom profiles, or quickly recolor the currently selected node category. Custom profiles persist in QSettings. Older PR2 node color preferences are migrated when opening the built-in theme.
 
@@ -50,3 +50,7 @@ See docs/ROADMAP.md for remaining correctness work, benchmarks, multi-file works
 ## GUI initialization smoke test
 
 The CTest suite also instantiates the full main window in an offscreen Qt backend, via `RA2NodeStudio --smoke-test`, to catch crashes during theme loading and three-pane UI construction on Windows and Linux. GUI controls still benefit from hands-on desktop interaction tests.
+
+### Flat UI and regression coverage
+
+The square-corner styling applies to the toolbar, dock-like panes, table headers, tabs, inputs, buttons, menus, group boxes and graph cards. The theme dialog uses small color preview swatches, editable HEX fields and a picker, rather than entire saturated colored buttons. Theme profiles still switch all 11 node-category colors independently. An offscreen UI regression test verifies that an empty category filter clears the selection and inspector, and that switching back restores the matching section.
