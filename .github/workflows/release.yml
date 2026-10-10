@@ -1,0 +1,46 @@
+name: Publish RA2 Node Studio v0.2.0
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+
+jobs:
+  windows-release:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: win64_msvc2022_64
+          cache: true
+      - name: Configure Qt 6 / CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build portable application
+        run: cmake --build build --config Release --parallel 2
+      - name: Test release build
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Bundle Windows Qt runtime
+        shell: pwsh
+        run: |
+          & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --release "build\Release\RA2NodeStudio.exe"
+          if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
+          if (-not (Test-Path "build\Release\RA2NodeStudio.exe")) { throw "Executable missing" }
+          Compress-Archive -Path "build\Release\*" -DestinationPath "RA2NodeStudio-v0.2.0-Windows-x64.zip" -CompressionLevel Optimal
+          if (-not (Test-Path "RA2NodeStudio-v0.2.0-Windows-x64.zip")) { throw "Release archive missing" }
+      - name: Publish versioned GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.2.0
+          target_commitish: ${{ github.sha }}
+          name: RA2 Node Studio v0.2.0 — Qt 6 Revival
+          body_path: RELEASE_NOTES.md
+          files: RA2NodeStudio-v0.2.0-Windows-x64.zip
+          fail_on_unmatched_files: true
+          make_latest: true
+          draft: false
+          prerelease: false
