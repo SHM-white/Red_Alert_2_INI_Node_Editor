@@ -20,6 +20,7 @@ class MainWindow final : public QMainWindow {
     Q_OBJECT
 public:
     MainWindow();
+    bool smokeTestUi();
 protected:
     void closeEvent(QCloseEvent* event) override;
 private:

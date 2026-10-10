@@ -12,6 +12,7 @@
 #include <QToolButton>
 #include <QRegularExpressionValidator>
 #include <QFrame>
+#include <QTemporaryDir>
 #include <QApplication>
 #include <QCloseEvent>
 #include <QColorDialog>
@@ -871,4 +872,37 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         settings_.setValue("window/geometry", saveGeometry());
         event->accept();
     } else event->ignore();
+}
+
+
+bool MainWindow::smokeTestUi() {
+    // Exercises a real parsed fixture and the visible filtering/inspector contract.
+    QTemporaryDir temp;
+    if (!temp.isValid()) return false;
+    const QString path = temp.filePath("selection-smoke.ini");
+    QFile sample(path);
+    if (!sample.open(QIODevice::WriteOnly)) return false;
+    if (sample.write("[Unit]\nPrimary=W1\n[W1]\nDamage=5\nROF=20\n") < 0) return false;
+    sample.close();
+    openPath(path);
+    if (document_.sections().size() != 2) return false;
+    if (current_ < 0 || properties_->rowCount() != 1) return false;
+    const int emptyFilter = categoryFilter_->findData("Projectile");
+    if (emptyFilter < 0) return false;
+    categoryFilter_->setCurrentIndex(emptyFilter);
+    // Regression: a filtered-out section must not remain in the right inspector or graph.
+    if (proxy_->rowCount() != 0 || current_ != -1 || properties_->rowCount() != 0) return false;
+    if (!sectionInfo_->text().contains("选择一个节")) return false;
+    const int weaponFilter = categoryFilter_->findData("Weapon");
+    if (weaponFilter < 0) return false;
+    categoryFilter_->setCurrentIndex(weaponFilter);
+    if (proxy_->rowCount() != 1 || current_ != document_.indexOf("W1")) return false;
+    if (properties_->rowCount() != 2) return false;
+    // Switching profiles should preserve the complete square-corner stylesheet.
+    const int light = theme_->findData("light");
+    if (light < 0) return false;
+    theme_->setCurrentIndex(light);
+    if (!qApp->styleSheet().contains("border-radius:0px")) return false;
+    if (qApp->styleSheet().contains("border-radius:12px")) return false;
+    return true;
 }
