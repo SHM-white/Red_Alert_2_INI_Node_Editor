@@ -156,7 +156,10 @@ void GraphView::display(const IniDocument& doc, int section) {
     scene_.setSceneRect(bounds);
     resetTransform();
     scale(0.92, 0.92);
-    centerOn(cardWidth / 2, cards[section]->height() / 2);
+    // When only one or two cards exist, keep the complete small graph in view.
+    // Otherwise prioritize the selected card so large dependency fans stay readable.
+    if (cards.size() <= 2) centerOn(scene_.itemsBoundingRect().center());
+    else centerOn(cardWidth / 2, cards[section]->height() / 2);
 }
 
 void GraphView::fitGraph() {
