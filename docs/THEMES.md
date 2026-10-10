@@ -22,6 +22,6 @@ Export an existing profile to obtain a valid starting JSON. Unknown fields are i
 
 ## Design constraints
 
-- Node cards, panels, buttons, input fields, tabs, and menus follow a unified rounded-corner style (roughly 10–12 px).
+- Node cards, panels, buttons, input fields, tabs, and menus use a unified square-corner (0px radius), VS-style flat desktop UI. Native Windows title bars and native system color/file dialogs may still follow the host OS window decorations.
 - Built-in theme palettes are individually tuned for contrast and node-class distinction; arbitrary imported colors can override contrast, so verify readability.
 - Theme editing only changes appearance, never dependency indexing, parse semantics, or INI file bytes.
