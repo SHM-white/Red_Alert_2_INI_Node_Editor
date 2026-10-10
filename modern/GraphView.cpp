@@ -1,0 +1,161 @@
+#include "GraphView.h"
+#include <QGraphicsPathItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
+#include <QScrollBar>
+#include <QWheelEvent>
+#include <QMouseEvent>
+#include <QSet>
+#include <algorithm>
+
+namespace {
+constexpr qreal width = 292.0;
+class Card final : public QGraphicsItem {
+public:
+    Card(const IniDocument& doc, int section, QColor color, QColor text, bool focused)
+        : section_(section), name_(doc.sections()[section].name),
+          category_(doc.category(section)), color_(color), text_(text), focused_(focused) {
+        for (const auto& e : doc.sections()[section].entries) {
+            if (rows_.size() >= 8) break;
+            rows_.append(qMakePair(e.key, e.value));
+        }
+        total_ = doc.sections()[section].entries.size();
+        height_ = 69 + rows_.size() * 24 + (total_ > rows_.size() ? 21 : 0);
+        setData(0, section_);
+        setToolTip(QString("[%1]\n%2 entries — double click to inspect").arg(name_).arg(total_));
+    }
+    QRectF boundingRect() const override { return QRectF(0, 0, width, height_); }
+    qreal height() const { return height_; }
+    void paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) override {
+        p->setRenderHint(QPainter::Antialiasing);
+        p->setPen(QPen(focused_ ? color_.lighter(125) : color_.darker(150), focused_ ? 2.5 : 1.2));
+        QColor base = color_.darker(265);
+        if (base.lightness() < 23) base = QColor("#242b39");
+        p->setBrush(base);
+        p->drawRoundedRect(boundingRect().adjusted(1.5, 1.5, -1.5, -1.5), 11, 11);
+
+        p->setPen(Qt::NoPen);
+        p->setBrush(color_);
+        p->drawRoundedRect(QRectF(2, 2, width - 4, 49), 9, 9);
+        p->drawRect(QRectF(2, 37, width - 4, 14));
+        QFont titleFont = p->font(); titleFont.setBold(true); titleFont.setPointSize(11);
+        p->setFont(titleFont);
+        p->setPen(QColor("#111723"));
+        const QFontMetrics titleMetrics(titleFont);
+        p->drawText(QRectF(13, 5, width - 26, 25), Qt::AlignLeft | Qt::AlignVCenter,
+                    titleMetrics.elidedText(name_, Qt::ElideRight, int(width - 26)));
+        QFont small = titleFont; small.setBold(false); small.setPointSize(9);
+        p->setFont(small);
+        p->drawText(QRectF(13, 28, width - 26, 19), Qt::AlignLeft | Qt::AlignVCenter,
+                    category_ + "  ·  " + QString::number(total_) + " properties");
+        const QFontMetrics fm(small);
+        for (int i = 0; i < rows_.size(); ++i) {
+            const qreal y = 60 + i * 24;
+            p->setPen(color_.lighter(140));
+            p->drawText(QRectF(12, y, 115, 19), Qt::AlignVCenter,
+                        fm.elidedText(rows_[i].first, Qt::ElideRight, 112));
+            p->setPen(text_);
+            p->drawText(QRectF(136, y, 143, 19), Qt::AlignVCenter,
+                        fm.elidedText(rows_[i].second, Qt::ElideRight, 141));
+        }
+        if (total_ > rows_.size()) {
+            p->setPen(text_);
+            p->drawText(QRectF(12, height_ - 25, width - 24, 20), Qt::AlignCenter,
+                        QString("+ %1 more properties").arg(total_ - rows_.size()));
+        }
+    }
+private:
+    int section_ = -1, total_ = 0;
+    QString name_, category_;
+    QColor color_, text_;
+    bool focused_ = false;
+    qreal height_ = 90;
+    QVector<QPair<QString, QString>> rows_;
+};
+}
+
+GraphView::GraphView(QWidget* parent) : QGraphicsView(parent), scene_(this) {
+    setScene(&scene_);
+    setDragMode(ScrollHandDrag);
+    setRenderHint(QPainter::Antialiasing, true);
+    setViewportUpdateMode(BoundingRectViewportUpdate);
+    setTransformationAnchor(AnchorUnderMouse);
+    setFrameShape(QFrame::NoFrame);
+    setBackgroundBrush(background_);
+    scene_.setItemIndexMethod(QGraphicsScene::NoIndex); // bounded, frequently rebuilt neighborhood
+}
+
+void GraphView::setColors(QHash<QString, QColor> colors, QColor background, QColor text) {
+    colors_ = std::move(colors);
+    background_ = background;
+    text_ = text;
+    setBackgroundBrush(background_);
+    scene_.update();
+}
+
+void GraphView::display(const IniDocument& doc, int section) {
+    scene_.clear();
+    if (section < 0 || section >= doc.sections().size()) {
+        scene_.addText("Open an INI and select a section to explore its references.");
+        return;
+    }
+    // Only materialize the selected section and a bounded, deduplicated set of neighbors.
+    // The underlying reference index covers the whole document.
+    QVector<int> parents, children;
+    QSet<int> visited{section};
+    for (int id : doc.incoming(section)) {
+        if (parents.size() >= 14) break;
+        if (!visited.contains(id)) { parents.append(id); visited.insert(id); }
+    }
+    for (int id : doc.outgoing(section)) {
+        if (children.size() >= 14) break;
+        if (!visited.contains(id)) { children.append(id); visited.insert(id); }
+    }
+    QHash<int, Card*> cards;
+    auto create = [&](int id, qreal x, qreal y, bool focus) {
+        auto* item = new Card(doc, id, colors_.value(doc.category(id), QColor("#9aa4b2")), text_, focus);
+        scene_.addItem(item);
+        item->setPos(x, y);
+        cards.insert(id, item);
+    };
+    create(section, 0, 0, true);
+    const qreal step = 285;
+    for (int i = 0; i < parents.size(); ++i)
+        create(parents[i], -450, (i - (parents.size() - 1) / 2.0) * step, false);
+    for (int i = 0; i < children.size(); ++i)
+        create(children[i], 450, (i - (children.size() - 1) / 2.0) * step, false);
+
+    auto edge = [&](int from, int to) {
+        Card* a = cards.value(from, nullptr), *b = cards.value(to, nullptr);
+        if (!a || !b) return;
+        const QPointF start(a->pos().x() + width, a->pos().y() + a->height() / 2);
+        const QPointF end(b->pos().x(), b->pos().y() + b->height() / 2);
+        QPainterPath path(start);
+        path.cubicTo(start.x() + 75, start.y(), end.x() - 75, end.y(), end.x(), end.y());
+        auto* curve = scene_.addPath(path, QPen(colors_.value(doc.category(from), QColor("#8794a2")), 1.8));
+        curve->setZValue(-2);
+    };
+    for (int id : parents) edge(id, section);
+    for (int id : children) edge(section, id);
+    const QRectF bounds = scene_.itemsBoundingRect().adjusted(-110, -90, 110, 90);
+    scene_.setSceneRect(bounds);
+    resetTransform();
+    scale(0.92, 0.92);
+    centerOn(width / 2, cards[section]->height() / 2);
+}
+
+void GraphView::wheelEvent(QWheelEvent* event) {
+    const qreal current = transform().m11();
+    const qreal factor = event->angleDelta().y() > 0 ? 1.14 : 1.0 / 1.14;
+    if (current * factor >= 0.25 && current * factor <= 2.4) scale(factor, factor);
+    event->accept();
+}
+void GraphView::mouseDoubleClickEvent(QMouseEvent* event) {
+    QGraphicsItem* item = itemAt(event->pos());
+    if (item && item->data(0).isValid()) {
+        emit sectionActivated(item->data(0).toInt());
+        event->accept();
+        return;
+    }
+    QGraphicsView::mouseDoubleClickEvent(event);
+}
