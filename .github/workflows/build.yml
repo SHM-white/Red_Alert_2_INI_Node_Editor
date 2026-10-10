@@ -1,0 +1,57 @@
+name: Build and package RA2 INI Node Editor
+
+on:
+  push:
+    branches:
+      - 'modernize/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-core-tests:
+    name: INI parser tests (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure core only
+        run: cmake -S . -B build-core -DRA2_BUILD_GUI=OFF -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build-core --parallel
+      - name: Test
+        run: ctest --test-dir build-core --output-on-failure
+
+  windows-x64:
+    name: Windows x64 Qt 6 package
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt 6.8
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: 'win64_msvc2022_64'
+          cache: true
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DRA2_BUILD_GUI=ON
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Deploy runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item 'build/Release/RA2-INI-Node-Editor.exe' 'dist/'
+          windeployqt --release --no-translations 'dist/RA2-INI-Node-Editor.exe'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item 'README.md' 'dist/README.md'
+      - name: Upload portable ZIP contents
+        uses: actions/upload-artifact@v4
+        with:
+          name: RA2-INI-Node-Editor-windows-x64
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
