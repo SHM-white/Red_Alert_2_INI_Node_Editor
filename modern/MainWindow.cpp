@@ -611,7 +611,9 @@ void MainWindow::editTheme() {
     palette->addStretch();
     scroll->setWidget(content);
     root->addWidget(scroll, 1);
-    auto* actions = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel, &dialog);
+    auto* actions = new QDialogButtonBox(&dialog);
+    actions->addButton("保存主题", QDialogButtonBox::AcceptRole);
+    actions->addButton("取消", QDialogButtonBox::RejectRole);
     connect(actions, &QDialogButtonBox::accepted, &dialog, [&] {
         if (name->text().trimmed().isEmpty()) {
             QMessageBox::warning(&dialog, "无效名称", "主题名称不能为空");
