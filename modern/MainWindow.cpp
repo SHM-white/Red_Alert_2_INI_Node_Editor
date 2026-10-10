@@ -452,9 +452,17 @@ void MainWindow::applyTheme() {
     )").arg(v("background"), v("panel"), v("surface"), v("text"),
            v("muted"), v("border"), v("accent"), v("canvas"), accentText);
     qApp->setStyleSheet(css);
+    // Theme changes recolor nodes without jumping the user's graph viewport.
+    const bool hasGraph = current_ >= 0 && current_ < document_.sections().size();
+    const QTransform transform = graph_->transform();
+    const QPointF center = graph_->mapToScene(graph_->viewport()->rect().center());
     graph_->setColors(current.nodes, current.ui.value("canvas"),
                       current.ui.value("text"), current.ui.value("panel"));
     graph_->display(document_, current_);
+    if (hasGraph) {
+        graph_->setTransform(transform);
+        graph_->centerOn(center);
+    }
     if (model_) {
         for (int i = 0; i < document_.sections().size(); ++i) {
             auto* item = model_->item(i);
