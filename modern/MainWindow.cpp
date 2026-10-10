@@ -670,7 +670,8 @@ void MainWindow::refreshList(const QString& focus) {
     for (int i = 0; i < document_.sections().size(); ++i) {
         const auto& section = document_.sections()[i];
         auto* item = new QStandardItem(section.name);
-        item->setData(i, Qt::UserRole + 1);
+        item->setData(i, kIndexRole);
+        item->setData(document_.category(i), kCategoryRole);
         item->setForeground(palette.value(document_.category(i), QColor("#9aa5b3")));
         item->setToolTip(document_.category(i) + " · " + QString::number(section.entries.size()) + " entries");
         model_->appendRow(item);
