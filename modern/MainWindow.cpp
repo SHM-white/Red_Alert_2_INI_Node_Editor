@@ -1,5 +1,15 @@
 #include "MainWindow.h"
 #include <QAction>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QGridLayout>
+#include <QScrollArea>
+#include <QFile>
+#include <QJsonDocument>
+#include <QItemSelectionModel>
+#include <QToolButton>
 #include <QApplication>
 #include <QCloseEvent>
 #include <QColorDialog>
@@ -29,6 +39,25 @@
 #include <QSet>
 
 namespace {
+constexpr int kCategoryRole = Qt::UserRole + 2;
+constexpr int kIndexRole = Qt::UserRole + 1;
+class CategoryProxy final : public QSortFilterProxyModel {
+public:
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+    void setCategory(const QString& newCategory) {
+        category_ = newCategory;
+        invalidateFilter();
+    }
+protected:
+    bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
+        if (!QSortFilterProxyModel::filterAcceptsRow(row, parent)) return false;
+        return category_.isEmpty()
+            || sourceModel()->data(sourceModel()->index(row, 0, parent), kCategoryRole).toString() == category_;
+    }
+private:
+    QString category_;
+};
+
 class HistoryEntry : public QUndoCommand {
 public:
     HistoryEntry(IniDocument* doc, QStringList before, QStringList after,
@@ -56,141 +85,207 @@ MainWindow::MainWindow() {
     setMinimumSize(880, 550);
     history_.setUndoLimit(30);
     createUi();
-    theme_->setCurrentIndex(settings_.value("theme", 0).toInt());
+    reloadThemeChoices(settings_.value("themes/selected", QString()).toString());
     encoding_->setCurrentIndex(settings_.value("encoding", 0).toInt());
     applyTheme();
     connect(&history_, &QUndoStack::cleanChanged, this, [this] { titleUpdate(); });
     refreshList();
-    statusBar()->showMessage("Ready · Open a rules.ini / art.ini to begin");
+    statusBar()->showMessage("就绪 · Ctrl+O 打开 rules.ini / art.ini");
+    const auto savedGeometry = settings_.value("window/geometry").toByteArray();
+    if (!savedGeometry.isEmpty()) restoreGeometry(savedGeometry);
 }
 
 void MainWindow::createUi() {
     auto* file = menuBar()->addMenu("文件(&F)");
     auto* edit = menuBar()->addMenu("编辑(&E)");
     auto* view = menuBar()->addMenu("视图(&V)");
+    auto* themesMenu = menuBar()->addMenu("主题(&T)");
     auto* help = menuBar()->addMenu("帮助(&H)");
     auto* bar = addToolBar("快捷操作");
     bar->setMovable(false);
 
-    auto add = [&](QMenu* menu, const QString& name, const QKeySequence& shortcut, auto fn) {
-        QAction* action = menu->addAction(name);
+    auto add = [&](QMenu* menu, const QString& text, const QKeySequence& shortcut, auto fn) {
+        QAction* action = menu->addAction(text);
         if (!shortcut.isEmpty()) action->setShortcut(shortcut);
         connect(action, &QAction::triggered, this, fn);
         return action;
     };
-    QAction* newFile = add(file, "新建", QKeySequence::New, [this] {
+    const auto newFile = add(file, "新建", QKeySequence::New, [this] {
         if (!maybeSave()) return;
         document_.clear(); history_.clear(); history_.setClean(); current_ = -1;
         refreshList(); titleUpdate();
     });
-    QAction* openFile = add(file, "打开 INI...", QKeySequence::Open, [this] {
-        const QString p = QFileDialog::getOpenFileName(this, "打开 INI", QDir::homePath(),
-                                                       "INI files (*.ini *.map *.mpr);;All files (*)");
-        if (!p.isEmpty()) openPath(p);
+    const auto openFile = add(file, "打开 INI...", QKeySequence::Open, [this] {
+        const QString path = QFileDialog::getOpenFileName(
+            this, "打开 INI", QDir::homePath(), "INI / map (*.ini *.map *.mpr);;所有文件 (*)");
+        if (!path.isEmpty()) openPath(path);
     });
-    QAction* saveFile = add(file, "保存", QKeySequence::Save, [this] { save(); });
-    QAction* saveAs = add(file, "另存为...", QKeySequence::SaveAs, [this] { save(true); });
+    const auto saveFile = add(file, "保存", QKeySequence::Save, [this] { save(); });
+    add(file, "另存为...", QKeySequence::SaveAs, [this] { save(true); });
     file->addSeparator();
     add(file, "退出", QKeySequence::Quit, [this] { close(); });
-    bar->addAction(newFile); bar->addAction(openFile); bar->addAction(saveFile);
+    bar->addAction(newFile);
+    bar->addAction(openFile);
+    bar->addAction(saveFile);
     bar->addSeparator();
-    QAction* undo = history_.createUndoAction(this, "撤销");
+
+    auto* undo = history_.createUndoAction(this, "撤销");
     undo->setShortcut(QKeySequence::Undo);
-    QAction* redo = history_.createRedoAction(this, "重做");
+    auto* redo = history_.createRedoAction(this, "重做");
     redo->setShortcut(QKeySequence::Redo);
     edit->addAction(undo); edit->addAction(redo);
     bar->addAction(undo); bar->addAction(redo);
     edit->addSeparator();
-
     add(edit, "新增节...", QKeySequence("Ctrl+Shift+N"), [this] { addSection(); });
     add(edit, "重命名节...", QKeySequence("F2"), [this] { renameSection(); });
     add(edit, "删除节", QKeySequence("Ctrl+Shift+D"), [this] { deleteSection(); });
     edit->addSeparator();
     add(edit, "新增属性...", QKeySequence("Ctrl+Insert"), [this] { addKey(); });
     add(edit, "删除选中属性", QKeySequence("Ctrl+Delete"), [this] { deleteKey(); });
-    add(view, "自定义当前节点类型颜色...", {}, [this] { setCategoryColor(); });
+
+    add(themesMenu, "编辑当前主题...", {}, [this] { editTheme(); });
+    add(themesMenu, "自定义选中节点类型颜色...", {}, [this] { setCategoryColor(); });
+    themesMenu->addSeparator();
+    add(themesMenu, "导入主题 JSON...", {}, [this] { importTheme(); });
+    add(themesMenu, "导出当前主题 JSON...", {}, [this] { exportTheme(); });
+    add(themesMenu, "删除当前自定义主题...", {}, [this] { deleteTheme(); });
+    add(view, "自定义节点类型颜色...", {}, [this] { setCategoryColor(); });
     add(help, "关于", {}, [this] {
         QMessageBox::about(this, "RA2 Node Studio",
-            "基于 Qt 6 的红色警戒 2 INI 节点编辑器。\n\n"
-            "在左侧选节，中央查看依赖关系，底部编辑键值；双击图中的节点可跳转。\n"
-            "不同颜色代表不同对象类型。分类基于规则列表与字段特征推断，可能需要人工确认。\n\n"
-            "旧版 Qt / ImGui 代码作为历史资料保留在仓库。");
+            "基于 Qt 6 的红警 2 INI 节点编辑器。\n\n"
+            "左侧筛选节，中间探索关系图或编辑源码，右侧修改当前节属性。\n"
+            "每套主题都有独立的 UI 颜色和节点颜色。"
+            "节点类别来自规则列表及字段特征，并非完整的游戏语义识别。");
     });
 
     bar->addSeparator();
     bar->addWidget(new QLabel(" 主题 "));
     theme_ = new QComboBox(this);
-    theme_->addItems({"深空暗夜", "晨光浅色", "海洋青蓝", "战场红黑"});
-    theme_->setToolTip("切换完整界面配色和节点默认颜色");
+    theme_->setMinimumWidth(145);
+    theme_->setToolTip("切换完整主题：背景、控件、节点分类配色同时更新");
     bar->addWidget(theme_);
+    auto* themeEdit = new QPushButton("编辑主题", bar);
+    bar->addWidget(themeEdit);
+    connect(themeEdit, &QPushButton::clicked, this, [this] { editTheme(); });
     bar->addWidget(new QLabel("   编码 "));
     encoding_ = new QComboBox(this);
     encoding_->addItems({"UTF-8", "系统本地编码 (ANSI)"});
-    encoding_->setToolTip("打开文件时采用的编码；简体中文 Windows 通常可用 ANSI/GBK");
+    encoding_->setToolTip("打开文件时采用的编码，简体中文 Windows 通常对应 GBK");
     bar->addWidget(encoding_);
-    connect(theme_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i) {
-        settings_.setValue("theme", i);
+    connect(theme_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) {
+        if (theme_->currentIndex() < 0) return;
+        settings_.setValue("themes/selected", theme_->currentData().toString());
         applyTheme();
     });
-    connect(encoding_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int i) {
-        settings_.setValue("encoding", i);
+    connect(encoding_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
+        settings_.setValue("encoding", index);
     });
 
-    auto* splitter = new QSplitter(Qt::Horizontal, this);
+    auto* host = new QWidget(this);
+    auto* page = new QVBoxLayout(host);
+    page->setContentsMargins(12, 10, 12, 12);
+    page->setSpacing(10);
+    auto* heading = new QHBoxLayout;
+    auto* brand = new QLabel("RA2  /  INI NODE STUDIO", host);
+    brand->setObjectName("brand");
+    heading->addWidget(brand);
+    heading->addSpacing(18);
+    fileInfo_ = new QLabel("未打开文件", host);
+    fileInfo_->setObjectName("subtle");
+    fileInfo_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    heading->addWidget(fileInfo_, 1);
+    page->addLayout(heading);
+
+    auto* splitter = new QSplitter(Qt::Horizontal, host);
+    splitter->setHandleWidth(9);
     splitter->setChildrenCollapsible(false);
-    setCentralWidget(splitter);
+    page->addWidget(splitter, 1);
+    setCentralWidget(host);
 
     auto* sidebar = new QWidget(splitter);
+    sidebar->setObjectName("pane");
+    sidebar->setAttribute(Qt::WA_StyledBackground, true);
     auto* sideLayout = new QVBoxLayout(sidebar);
     sideLayout->setContentsMargins(12, 14, 12, 12);
-    sideLayout->addWidget(makeTitle("节浏览器  /  Sections"));
+    sideLayout->setSpacing(9);
+    sideLayout->addWidget(makeTitle("SECTION EXPLORER  /  节浏览器"));
     auto* search = new QLineEdit(sidebar);
     search->setPlaceholderText("搜索节名…   Ctrl+F");
     search->setClearButtonEnabled(true);
     sideLayout->addWidget(search);
+    categoryFilter_ = new QComboBox(sidebar);
+    categoryFilter_->addItem("全部对象类型", "");
+    for (const QString& category : ThemeStore::nodeKeys())
+        categoryFilter_->addItem(category, category);
+    sideLayout->addWidget(categoryFilter_);
     model_ = new QStandardItemModel(this);
-    proxy_ = new QSortFilterProxyModel(this);
+    auto* categoryProxy = new CategoryProxy(this);
+    proxy_ = categoryProxy;
     proxy_->setSourceModel(model_);
     proxy_->setFilterCaseSensitivity(Qt::CaseInsensitive);
     proxy_->setFilterKeyColumn(0);
     list_ = new QListView(sidebar);
     list_->setModel(proxy_);
     list_->setUniformItemSizes(true);
+    list_->setAlternatingRowColors(true);
+    list_->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     list_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     list_->setSelectionMode(QAbstractItemView::SingleSelection);
     sideLayout->addWidget(list_, 1);
-    auto* secBtns = new QHBoxLayout();
-    auto* plus = new QPushButton("+ 节", sidebar);
-    auto* minus = new QPushButton("− 节", sidebar);
+    countInfo_ = new QLabel(sidebar);
+    countInfo_->setObjectName("subtle");
+    sideLayout->addWidget(countInfo_);
+    auto* secBtns = new QHBoxLayout;
+    auto* plus = new QPushButton("+ 新增", sidebar);
     auto* rename = new QPushButton("重命名", sidebar);
-    secBtns->addWidget(plus); secBtns->addWidget(minus); secBtns->addWidget(rename);
+    auto* minus = new QPushButton("删除", sidebar);
+    secBtns->addWidget(plus); secBtns->addWidget(rename); secBtns->addWidget(minus);
     sideLayout->addLayout(secBtns);
     connect(plus, &QPushButton::clicked, this, [this] { addSection(); });
     connect(minus, &QPushButton::clicked, this, [this] { deleteSection(); });
     connect(rename, &QPushButton::clicked, this, [this] { renameSection(); });
     auto* searchTimer = new QTimer(this);
     searchTimer->setSingleShot(true);
-    searchTimer->setInterval(130);
+    searchTimer->setInterval(120);
     connect(search, &QLineEdit::textChanged, searchTimer, QOverload<>::of(&QTimer::start));
     connect(searchTimer, &QTimer::timeout, this, [this, search] {
         proxy_->setFilterFixedString(search->text());
+        updateCategoryCount();
     });
+    connect(categoryFilter_, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+        [this, categoryProxy](int) {
+            categoryProxy->setCategory(categoryFilter_->currentData().toString());
+            updateCategoryCount();
+        });
     add(view, "查找节", QKeySequence::Find, [search] { search->setFocus(); search->selectAll(); });
-    connect(list_, &QListView::clicked, this, [this](const QModelIndex& row) {
-        const QModelIndex source = proxy_->mapToSource(row);
-        if (source.isValid()) selectSection(source.data(Qt::UserRole + 1).toInt());
-    });
+    connect(list_->selectionModel(), &QItemSelectionModel::currentChanged, this,
+        [this](const QModelIndex& row) {
+            if (!row.isValid()) return;
+            const QModelIndex source = proxy_->mapToSource(row);
+            const int id = source.data(kIndexRole).toInt();
+            if (source.isValid() && id != current_) selectSection(id);
+        });
 
-    auto* vertical = new QSplitter(Qt::Vertical, splitter);
-    vertical->setChildrenCollapsible(false);
-    views_ = new QTabWidget(vertical);
+    auto* center = new QWidget(splitter);
+    auto* centerLayout = new QVBoxLayout(center);
+    centerLayout->setContentsMargins(4, 5, 4, 5);
+    centerLayout->setSpacing(9);
+    auto* graphHeader = new QHBoxLayout;
+    graphHeader->addWidget(makeTitle("RELATION GRAPH  /  节点关系"));
+    graphHeader->addStretch();
+    auto* fit = new QPushButton("适应画布", center);
+    graphHeader->addWidget(fit);
+    centerLayout->addLayout(graphHeader);
+    views_ = new QTabWidget(center);
+    views_->setObjectName("workspaceTabs");
     graph_ = new GraphView(views_);
-    views_->addTab(graph_, " 关系图 · Graph ");
+    graph_->setObjectName("graphCanvas");
+    views_->addTab(graph_, "关系图");
     auto* sourcePage = new QWidget(views_);
     auto* sourceLayout = new QVBoxLayout(sourcePage);
-    sourceLayout->setContentsMargins(8, 8, 8, 8);
-    auto* sourceControls = new QHBoxLayout();
-    sourceControls->addWidget(new QLabel("原始 INI 文本（保留注释和原始节顺序）"));
+    sourceLayout->setContentsMargins(9, 9, 9, 9);
+    auto* sourceControls = new QHBoxLayout;
+    sourceControls->addWidget(new QLabel("原始 INI 文本（保留注释及顺序）"));
     sourceControls->addStretch();
     auto* applySource = new QPushButton("应用源码修改", sourcePage);
     sourceControls->addWidget(applySource);
@@ -199,7 +294,13 @@ void MainWindow::createUi() {
     source_->setLineWrapMode(QPlainTextEdit::NoWrap);
     source_->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     sourceLayout->addWidget(source_);
-    views_->addTab(sourcePage, " 源码 · Source ");
+    views_->addTab(sourcePage, "源码");
+    centerLayout->addWidget(views_, 1);
+    auto* graphHint = new QLabel("滚轮缩放 · 拖动画布 · 双击节点跳转 · 每侧最多展示 14 个关联节点");
+    graphHint->setObjectName("subtle");
+    graphHint->setAlignment(Qt::AlignCenter);
+    centerLayout->addWidget(graphHint);
+    connect(fit, &QPushButton::clicked, graph_, &GraphView::fitGraph);
     connect(views_, &QTabWidget::currentChanged, this, [this, previous = 0](int index) mutable {
         if (previous == 1 && index != 1) applySourceIfNeeded();
         if (index == 1) {
@@ -209,28 +310,40 @@ void MainWindow::createUi() {
         }
         previous = index;
     });
+    connect(source_, &QPlainTextEdit::textChanged, this, [this] { titleUpdate(); });
     connect(applySource, &QPushButton::clicked, this, [this] { applySourceIfNeeded(); });
     connect(graph_, &GraphView::sectionActivated, this, [this](int id) { selectSection(id); });
 
-    auto* editorPanel = new QWidget(vertical);
-    auto* editorLayout = new QVBoxLayout(editorPanel);
-    editorLayout->setContentsMargins(9, 8, 9, 8);
-    auto* propsHead = new QHBoxLayout();
-    propsHead->addWidget(makeTitle("属性编辑器  /  Properties"));
-    propsHead->addStretch();
-    auto* addProp = new QPushButton("+ 属性");
-    auto* removeProp = new QPushButton("− 属性");
-    propsHead->addWidget(addProp); propsHead->addWidget(removeProp);
-    editorLayout->addLayout(propsHead);
-    properties_ = new QTableWidget(editorPanel);
+    auto* inspector = new QWidget(splitter);
+    inspector->setObjectName("pane");
+    inspector->setAttribute(Qt::WA_StyledBackground, true);
+    auto* inspectorLayout = new QVBoxLayout(inspector);
+    inspectorLayout->setContentsMargins(12, 14, 12, 12);
+    inspectorLayout->setSpacing(9);
+    inspectorLayout->addWidget(makeTitle("INSPECTOR  /  属性检查器"));
+    sectionInfo_ = new QLabel("选择一个节查看属性", inspector);
+    sectionInfo_->setObjectName("inspectorTitle");
+    sectionInfo_->setWordWrap(true);
+    inspectorLayout->addWidget(sectionInfo_);
+    properties_ = new QTableWidget(inspector);
     properties_->setColumnCount(2);
-    properties_->setHorizontalHeaderLabels({"键 / Key", "值 / Value"});
-    properties_->horizontalHeader()->setStretchLastSection(true);
+    properties_->setHorizontalHeaderLabels({"键 / KEY", "值 / VALUE"});
+    properties_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    properties_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     properties_->verticalHeader()->setVisible(false);
     properties_->setAlternatingRowColors(true);
     properties_->setSelectionBehavior(QAbstractItemView::SelectRows);
     properties_->setSelectionMode(QAbstractItemView::SingleSelection);
-    editorLayout->addWidget(properties_);
+    properties_->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+    inspectorLayout->addWidget(properties_, 1);
+    auto* propertyButtons = new QHBoxLayout;
+    auto* addProp = new QPushButton("+ 新增属性", inspector);
+    auto* removeProp = new QPushButton("删除属性", inspector);
+    propertyButtons->addWidget(addProp); propertyButtons->addWidget(removeProp);
+    inspectorLayout->addLayout(propertyButtons);
+    auto* hint = new QLabel("双击表格编辑；更改可以撤销、保存。", inspector);
+    hint->setObjectName("subtle");
+    inspectorLayout->addWidget(hint);
     connect(addProp, &QPushButton::clicked, this, [this] { addKey(); });
     connect(removeProp, &QPushButton::clicked, this, [this] { deleteKey(); });
     connect(properties_, &QTableWidget::itemChanged, this, [this](QTableWidgetItem* item) {
@@ -248,9 +361,12 @@ void MainWindow::createUi() {
     });
 
     splitter->addWidget(sidebar);
-    splitter->addWidget(vertical);
-    splitter->setSizes({270, 1170});
-    vertical->setSizes({590, 245});
+    splitter->addWidget(center);
+    splitter->addWidget(inspector);
+    splitter->setStretchFactor(0, 0);
+    splitter->setStretchFactor(1, 1);
+    splitter->setStretchFactor(2, 0);
+    splitter->setSizes({270, 810, 370});
 }
 
 QHash<QString, QColor> MainWindow::colors() const {
