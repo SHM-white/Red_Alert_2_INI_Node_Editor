@@ -492,8 +492,11 @@ void MainWindow::editTheme() {
     const bool editingCustom = !draft.builtIn;
     QDialog dialog(this);
     dialog.setWindowTitle(editingCustom ? "编辑自定义主题" : "从预设创建自定义主题");
-    dialog.resize(545, 700);
+    dialog.resize(520, 690);
+    dialog.setMinimumSize(440, 460);
     auto* root = new QVBoxLayout(&dialog);
+    root->setContentsMargins(14, 12, 14, 12);
+    root->setSpacing(10);
     auto* name = new QLineEdit(editingCustom ? draft.name : draft.name + " 自定义", &dialog);
     auto* description = new QLabel("一套主题同时控制界面色板与所有节点类型颜色。预设不可覆盖，编辑会生成独立副本。");
     description->setWordWrap(true);
@@ -507,27 +510,61 @@ void MainWindow::editTheme() {
     scroll->setFrameShape(QFrame::NoFrame);
     auto* content = new QWidget(scroll);
     auto* palette = new QVBoxLayout(content);
+    palette->setContentsMargins(2, 5, 9, 5);
+    palette->setSpacing(10);
     auto addColorSection = [&](const QString& heading, const QStringList& keys,
                                QHash<QString, QColor>* target, const QHash<QString, QString>& labels) {
         auto* group = new QGroupBox(heading, content);
         auto* form = new QFormLayout(group);
+        form->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        form->setFormAlignment(Qt::AlignTop);
+        form->setHorizontalSpacing(16);
+        form->setVerticalSpacing(5);
         for (const QString& key : keys) {
-            auto* button = new QPushButton(group);
-            auto updateSwatch = [button, target, key] {
-                const QColor c = target->value(key);
-                const QString fg = c.lightness() > 145 ? "#171b24" : "#ffffff";
-                button->setText(c.name(QColor::HexRgb).toUpper());
-                button->setStyleSheet(QString("QPushButton{background:%1;color:%2;border:1px solid %1;"
-                                              "border-radius:10px;padding:7px 18px;}")
-                                              .arg(c.name(), fg));
+            auto* control = new QWidget(group);
+            auto* row = new QHBoxLayout(control);
+            row->setContentsMargins(0, 1, 0, 1);
+            row->setSpacing(7);
+            auto* swatch = new QFrame(control);
+            swatch->setFixedSize(34, 25);
+            swatch->setFrameShape(QFrame::Box);
+            auto* input = new QLineEdit(control);
+            input->setMaxLength(7);
+            input->setFixedWidth(104);
+            input->setToolTip("直接输入 #RRGGBB，或点击右侧按钮选择颜色");
+            auto* pick = new QPushButton("选择…", control);
+            pick->setMinimumWidth(72);
+            auto redraw = [target, key, swatch, input] {
+                const QColor color = target->value(key);
+                swatch->setStyleSheet(QString("QFrame{background:%1;border:1px solid #858c96;"
+                                               "border-radius:0px;}").arg(color.name()));
+                input->setText(color.name(QColor::HexRgb).toUpper());
             };
-            updateSwatch();
-            connect(button, &QPushButton::clicked, &dialog, [&, key, target, updateSwatch] {
-                const QColor candidate = QColorDialog::getColor(
-                    target->value(key), &dialog, "选择 " + labels.value(key, key));
-                if (candidate.isValid()) { (*target)[key] = candidate; updateSwatch(); }
+            redraw();
+            connect(input, &QLineEdit::editingFinished, &dialog,
+                    [input, target, key, redraw] {
+                const QString hex = input->text().trimmed();
+                static const QRegularExpression format("^#[0-9a-fA-F]{6}$");
+                if (format.match(hex).hasMatch()) {
+                    (*target)[key] = QColor(hex);
+                } else {
+                    input->setToolTip("无效的颜色格式，应为 #RRGGBB");
+                }
+                redraw();
             });
-            form->addRow(labels.value(key, key), button);
+            connect(pick, &QPushButton::clicked, &dialog, [&, key, target, redraw] {
+                const QColor selected = QColorDialog::getColor(
+                    target->value(key), &dialog, "选择 " + labels.value(key, key));
+                if (selected.isValid()) {
+                    (*target)[key] = selected;
+                    redraw();
+                }
+            });
+            row->addWidget(swatch);
+            row->addWidget(input);
+            row->addWidget(pick);
+            row->addStretch(1);
+            form->addRow(labels.value(key, key), control);
         }
         palette->addWidget(group);
     };
