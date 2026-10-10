@@ -79,6 +79,14 @@ jobs:
           New-Item -ItemType Directory -Force dist | Out-Null
           Compress-Archive -Path "build\Release\*" -DestinationPath "dist\RA2NodeStudio-$env:RELEASE_TAG-Windows-x64.zip" -CompressionLevel Optimal
 
+      - name: Check out AppImage metadata
+        if: matrix.kind == 'linux'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _deployment
+          sparse-checkout: packaging
+
       - name: Install AppImage deployment tools
         if: matrix.kind == 'linux'
         shell: bash
@@ -105,8 +113,8 @@ jobs:
           ./linuxdeploy.AppImage \
             --appdir AppDir \
             --executable build/RA2NodeStudio \
-            --desktop-file packaging/ra2-node-studio.desktop \
-            --icon-file packaging/ra2-node-studio.svg \
+            --desktop-file _deployment/packaging/ra2-node-studio.desktop \
+            --icon-file _deployment/packaging/ra2-node-studio.svg \
             --plugin qt \
             --output appimage
           image=$(find . -maxdepth 1 -name '*.AppImage' ! -name linuxdeploy.AppImage -print -quit)
