@@ -4,6 +4,14 @@ A node-oriented graphical editor for Red Alert 2 / Yuri's Revenge INI mod files.
 
 The repository also contains the original Rine, GraphicsControl and ImGui/INIBrowser experiments. They are preserved for reference; the new application builds from the **root CMakeLists.txt**, not the old Visual Studio solution.
 
+## PR2 × PR3 UI / theme integration
+
+The integration branch preserves PR2's tested INI editing and raw source workflow, while adopting PR3's **three-pane desktop layout**: section explorer with type filter (left), graph plus source tab (center), and always-visible property inspector (right). The full UI and node cards use a consistent **12px rounded** visual system.
+
+**Theme profiles** now include eight UI colors and eleven independently stored node-category colors. The toolbar theme selector switches the entire profile; its **Edit Theme** button opens a palette editor. Built-in themes are read-only templates: editing them creates a new custom copy. Use the Theme menu to import/export JSON, delete custom profiles, or quickly recolor the currently selected node category. Custom profiles persist in QSettings. Older PR2 node color preferences are migrated when opening the built-in theme.
+
+Theme JSON schema is documented in [docs/THEMES.md](docs/THEMES.md). Neither theme files nor color preferences modify the underlying INI file.
+
 ## Implemented
 
 - Standalone Qt 6 Widgets application with CMake/C++20.
