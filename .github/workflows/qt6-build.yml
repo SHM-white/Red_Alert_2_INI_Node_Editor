@@ -28,11 +28,10 @@ jobs:
         run: cmake --build build --config Release --parallel 2
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
-      - name: Upload Linux UI preview
-        if: runner.os == 'Linux'
+      - name: Upload UI previews
         uses: actions/upload-artifact@v4
         with:
-          name: RA2NodeStudio-flat-ui-preview
+          name: RA2NodeStudio-${{ runner.os }}-flat-ui-preview
           path: build/*-preview.png
           if-no-files-found: error
       - name: Deploy Windows Qt runtime
