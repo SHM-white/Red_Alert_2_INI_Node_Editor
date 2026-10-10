@@ -4,6 +4,9 @@
 #include <QCloseEvent>
 #include <QColorDialog>
 #include <QDir>
+#include <QHeaderView>
+#include <QMenu>
+#include <QTextDocument>
 #include <QFileDialog>
 #include <QFontDatabase>
 #include <QInputDialog>
@@ -197,12 +200,14 @@ void MainWindow::createUi() {
     source_->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     sourceLayout->addWidget(source_);
     views_->addTab(sourcePage, " 源码 · Source ");
-    connect(views_, &QTabWidget::currentChanged, this, [this](int index) {
+    connect(views_, &QTabWidget::currentChanged, this, [this, previous = 0](int index) mutable {
+        if (previous == 1 && index != 1) applySourceIfNeeded();
         if (index == 1) {
             QSignalBlocker block(source_);
             source_->setPlainText(document_.lines().join("\n"));
             source_->document()->setModified(false);
         }
+        previous = index;
     });
     connect(applySource, &QPushButton::clicked, this, [this] { applySourceIfNeeded(); });
     connect(graph_, &GraphView::sectionActivated, this, [this](int id) { selectSection(id); });

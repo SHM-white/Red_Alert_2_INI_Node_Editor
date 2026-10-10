@@ -35,6 +35,7 @@ private:
     static QString norm(const QString& s) { return s.trimmed().toCaseFolded(); }
     void rebuild();
     QStringList lines_;
+    QByteArray originalBytes_;
     QVector<IniSection> sections_;
     QHash<QString, int> byName_;
     QHash<QString, QVector<int>> inbound_;
