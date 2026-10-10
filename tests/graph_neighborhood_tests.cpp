@@ -33,9 +33,13 @@ int main(int argc, char** argv) {
     require(has(deep.children, d, 1) && has(deep.children, e, 2)
             && has(deep.children, f, 3), "three children");
     require(edge(deep, a, b) && edge(deep, d, e) && edge(deep, e, f), "deep oriented edges");
+    // De-duplicate within each direction, not across directions: a cyclic section
+    // legitimately appears on both sides and should not be silently omitted.
     QSet<int> ids{c};
-    for (const auto& n : deep.parents) { require(!ids.contains(n.section), "no duplicate parent"); ids.insert(n.section); }
-    for (const auto& n : deep.children) { require(!ids.contains(n.section), "no duplicate child"); ids.insert(n.section); }
+    for (const auto& n : deep.parents) { require(!ids.contains(n.section), "no repeated parent"); ids.insert(n.section); }
+    ids = QSet<int>{c};
+    for (const auto& n : deep.children) { require(!ids.contains(n.section), "no repeated child"); ids.insert(n.section); }
+    require(has(deep.parents, f, 2) && has(deep.children, f, 3), "two independent cycle-safe directions");
 
     const auto noParents = buildNeighborhood(doc, c, 0, 4);
     require(noParents.parents.isEmpty(), "zero parent depth hides parents");
