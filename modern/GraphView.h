@@ -9,7 +9,7 @@ class GraphView : public QGraphicsView {
     Q_OBJECT
 public:
     explicit GraphView(QWidget* parent = nullptr);
-    void setColors(QHash<QString, QColor> categoryColors, QColor background, QColor text);
+    void setColors(QHash<QString, QColor> categoryColors, QColor background, QColor text, QColor cardBackground);
     void display(const IniDocument& document, int sectionIndex);
     void fitGraph();
 signals:
