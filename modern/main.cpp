@@ -10,7 +10,11 @@ int main(int argc, char** argv) {
     MainWindow window;
     if (app.arguments().contains("--smoke-test")) {
         // Exercise QMainWindow, proxies, graph, and theme setup on a headless Qt platform.
-        QTimer::singleShot(0, &app, &QCoreApplication::quit);
+        QTimer::singleShot(0, &app, [&app, &window] {
+            const bool passed = window.smokeTestUi();
+            if (!passed) qCritical("UI filtering / flat theme smoke test failed");
+            app.exit(passed ? 0 : 2);
+        });
     } else {
         window.show();
     }
