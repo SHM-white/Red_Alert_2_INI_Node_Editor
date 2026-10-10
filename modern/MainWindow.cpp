@@ -182,6 +182,7 @@ void MainWindow::createUi() {
     });
 
     auto* host = new QWidget(this);
+    host->setObjectName("centralHost");
     auto* page = new QVBoxLayout(host);
     page->setContentsMargins(12, 10, 12, 12);
     page->setSpacing(10);
@@ -400,7 +401,7 @@ void MainWindow::applyTheme() {
     const QString accentText = current.ui.value("accent").lightness() > 145 ? "#141923" : "#ffffff";
     const QString css = QString(R"(
        QWidget { color:%4; font-family:'Segoe UI','Microsoft YaHei UI',sans-serif; font-size:13px; }
-       QMainWindow, QWidget#centralwidget { background:%1; }
+       QMainWindow, QWidget#centralHost { background:%1; }
        QMainWindow > QWidget, QMenuBar, QToolBar, QStatusBar { background:%1; }
        QWidget#pane { background:%2; border:1px solid %6; border-radius:12px; }
        QLabel#brand { color:%7; font-weight:800; font-size:18px; letter-spacing:1px; }
@@ -445,6 +446,8 @@ void MainWindow::applyTheme() {
        QScrollBar:horizontal { background:%2; height:11px; }
        QScrollBar::handle:horizontal { background:%6; min-width:25px; border-radius:5px; }
        QSplitter::handle { background:transparent; }
+       QGroupBox { background:%2; border:1px solid %6; border-radius:12px; margin-top:12px; padding-top:10px; }
+       QGroupBox::title { subcontrol-origin:margin; left:12px; color:%5; padding:0 6px; }
        QDialog, QMessageBox { background:%1; }
     )").arg(v("background"), v("panel"), v("surface"), v("text"),
            v("muted"), v("border"), v("accent"), v("canvas"), accentText);
