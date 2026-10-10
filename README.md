@@ -54,3 +54,11 @@ The CTest suite also instantiates the full main window in an offscreen Qt backen
 ### Flat UI and regression coverage
 
 The square-corner styling applies to the toolbar, dock-like panes, table headers, tabs, inputs, buttons, menus, group boxes and graph cards. The theme dialog uses small color preview swatches, editable HEX fields and a picker, rather than entire saturated colored buttons. Theme profiles still switch all 11 node-category colors independently. An offscreen UI regression test verifies that an empty category filter clears the selection and inspector, and that switching back restores the matching section.
+
+## Adjustable relationship depths
+
+The center pane's graph header now provides independent **父节点最大深度** (upstream) and **子节点最大深度** (downstream) spin boxes. Both accept **0–5**, default to 1, and persist in QSettings as graph/parentDepth and graph/childDepth. Setting either to 0 hides that direction while preserving the other. Changes rebuild only the displayed neighborhood; they do not alter INI contents. The 适应画布 button fits the expanded graph in the viewport.
+
+Graph traversal uses bounded, cycle-safe BFS. Each depth column can include up to **14** nodes, and each side can include up to **64** nodes total. These limits are distinct from depth; on dense mods, some deeper nodes may be omitted to stay responsive. A section found on both sides is drawn once, favoring its shortest upstream path. Drawn edges reflect the spanning discovery tree, not every possible shortcut or cyclic link.
+
+graph_neighborhood_tests covers independent depth settings, 0-depth hiding, multi-hop oriented edges, cycle handling, breadth/total caps and invalid selections. The offscreen UI test exercises the controls against a fixture and verifies the relation model updates.
