@@ -621,6 +621,16 @@ void MainWindow::editTheme() {
     });
     connect(actions, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     root->addWidget(actions);
+    // Screenshot probe used by the offscreen regression job; normal users never see it.
+    if (qEnvironmentVariableIsSet("RA2_THEME_PREVIEW_PATH")) {
+        const QString imagePath = qEnvironmentVariable("RA2_THEME_PREVIEW_PATH");
+        QTimer::singleShot(0, &dialog, [&dialog, imagePath] {
+            dialog.show();
+            qApp->processEvents();
+            if (!dialog.grab().save(imagePath)) qWarning("Could not capture theme editor preview");
+            dialog.reject();
+        });
+    }
     if (dialog.exec() != QDialog::Accepted) return;
     draft.name = name->text().trimmed();
     if (!editingCustom) draft.id.clear();
@@ -910,5 +920,10 @@ bool MainWindow::smokeTestUi() {
     theme_->setCurrentIndex(light);
     if (!check(qApp->styleSheet().contains("border-radius:0px"), "square style applied")) return false;
     if (!check(!qApp->styleSheet().contains("border-radius:12px"), "no rounded style rules")) return false;
+    if (qEnvironmentVariableIsSet("RA2_THEME_PREVIEW_PATH")) {
+        editTheme();
+        if (!check(QFile::exists(qEnvironmentVariable("RA2_THEME_PREVIEW_PATH")),
+                   "theme dialog preview rendered")) return false;
+    }
     return true;
 }
