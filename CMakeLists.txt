@@ -32,5 +32,5 @@ endif()
 if(BUILD_TESTING)
     add_test(NAME ui_startup_smoke COMMAND RA2NodeStudio --smoke-test)
     set_tests_properties(ui_startup_smoke PROPERTIES ENVIRONMENT
-        "QT_QPA_PLATFORM=offscreen;RA2_UI_PREVIEW_PATH=${CMAKE_BINARY_DIR}/ui-preview.png")
+        "QT_QPA_PLATFORM=offscreen;RA2_UI_PREVIEW_PATH=${CMAKE_BINARY_DIR}/ui-preview.png;RA2_THEME_PREVIEW_PATH=${CMAKE_BINARY_DIR}/theme-preview.png")
 endif()

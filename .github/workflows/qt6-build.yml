@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RA2NodeStudio-flat-ui-preview
-          path: build/ui-preview.png
+          path: build/*-preview.png
           if-no-files-found: error
       - name: Deploy Windows Qt runtime
         if: runner.os == 'Windows'
