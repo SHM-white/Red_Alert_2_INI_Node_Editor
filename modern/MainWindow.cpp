@@ -313,7 +313,7 @@ void MainWindow::refreshList(const QString& focus) {
     QString desired = focus;
     if (desired.isEmpty() && current_ >= 0 && current_ < document_.sections().size())
         desired = document_.sections()[current_].name;
-    QSignalBlocker blocker(model_);
+    // Allow model reset/data signals to reach the proxy and QListView.
     model_->clear();
     const auto palette = colors();
     for (int i = 0; i < document_.sections().size(); ++i) {
