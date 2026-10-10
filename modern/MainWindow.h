@@ -45,6 +45,7 @@ private:
     void deleteTheme();
     void reloadThemeChoices(const QString& id = {});
     void updateCategoryCount();
+    void syncSelectionToFilter();
     void titleUpdate();
     QHash<QString, QColor> colors() const;
 
