@@ -90,12 +90,12 @@ GraphView::GraphView(QWidget* parent) : QGraphicsView(parent), scene_(this) {
     scene_.setItemIndexMethod(QGraphicsScene::NoIndex); // bounded, frequently rebuilt neighborhood
 }
 
-void GraphView::setColors(QHash<QString, QColor> colors, QColor background, QColor text) {
+void GraphView::setColors(QHash<QString, QColor> colors, QColor background, QColor text, QColor cardBackground) {
     colors_ = std::move(colors);
     background_ = background;
     text_ = text;
     dots_ = background_.lightness() < 128 ? background_.lighter(145) : background_.darker(110);
-    cardBackground_ = background_.lightness() < 128 ? background_.lighter(165) : background_.lighter(110);
+    cardBackground_ = cardBackground;
     setBackgroundBrush(background_);
     resetCachedContent();
     scene_.update();
