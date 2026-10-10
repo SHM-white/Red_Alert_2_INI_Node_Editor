@@ -23,7 +23,7 @@ Requirements: Qt 6.5+ (Widgets), CMake 3.21+, and C++20 compiler.
 
     cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/compiler
     cmake --build build --config Release --parallel
-    ctest --test-dir build --config Release --output-on-failure
+    ctest --test-dir build -C Release --output-on-failure
 
 For Windows, use a Qt package matching your MSVC or MinGW compiler. GitHub Actions runs Windows and Linux builds and uploads a Windows windeployqt deployment folder as a workflow artifact.
 
