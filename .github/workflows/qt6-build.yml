@@ -1,0 +1,41 @@
+name: Qt 6 desktop build
+on:
+  push:
+    branches: [feature/qt6-node-editor-revival]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            arch: win64_msvc2022_64
+          - os: ubuntu-24.04
+            arch: linux_gcc_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: ${{ matrix.arch }}
+          cache: true
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release --parallel 2
+      - name: Test
+        run: ctest --test-dir build --config Release --output-on-failure
+      - name: Deploy Windows Qt runtime
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --release "build\Release\RA2NodeStudio.exe"
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: RA2NodeStudio-windows
+          path: build/Release/
+          retention-days: 14
