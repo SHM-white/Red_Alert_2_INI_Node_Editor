@@ -1,6 +1,7 @@
 #include "GraphNeighborhood.h"
 #include <QSet>
 #include <algorithm>
+#include <utility>
 
 GraphNeighborhood buildNeighborhood(const IniDocument& document, int focus,
                                      int parentDepth, int childDepth,

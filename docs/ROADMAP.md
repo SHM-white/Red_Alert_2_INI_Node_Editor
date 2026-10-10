@@ -37,3 +37,12 @@
 3. Relationships have verified accuracy on a curated RA2/YR mod set.
 4. Large file operations remain responsive with bounded memory and render cost.
 5. Windows binaries build, deploy and launch successfully.
+
+## Multi-level graph explorer
+
+- [x] Independent persistent parent/child maximum depth controls (0–5, default 1)
+- [x] Column layout for multiple depths; bounded breadth-first expansion with cycle deduplication
+- [x] 14 nodes per depth level and 64 total per side to protect UI responsiveness
+- [x] Unit and Qt offscreen UI smoke coverage for multi-level relationships
+- [ ] Offer optional expansion of truncated columns, node-budget controls and a minimap for very large mod graphs
+- [ ] Show non-tree / cycle links as optional secondary edges without visual clutter

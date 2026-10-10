@@ -474,12 +474,12 @@ void MainWindow::applyTheme() {
       QLabel#subtle { color:%5; font-size:11px; }
       QLabel#sectionTitle { color:%5; font-size:11px; font-weight:700; }
       QLabel#inspectorTitle { color:%4; font-size:16px; font-weight:700; padding:3px 0; }
-      QLineEdit, QComboBox, QListView, QTableWidget, QPlainTextEdit {
+      QLineEdit, QComboBox, QSpinBox, QListView, QTableWidget, QPlainTextEdit {
         background:%3; color:%4; border:1px solid %6; border-radius:0px;
         selection-background-color:%7; selection-color:%8;
       }
-      QLineEdit, QComboBox { padding:5px 7px; min-height:24px; }
-      QLineEdit:focus, QComboBox:focus, QPlainTextEdit:focus,
+      QLineEdit, QComboBox, QSpinBox { padding:5px 7px; min-height:24px; }
+      QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QPlainTextEdit:focus,
       QListView:focus, QTableWidget:focus { border:1px solid %7; }
       QListView { outline:0; alternate-background-color:%2; }
       QListView::item { min-height:26px; padding-left:8px; border-radius:0px; }
@@ -498,6 +498,8 @@ void MainWindow::applyTheme() {
       QPushButton:disabled, QToolButton:disabled { color:%5; background:%2; }
       QPushButton:focus, QToolButton:focus { border:1px solid %7; }
       QComboBox::drop-down { border-left:1px solid %6; width:22px; background:%2; }
+      QSpinBox::up-button, QSpinBox::down-button { background:%2; border-left:1px solid %6; width:17px; }
+      QSpinBox::up-button:hover, QSpinBox::down-button:hover { background:%7; }
       QComboBox QAbstractItemView { background:%2; color:%4; border:1px solid %6;
         border-radius:0px; selection-background-color:%7; selection-color:%8; }
       QTabWidget::pane { background:%2; border:1px solid %6; border-radius:0px; }
