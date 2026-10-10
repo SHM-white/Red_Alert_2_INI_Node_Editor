@@ -28,3 +28,8 @@ if(BUILD_TESTING)
     target_link_libraries(theme_tests PRIVATE Qt6::Widgets)
     add_test(NAME theme_tests COMMAND theme_tests)
 endif()
+
+if(BUILD_TESTING)
+    add_test(NAME ui_startup_smoke COMMAND RA2NodeStudio --smoke-test)
+    set_tests_properties(ui_startup_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif()
