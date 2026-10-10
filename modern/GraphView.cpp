@@ -8,14 +8,15 @@
 #include <QMouseEvent>
 #include <QSet>
 #include <algorithm>
+#include <cmath>
 
 namespace {
 constexpr qreal cardWidth = 292.0;
 class Card final : public QGraphicsItem {
 public:
-    Card(const IniDocument& doc, int section, QColor color, QColor text, bool focused)
+    Card(const IniDocument& doc, int section, QColor color, QColor text, QColor surface, bool focused)
         : section_(section), name_(doc.sections()[section].name),
-          category_(doc.category(section)), color_(color), text_(text), focused_(focused) {
+          category_(doc.category(section)), color_(color), text_(text), surface_(surface), focused_(focused) {
         for (const auto& e : doc.sections()[section].entries) {
             if (rows_.size() >= 8) break;
             rows_.append(qMakePair(e.key, e.value));
@@ -30,18 +31,20 @@ public:
     void paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) override {
         p->setRenderHint(QPainter::Antialiasing);
         p->setPen(QPen(focused_ ? color_.lighter(125) : color_.darker(150), focused_ ? 2.5 : 1.2));
-        QColor base = color_.darker(265);
-        if (base.lightness() < 23) base = QColor("#242b39");
-        p->setBrush(base);
-        p->drawRoundedRect(boundingRect().adjusted(1.5, 1.5, -1.5, -1.5), 11, 11);
-
+        const QRectF outer = boundingRect().adjusted(1.5, 1.5, -1.5, -1.5);
+        QPainterPath clip;
+        clip.addRoundedRect(outer, 12, 12);
+        p->setBrush(surface_);
+        p->drawPath(clip);
+        p->save();
+        p->setClipPath(clip);
         p->setPen(Qt::NoPen);
         p->setBrush(color_);
-        p->drawRoundedRect(QRectF(2, 2, cardWidth - 4, 49), 9, 9);
-        p->drawRect(QRectF(2, 37, cardWidth - 4, 14));
+        p->drawRect(QRectF(2, 2, cardWidth - 4, 49));
+        p->restore();
         QFont titleFont = p->font(); titleFont.setBold(true); titleFont.setPointSize(11);
         p->setFont(titleFont);
-        p->setPen(QColor("#111723"));
+        p->setPen(color_.lightness() > 145 ? QColor("#141923") : QColor("#ffffff"));
         const QFontMetrics titleMetrics(titleFont);
         p->drawText(QRectF(13, 5, cardWidth - 26, 25), Qt::AlignLeft | Qt::AlignVCenter,
                     titleMetrics.elidedText(name_, Qt::ElideRight, int(cardWidth - 26)));
@@ -68,7 +71,7 @@ public:
 private:
     int section_ = -1, total_ = 0;
     QString name_, category_;
-    QColor color_, text_;
+    QColor color_, text_, surface_;
     bool focused_ = false;
     qreal height_ = 90;
     QVector<QPair<QString, QString>> rows_;
@@ -83,6 +86,7 @@ GraphView::GraphView(QWidget* parent) : QGraphicsView(parent), scene_(this) {
     setTransformationAnchor(AnchorUnderMouse);
     setFrameShape(QFrame::NoFrame);
     setBackgroundBrush(background_);
+    setCacheMode(CacheBackground);
     scene_.setItemIndexMethod(QGraphicsScene::NoIndex); // bounded, frequently rebuilt neighborhood
 }
 
@@ -90,14 +94,18 @@ void GraphView::setColors(QHash<QString, QColor> colors, QColor background, QCol
     colors_ = std::move(colors);
     background_ = background;
     text_ = text;
+    dots_ = background_.lightness() < 128 ? background_.lighter(145) : background_.darker(110);
+    cardBackground_ = background_.lightness() < 128 ? background_.lighter(165) : background_.lighter(110);
     setBackgroundBrush(background_);
+    resetCachedContent();
     scene_.update();
 }
 
 void GraphView::display(const IniDocument& doc, int section) {
     scene_.clear();
     if (section < 0 || section >= doc.sections().size()) {
-        scene_.addText("Open an INI and select a section to explore its references.");
+        auto* note = scene_.addText("打开 INI 后，从左侧选择对象以查看引用关系");
+        note->setDefaultTextColor(text_);
         return;
     }
     // Only materialize the selected section and a bounded, deduplicated set of neighbors.
@@ -114,7 +122,7 @@ void GraphView::display(const IniDocument& doc, int section) {
     }
     QHash<int, Card*> cards;
     auto create = [&](int id, qreal x, qreal y, bool focus) {
-        auto* item = new Card(doc, id, colors_.value(doc.category(id), QColor("#9aa4b2")), text_, focus);
+        auto* item = new Card(doc, id, colors_.value(doc.category(id), QColor("#9aa4b2")), text_, cardBackground_, focus);
         scene_.addItem(item);
         item->setPos(x, y);
         cards.insert(id, item);
@@ -144,6 +152,23 @@ void GraphView::display(const IniDocument& doc, int section) {
     scale(0.92, 0.92);
     centerOn(cardWidth / 2, cards[section]->height() / 2);
 }
+
+void GraphView::fitGraph() {
+    if (scene_.items().isEmpty()) return;
+    fitInView(scene_.itemsBoundingRect().adjusted(-40, -40, 40, 40), Qt::KeepAspectRatio);
+}
+
+void GraphView::drawBackground(QPainter* painter, const QRectF& exposed) {
+    painter->fillRect(exposed, background_);
+    painter->setPen(QPen(dots_, 1));
+    constexpr int spacing = 28;
+    const int left = int(std::floor(exposed.left() / spacing)) * spacing;
+    const int top = int(std::floor(exposed.top() / spacing)) * spacing;
+    for (int x = left; x < exposed.right(); x += spacing)
+        for (int y = top; y < exposed.bottom(); y += spacing)
+            painter->drawPoint(x, y);
+}
+
 
 void GraphView::wheelEvent(QWheelEvent* event) {
     const qreal current = transform().m11();

@@ -10,6 +10,7 @@ qt_add_executable(RA2NodeStudio
     modern/IniDocument.h modern/IniDocument.cpp
     modern/GraphView.h modern/GraphView.cpp
     modern/MainWindow.h modern/MainWindow.cpp
+    modern/ThemeStore.h modern/ThemeStore.cpp
 )
 target_link_libraries(RA2NodeStudio PRIVATE Qt6::Widgets)
 set_target_properties(RA2NodeStudio PROPERTIES WIN32_EXECUTABLE ON MACOSX_BUNDLE ON)
@@ -20,4 +21,10 @@ if(BUILD_TESTING)
     add_executable(ini_document_tests tests/ini_document_tests.cpp modern/IniDocument.cpp modern/IniDocument.h)
     target_link_libraries(ini_document_tests PRIVATE Qt6::Core)
     add_test(NAME ini_document_tests COMMAND ini_document_tests)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(theme_tests tests/theme_tests.cpp modern/ThemeStore.cpp modern/ThemeStore.h)
+    target_link_libraries(theme_tests PRIVATE Qt6::Widgets)
+    add_test(NAME theme_tests COMMAND theme_tests)
 endif()
