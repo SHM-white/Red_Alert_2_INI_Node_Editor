@@ -441,7 +441,7 @@ void MainWindow::applyTheme() {
       QLabel#inspectorTitle { color:%4; font-size:16px; font-weight:700; padding:3px 0; }
       QLineEdit, QComboBox, QListView, QTableWidget, QPlainTextEdit {
         background:%3; color:%4; border:1px solid %6; border-radius:0px;
-        selection-background-color:%7; selection-color:%9;
+        selection-background-color:%7; selection-color:%8;
       }
       QLineEdit, QComboBox { padding:5px 7px; min-height:24px; }
       QLineEdit:focus, QComboBox:focus, QPlainTextEdit:focus,
@@ -449,7 +449,7 @@ void MainWindow::applyTheme() {
       QListView { outline:0; alternate-background-color:%2; }
       QListView::item { min-height:26px; padding-left:8px; border-radius:0px; }
       QListView::item:hover { background:%2; }
-      QListView::item:selected, QTableWidget::item:selected { background:%7; color:%9; }
+      QListView::item:selected, QTableWidget::item:selected { background:%7; color:%8; }
       QTableWidget { gridline-color:%6; alternate-background-color:%2; }
       QHeaderView { background:%2; }
       QHeaderView::section { background:%2; color:%4; border:0; border-right:1px solid %6;
@@ -458,13 +458,13 @@ void MainWindow::applyTheme() {
         background:%3; color:%4; border:1px solid %6; border-radius:0px;
         padding:5px 12px; min-height:23px; font-weight:400;
       }
-      QPushButton:hover, QToolButton:hover { background:%7; color:%9; border-color:%7; }
+      QPushButton:hover, QToolButton:hover { background:%7; color:%8; border-color:%7; }
       QPushButton:pressed, QToolButton:pressed { background:%6; color:%4; }
       QPushButton:disabled, QToolButton:disabled { color:%5; background:%2; }
       QPushButton:focus, QToolButton:focus { border:1px solid %7; }
       QComboBox::drop-down { border-left:1px solid %6; width:22px; background:%2; }
       QComboBox QAbstractItemView { background:%2; color:%4; border:1px solid %6;
-        border-radius:0px; selection-background-color:%7; selection-color:%9; }
+        border-radius:0px; selection-background-color:%7; selection-color:%8; }
       QTabWidget::pane { background:%2; border:1px solid %6; border-radius:0px; }
       QTabBar::tab { background:%2; color:%5; border:1px solid %6; border-radius:0px;
         border-bottom:0; padding:7px 18px; margin-right:0px; }
@@ -474,7 +474,7 @@ void MainWindow::applyTheme() {
       QToolBar::separator { background:%6; width:1px; margin:4px; }
       QMenu { background:%2; color:%4; border:1px solid %6; border-radius:0px; padding:3px; }
       QMenu::item { padding:6px 25px; border-radius:0px; }
-      QMenu::item:selected { background:%7; color:%9; }
+      QMenu::item:selected { background:%7; color:%8; }
       QMenuBar::item { background:transparent; padding:5px 10px; border-radius:0px; }
       QMenuBar::item:selected { background:%3; }
       QScrollBar:vertical { background:%2; width:12px; border:0; }
@@ -492,7 +492,7 @@ void MainWindow::applyTheme() {
       QDialogButtonBox { background:%1; }
       QToolTip { background:%2; color:%4; border:1px solid %6; }
     )").arg(v("background"), v("panel"), v("surface"), v("text"),
-           v("muted"), v("border"), v("accent"), v("canvas"), accentText);
+           v("muted"), v("border"), v("accent"), accentText);
     qApp->setStyleSheet(css);
     // Theme changes recolor nodes without jumping the user's graph viewport.
     const bool hasGraph = current_ >= 0 && current_ < document_.sections().size();
@@ -876,33 +876,38 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 
 
 bool MainWindow::smokeTestUi() {
-    // Exercises a real parsed fixture and the visible filtering/inspector contract.
+    auto check = [](bool good, const char* stage) {
+        if (!good) qWarning("UI smoke failed at: %s", stage);
+        return good;
+    };
     QTemporaryDir temp;
-    if (!temp.isValid()) return false;
+    if (!check(temp.isValid(), "temporary directory")) return false;
     const QString path = temp.filePath("selection-smoke.ini");
     QFile sample(path);
-    if (!sample.open(QIODevice::WriteOnly)) return false;
-    if (sample.write("[Unit]\nPrimary=W1\n[W1]\nDamage=5\nROF=20\n") < 0) return false;
+    if (!check(sample.open(QIODevice::WriteOnly), "create sample file")) return false;
+    if (!check(sample.write("[Unit]\nPrimary=W1\n[W1]\nDamage=5\nROF=20\n") > 0, "write sample")) return false;
     sample.close();
     openPath(path);
-    if (document_.sections().size() != 2) return false;
-    if (current_ < 0 || properties_->rowCount() != 1) return false;
+    if (!check(document_.sections().size() == 2, "parse two sections")) return false;
+    if (!check(current_ >= 0, "initial current selection")) return false;
+    if (!check(properties_->rowCount() == 1, "initial Unit has one property")) return false;
     const int emptyFilter = categoryFilter_->findData("Projectile");
-    if (emptyFilter < 0) return false;
+    if (!check(emptyFilter >= 0, "Projectile selector exists")) return false;
     categoryFilter_->setCurrentIndex(emptyFilter);
-    // Regression: a filtered-out section must not remain in the right inspector or graph.
-    if (proxy_->rowCount() != 0 || current_ != -1 || properties_->rowCount() != 0) return false;
-    if (!sectionInfo_->text().contains("选择一个节")) return false;
+    if (!check(proxy_->rowCount() == 0, "Projectile filter empty")) return false;
+    if (!check(current_ == -1, "hidden selection cleared")) return false;
+    if (!check(properties_->rowCount() == 0, "inspector cleared when filter empty")) return false;
+    if (!check(sectionInfo_->text().contains("选择一个节"), "inspector title cleared")) return false;
     const int weaponFilter = categoryFilter_->findData("Weapon");
-    if (weaponFilter < 0) return false;
+    if (!check(weaponFilter >= 0, "Weapon selector exists")) return false;
     categoryFilter_->setCurrentIndex(weaponFilter);
-    if (proxy_->rowCount() != 1 || current_ != document_.indexOf("W1")) return false;
-    if (properties_->rowCount() != 2) return false;
-    // Switching profiles should preserve the complete square-corner stylesheet.
+    if (!check(proxy_->rowCount() == 1, "Weapon filter one match")) return false;
+    if (!check(current_ == document_.indexOf("W1"), "visible Weapon selected")) return false;
+    if (!check(properties_->rowCount() == 2, "Weapon two properties")) return false;
     const int light = theme_->findData("light");
-    if (light < 0) return false;
+    if (!check(light >= 0, "light theme exists")) return false;
     theme_->setCurrentIndex(light);
-    if (!qApp->styleSheet().contains("border-radius:0px")) return false;
-    if (qApp->styleSheet().contains("border-radius:12px")) return false;
+    if (!check(qApp->styleSheet().contains("border-radius:0px"), "square style applied")) return false;
+    if (!check(!qApp->styleSheet().contains("border-radius:12px"), "no rounded style rules")) return false;
     return true;
 }
