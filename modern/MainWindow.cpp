@@ -217,6 +217,7 @@ void MainWindow::createUi() {
     search->setClearButtonEnabled(true);
     sideLayout->addWidget(search);
     categoryFilter_ = new QComboBox(sidebar);
+    categoryFilter_->setObjectName("categoryFilter");
     categoryFilter_->addItem("全部对象类型", "");
     for (const QString& category : ThemeStore::nodeKeys())
         categoryFilter_->addItem(category, category);
@@ -228,6 +229,7 @@ void MainWindow::createUi() {
     proxy_->setFilterCaseSensitivity(Qt::CaseInsensitive);
     proxy_->setFilterKeyColumn(0);
     list_ = new QListView(sidebar);
+    list_->setObjectName("sectionList");
     list_->setModel(proxy_);
     list_->setUniformItemSizes(true);
     list_->setAlternatingRowColors(true);
@@ -254,11 +256,13 @@ void MainWindow::createUi() {
     connect(searchTimer, &QTimer::timeout, this, [this, search] {
         proxy_->setFilterFixedString(search->text());
         updateCategoryCount();
+        syncSelectionToFilter();
     });
     connect(categoryFilter_, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
         [this, categoryProxy](int) {
             categoryProxy->setCategory(categoryFilter_->currentData().toString());
             updateCategoryCount();
+            syncSelectionToFilter();
         });
     add(view, "查找节", QKeySequence::Find, [search] { search->setFocus(); search->selectAll(); });
     connect(list_->selectionModel(), &QItemSelectionModel::currentChanged, this,
@@ -394,6 +398,28 @@ void MainWindow::reloadThemeChoices(const QString& requested) {
 void MainWindow::updateCategoryCount() {
     if (countInfo_) countInfo_->setText(
         QString("当前显示 %1 / %2 个节").arg(proxy_->rowCount()).arg(model_->rowCount()));
+}
+
+// Keep graph, inspector, and list synchronized when a filter hides the current section.
+void MainWindow::syncSelectionToFilter() {
+    if (!list_ || !model_ || !proxy_) return;
+    const QModelIndex currentSource = current_ < 0 ? QModelIndex() : model_->index(current_, 0);
+    const QModelIndex currentVisible = proxy_->mapFromSource(currentSource);
+    if (currentVisible.isValid()) {
+        if (list_->currentIndex() != currentVisible) {
+            QSignalBlocker block(list_->selectionModel());
+            list_->setCurrentIndex(currentVisible);
+        }
+        return;
+    }
+    const QModelIndex first = proxy_->index(0, 0);
+    const QModelIndex source = first.isValid() ? proxy_->mapToSource(first) : QModelIndex();
+    const int replacement = source.isValid() ? source.data(kIndexRole).toInt() : -1;
+    if (replacement != current_) selectSection(replacement);
+    else if (replacement < 0) {
+        QSignalBlocker block(list_->selectionModel());
+        list_->selectionModel()->clear();
+    }
 }
 
 void MainWindow::applyTheme() {
@@ -651,7 +677,10 @@ void MainWindow::refreshList(const QString& focus) {
     updateCategoryCount();
     current_ = document_.indexOf(desired);
     if (current_ < 0 && !document_.sections().isEmpty()) current_ = 0;
-    selectSection(current_);
+    syncSelectionToFilter();
+    // If the visible selection did not change, refresh the property inspector anyway
+    // because the underlying document contents may have changed.
+    refreshDetails();
     titleUpdate();
 }
 
@@ -665,7 +694,10 @@ void MainWindow::selectSection(int section) {
             list_->setCurrentIndex(visible);
             list_->scrollTo(visible);
         }
-    } else list_->clearSelection();
+    } else {
+        QSignalBlocker block(list_->selectionModel());
+        list_->selectionModel()->clear();
+    }
     refreshDetails();
 }
 void MainWindow::refreshDetails() {
