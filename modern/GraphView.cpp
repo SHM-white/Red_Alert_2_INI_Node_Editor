@@ -124,20 +124,19 @@ void GraphView::display(const IniDocument& doc, int section) {
 
     // Scene geometry is built only for the bounded subgraph, never for the whole INI.
     // BFS depth determines the column; rows in a column are vertically centered.
-    QHash<int, Card*> cards;
-    const auto addCard = [&](int id, qreal x, qreal y, bool focus) {
+    QHash<int, Card*> parentCards, childCards;
+    const auto addCard = [&](int id, qreal x, qreal y, bool isFocus) {
         auto* item = new Card(doc, id, colors_.value(doc.category(id), QColor("#9aa4b2")),
-                              text_, cardBackground_, focus);
+                              text_, cardBackground_, isFocus);
         scene_.addItem(item);
         item->setPos(x, y);
-        cards.insert(id, item);
         return item;
     };
     Card* focus = addCard(section, 0, 0, true);
     constexpr qreal columnGap = 445.0;
     constexpr qreal rowGap = 22.0;
     const auto placeColumns = [&](const QVector<GraphNeighborhood::Node>& nodes,
-                                  int side, int depthLimit) {
+                                  int side, int depthLimit, QHash<int, Card*>& cards) {
         for (int depth = 1; depth <= depthLimit; ++depth) {
             QVector<int> ids;
             qreal height = 0;
@@ -145,8 +144,7 @@ void GraphView::display(const IniDocument& doc, int section) {
                 if (node.depth != depth) continue;
                 ids.append(node.section);
                 const int count = doc.sections()[node.section].entries.size();
-                const qreal cardHeight = 69 + std::min(count, 8) * 24 + (count > 8 ? 21 : 0);
-                height += cardHeight;
+                height += 69 + std::min(count, 8) * 24 + (count > 8 ? 21 : 0);
             }
             if (ids.isEmpty()) continue;
             height += (ids.size() - 1) * rowGap;
@@ -154,32 +152,41 @@ void GraphView::display(const IniDocument& doc, int section) {
             const qreal x = side * columnGap * depth;
             for (const int id : ids) {
                 Card* card = addCard(id, x, y, false);
+                cards.insert(id, card);
                 y += card->height() + rowGap;
             }
         }
     };
-    placeColumns(neighborhood_.parents, -1, parentDepth_);
-    placeColumns(neighborhood_.children, 1, childDepth_);
+    placeColumns(neighborhood_.parents, -1, parentDepth_, parentCards);
+    placeColumns(neighborhood_.children, 1, childDepth_, childCards);
 
-    for (const auto& edge : neighborhood_.edges) {
-        Card* from = cards.value(edge.from, nullptr);
-        Card* to = cards.value(edge.to, nullptr);
-        if (!from || !to) continue;
+    const auto drawEdge = [&](Card* from, Card* to, int fromSection) {
+        if (!from || !to) return;
         const QPointF start(from->pos().x() + cardWidth, from->pos().y() + from->height() / 2);
         const QPointF finish(to->pos().x(), to->pos().y() + to->height() / 2);
         QPainterPath curve(start);
         curve.cubicTo(start.x() + 60, start.y(), finish.x() - 60, finish.y(),
                       finish.x(), finish.y());
-        auto* line = scene_.addPath(
-            curve, QPen(colors_.value(doc.category(edge.from), QColor("#8794a2")), 1.65));
+        auto* line = scene_.addPath(curve, QPen(
+            colors_.value(doc.category(fromSection), QColor("#8794a2")), 1.65));
         line->setZValue(-2);
+    };
+    for (const auto& node : neighborhood_.parents) {
+        drawEdge(parentCards.value(node.section, nullptr),
+                 node.nextToFocus == section ? focus : parentCards.value(node.nextToFocus, nullptr),
+                 node.section);
+    }
+    for (const auto& node : neighborhood_.children) {
+        drawEdge(node.nextToFocus == section ? focus : childCards.value(node.nextToFocus, nullptr),
+                 childCards.value(node.section, nullptr), node.nextToFocus);
     }
 
     const QRectF bounds = scene_.itemsBoundingRect().adjusted(-100, -80, 100, 80);
     scene_.setSceneRect(bounds);
     resetTransform();
     scale(0.92, 0.92);
-    if (cards.size() <= 2) centerOn(scene_.itemsBoundingRect().center());
+    if (parentCards.size() + childCards.size() + 1 <= 2)
+        centerOn(scene_.itemsBoundingRect().center());
     else centerOn(cardWidth / 2, focus->height() / 2);
 }
 

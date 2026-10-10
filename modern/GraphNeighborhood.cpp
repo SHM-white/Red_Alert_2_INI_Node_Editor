@@ -12,10 +12,10 @@ GraphNeighborhood buildNeighborhood(const IniDocument& document, int focus,
     childDepth = std::clamp(childDepth, 0, 5);
     maxPerLevel = std::max(0, maxPerLevel);
     maxPerSide = std::max(0, maxPerSide);
-    QSet<int> seen{focus};
     const auto traverse = [&](bool upstream, int maxDepth,
                               QVector<GraphNeighborhood::Node>& nodes,
                               bool& truncated) {
+        QSet<int> seen{focus};
         QVector<int> frontier{focus};
         for (int depth = 1; depth <= maxDepth && !frontier.isEmpty(); ++depth) {
             QVector<int> next;
