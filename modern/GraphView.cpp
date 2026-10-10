@@ -2,6 +2,7 @@
 #include <QGraphicsPathItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QFontMetrics>
 #include <QScrollBar>
 #include <QWheelEvent>
 #include <QMouseEvent>

@@ -1,5 +1,6 @@
 #include "IniDocument.h"
 #include <QFile>
+#include <QStringConverter>
 #include <QSaveFile>
 #include <QRegularExpression>
 #include <QSet>
@@ -18,7 +19,8 @@ QString categoryForList(const QString& name) {
     return {};
 }
 QStringList tokens(const QString& value) {
-    return value.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
+    static const QRegularExpression rx("[,\\s]+");
+    return value.split(rx, Qt::SkipEmptyParts);
 }
 }
 
@@ -33,7 +35,13 @@ bool IniDocument::load(const QString& path, Encoding encoding, QString* error) {
     path_ = path;
     bom_ = bytes.startsWith("\xEF\xBB\xBF");
     const QByteArray payload = bom_ ? bytes.mid(3) : bytes;
-    const QString content = encoding == Encoding::Utf8 ? QString::fromUtf8(payload) : QString::fromLocal8Bit(payload);
+    QStringDecoder utf8(QStringConverter::Utf8);
+    const QString content = encoding == Encoding::Utf8 ? utf8.decode(payload) : QString::fromLocal8Bit(payload);
+    if (encoding == Encoding::Utf8 && utf8.hasError()) {
+        if (error) *error = "Invalid UTF-8; re-open with System/ANSI encoding.";
+        return false;
+    }
+    originalBytes_ = bytes;
     newline_ = content.contains("\r\n") ? "\r\n" : "\n";
     lines_ = content.isEmpty() ? QStringList{} :
         content.split(QRegularExpression("\r\n|\n|\r"), Qt::KeepEmptyParts);
@@ -44,18 +52,18 @@ bool IniDocument::load(const QString& path, Encoding encoding, QString* error) {
 bool IniDocument::save(const QString& path, QString* error) {
     if (path.isEmpty()) { if (error) *error = "No output path"; return false; }
     const QString content = lines_.join(newline_);
-    QByteArray out = encoding_ == Encoding::Utf8 ? content.toUtf8() : content.toLocal8Bit();
-    if (bom_ && encoding_ == Encoding::Utf8) out.prepend("\xEF\xBB\xBF", 3);
+    QByteArray out = modified_ ? (encoding_ == Encoding::Utf8 ? content.toUtf8() : content.toLocal8Bit()) : originalBytes_;
+    if (modified_ && bom_ && encoding_ == Encoding::Utf8) out.prepend("\xEF\xBB\xBF", 3);
     QSaveFile f(path);
     if (!f.open(QIODevice::WriteOnly)) { if (error) *error = f.errorString(); return false; }
     if (f.write(out) != out.size()) { if (error) *error = f.errorString(); f.cancelWriting(); return false; }
     if (!f.commit()) { if (error) *error = f.errorString(); return false; }
-    path_ = path; modified_ = false;
+    path_ = path; originalBytes_ = out; modified_ = false;
     return true;
 }
 void IniDocument::clear() {
     lines_.clear(); sections_.clear(); byName_.clear(); inbound_.clear();
-    categoryByName_.clear(); path_.clear(); newline_ = "\n"; bom_ = false; modified_ = false;
+    categoryByName_.clear(); path_.clear(); originalBytes_.clear(); newline_ = "\n"; bom_ = false; modified_ = false;
 }
 void IniDocument::setLines(const QStringList& lines) {
     lines_ = lines; rebuild(); modified_ = true;
