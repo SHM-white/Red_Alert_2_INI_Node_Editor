@@ -1,46 +1,172 @@
-name: Publish RA2 Node Studio v0.2.0
+name: Build and publish cross-platform binaries
+
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*"
+    branches:
+      - main
     paths:
-      - '.github/workflows/release.yml'
+      - ".github/workflows/release.yml"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing or new release tag to build from (e.g. v0.2.0)"
+        required: true
+        default: "v0.2.0"
+        type: string
+
 permissions:
-  contents: write
+  contents: read
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name || 'v0.2.0') }}
 
 jobs:
-  windows-release:
-    runs-on: windows-2022
+  build:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: Windows-x64
+            runner: windows-2022
+            qt_arch: win64_msvc2022_64
+            kind: windows
+          - platform: Linux-x86_64
+            runner: ubuntu-22.04
+            qt_arch: linux_gcc_64
+            kind: linux
+          - platform: macOS-arm64
+            runner: macos-15
+            qt_arch: clang_64
+            kind: macos
+          - platform: macOS-x86_64
+            runner: macos-15-intel
+            qt_arch: clang_64
+            kind: macos
+
+    runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: jurplel/install-qt-action@v4
+      - name: Check out exact release tag
+        uses: actions/checkout@v4
         with:
-          version: '6.8.3'
-          arch: win64_msvc2022_64
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Install Qt 6.8.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          arch: ${{ matrix.qt_arch }}
           cache: true
-      - name: Configure Qt 6 / CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-      - name: Build portable application
+
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+
+      - name: Compile
         run: cmake --build build --config Release --parallel 2
-      - name: Test release build
+
+      - name: Run automated tests
         run: ctest --test-dir build -C Release --output-on-failure
-      - name: Bundle Windows Qt runtime
+
+      - name: Package Windows and Qt runtime
+        if: matrix.kind == 'windows'
         shell: pwsh
         run: |
           & "$env:QT_ROOT_DIR\bin\windeployqt.exe" --release "build\Release\RA2NodeStudio.exe"
           if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
-          if (-not (Test-Path "build\Release\RA2NodeStudio.exe")) { throw "Executable missing" }
-          Compress-Archive -Path "build\Release\*" -DestinationPath "RA2NodeStudio-v0.2.0-Windows-x64.zip" -CompressionLevel Optimal
-          if (-not (Test-Path "RA2NodeStudio-v0.2.0-Windows-x64.zip")) { throw "Release archive missing" }
-      - name: Publish versioned GitHub Release
+          if (-not (Test-Path "build\Release\RA2NodeStudio.exe")) { throw "RA2NodeStudio.exe missing" }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path "build\Release\*" -DestinationPath "dist\RA2NodeStudio-$env:RELEASE_TAG-Windows-x64.zip" -CompressionLevel Optimal
+
+      - name: Install AppImage deployment tools
+        if: matrix.kind == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o linuxdeploy.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -fL --retry 3 -o linuxdeploy-plugin-qt-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+          mkdir -p "$HOME/.local/bin"
+          mv linuxdeploy-plugin-qt-x86_64.AppImage "$HOME/.local/bin/linuxdeploy-plugin-qt"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Package Linux AppImage with Qt runtime
+        if: matrix.kind == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          export PATH="$HOME/.local/bin:$PATH"
+          export QMAKE="$QT_ROOT_DIR/bin/qmake"
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          ./linuxdeploy.AppImage \
+            --appdir AppDir \
+            --executable build/RA2NodeStudio \
+            --desktop-file packaging/ra2-node-studio.desktop \
+            --icon-file packaging/ra2-node-studio.svg \
+            --plugin qt \
+            --output appimage
+          image=$(find . -maxdepth 1 -name '*.AppImage' ! -name linuxdeploy.AppImage -print -quit)
+          if [ -z "$image" ]; then echo "AppImage not generated" >&2; exit 1; fi
+          mv "$image" "dist/RA2NodeStudio-${RELEASE_TAG}-Linux-x86_64.AppImage"
+          chmod +x dist/*.AppImage
+
+      - name: Package macOS app with bundled Qt
+        if: matrix.kind == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d build/RA2NodeStudio.app
+          "$QT_ROOT_DIR/bin/macdeployqt" build/RA2NodeStudio.app -verbose=1
+          codesign --force --deep --sign - build/RA2NodeStudio.app
+          export QT_QPA_PLATFORM=offscreen
+          build/RA2NodeStudio.app/Contents/MacOS/RA2NodeStudio --smoke-test
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent build/RA2NodeStudio.app \
+            "dist/RA2NodeStudio-${RELEASE_TAG}-${{ matrix.platform }}.zip"
+
+      - name: Upload validated platform artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish only after all four builds pass
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: dist
+          merge-multiple: true
+      - name: Verify all platform files exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "dist/RA2NodeStudio-${RELEASE_TAG}-Windows-x64.zip"
+          test -s "dist/RA2NodeStudio-${RELEASE_TAG}-Linux-x86_64.AppImage"
+          test -s "dist/RA2NodeStudio-${RELEASE_TAG}-macOS-arm64.zip"
+          test -s "dist/RA2NodeStudio-${RELEASE_TAG}-macOS-x86_64.zip"
+          ls -lah dist
+      - name: Attach Windows, Linux and macOS packages to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.2.0
-          target_commitish: ${{ github.sha }}
-          name: RA2 Node Studio v0.2.0 — Qt 6 Revival
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: RA2 Node Studio ${{ env.RELEASE_TAG }} — Qt 6 Revival
           body_path: RELEASE_NOTES.md
-          files: RA2NodeStudio-v0.2.0-Windows-x64.zip
+          files: dist/*
           fail_on_unmatched_files: true
-          make_latest: true
           draft: false
           prerelease: false

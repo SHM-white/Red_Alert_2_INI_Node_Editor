@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=RA2 Node Studio
+Comment=Qt 6 visual INI node editor for Red Alert 2
+Exec=RA2NodeStudio
+Icon=ra2-node-studio
+Terminal=false
+Categories=Development;Utility;TextEditor;
