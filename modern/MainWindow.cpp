@@ -6,6 +6,7 @@
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QScrollArea>
+#include <algorithm>
 #include <QFile>
 #include <QJsonDocument>
 #include <QItemSelectionModel>
@@ -284,10 +285,44 @@ void MainWindow::createUi() {
     auto* fit = new QPushButton("适应画布", center);
     graphHeader->addWidget(fit);
     centerLayout->addLayout(graphHeader);
+
+    auto* depthControls = new QHBoxLayout;
+    depthControls->setSpacing(7);
+    auto makeDepthSpin = [this, center, depthControls](const QString& text,
+                                                      const QString& key,
+                                                      const QString& name) {
+        auto* label = new QLabel(text, center);
+        depthControls->addWidget(label);
+        auto* spin = new QSpinBox(center);
+        spin->setObjectName(name);
+        spin->setRange(0, 5);
+        spin->setValue(std::clamp(settings_.value(key, 1).toInt(), 0, 5));
+        spin->setToolTip("0 = 隐藏此方向；1 = 直接关系；2–5 = 逐层追溯/展开。"
+                         "每层最多展示 14 个节点，每个方向最多 64 个。");
+        spin->setFixedWidth(65);
+        spin->setAlignment(Qt::AlignCenter);
+        depthControls->addWidget(spin);
+        return spin;
+    };
+    parentDepth_ = makeDepthSpin("父节点最大深度", "graph/parentDepth", "parentDepth");
+    childDepth_ = makeDepthSpin("子节点最大深度", "graph/childDepth", "childDepth");
+    depthControls->addStretch();
+    centerLayout->addLayout(depthControls);
     views_ = new QTabWidget(center);
     views_->setObjectName("workspaceTabs");
     graph_ = new GraphView(views_);
     graph_->setObjectName("graphCanvas");
+    graph_->setDepthLimits(parentDepth_->value(), childDepth_->value());
+    const auto changeDepth = [this] {
+        settings_.setValue("graph/parentDepth", parentDepth_->value());
+        settings_.setValue("graph/childDepth", childDepth_->value());
+        graph_->setDepthLimits(parentDepth_->value(), childDepth_->value());
+        graph_->display(document_, current_);
+    };
+    connect(parentDepth_, QOverload<int>::of(&QSpinBox::valueChanged), this,
+            [changeDepth](int) { changeDepth(); });
+    connect(childDepth_, QOverload<int>::of(&QSpinBox::valueChanged), this,
+            [changeDepth](int) { changeDepth(); });
     views_->addTab(graph_, "关系图");
     auto* sourcePage = new QWidget(views_);
     auto* sourceLayout = new QVBoxLayout(sourcePage);
@@ -304,7 +339,7 @@ void MainWindow::createUi() {
     sourceLayout->addWidget(source_);
     views_->addTab(sourcePage, "源码");
     centerLayout->addWidget(views_, 1);
-    auto* graphHint = new QLabel("滚轮缩放 · 拖动画布 · 双击节点跳转 · 每侧最多展示 14 个关联节点");
+    auto* graphHint = new QLabel("滚轮缩放 · 拖动画布 · 双击节点跳转 · 每层最多 14 个、每侧累计最多 64 个节点");
     graphHint->setObjectName("subtle");
     graphHint->setAlignment(Qt::AlignCenter);
     centerLayout->addWidget(graphHint);
@@ -922,6 +957,26 @@ bool MainWindow::smokeTestUi() {
     theme_->setCurrentIndex(light);
     if (!check(qApp->styleSheet().contains("border-radius:0px"), "square style applied")) return false;
     if (!check(!qApp->styleSheet().contains("border-radius:12px"), "no rounded style rules")) return false;
+    // Verify controls trigger actual BFS model rebuild, separately per direction.
+    categoryFilter_->setCurrentIndex(0);
+    document_.setLines({"[Grand]", "ref=Unit", "[Unit]", "Primary=W1",
+                        "[W1]", "Damage=5", "ROF=20", "Next=End",
+                        "[End]", "Value=2"});
+    refreshList("W1");
+    if (!check(current_ == document_.indexOf("W1"), "depth test selection")) return false;
+    parentDepth_->setValue(2);
+    childDepth_->setValue(1);
+    const auto& expanded = graph_->visibleNeighborhood();
+    if (!check(expanded.parents.size() == 2 && expanded.children.size() == 1,
+               "independent parent 2 child 1 expansion")) return false;
+    parentDepth_->setValue(0);
+    if (!check(graph_->visibleNeighborhood().parents.isEmpty()
+               && graph_->visibleNeighborhood().children.size() == 1,
+               "zero parent hides parents, preserves children")) return false;
+    childDepth_->setValue(0);
+    if (!check(graph_->visibleNeighborhood().children.isEmpty(), "zero child hides children")) return false;
+    parentDepth_->setValue(1);
+    childDepth_->setValue(1);
     if (qEnvironmentVariableIsSet("RA2_THEME_PREVIEW_PATH")) {
         editTheme();
         if (!check(QFile::exists(qEnvironmentVariable("RA2_THEME_PREVIEW_PATH")),

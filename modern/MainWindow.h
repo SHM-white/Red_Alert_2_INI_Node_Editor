@@ -5,6 +5,7 @@
 #include <QListView>
 #include <QPlainTextEdit>
 #include <QSettings>
+#include <QSpinBox>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QTableWidget>
@@ -55,6 +56,8 @@ private:
     ThemeStore themes_{settings_};
     QUndoStack history_{this};
     GraphView* graph_ = nullptr;
+    QSpinBox* parentDepth_ = nullptr;
+    QSpinBox* childDepth_ = nullptr;
     QStandardItemModel* model_ = nullptr;
     QSortFilterProxyModel* proxy_ = nullptr;
     QListView* list_ = nullptr;
