@@ -10,7 +10,7 @@
 #include <algorithm>
 
 namespace {
-constexpr qreal width = 292.0;
+constexpr qreal cardWidth = 292.0;
 class Card final : public QGraphicsItem {
 public:
     Card(const IniDocument& doc, int section, QColor color, QColor text, bool focused)
@@ -25,7 +25,7 @@ public:
         setData(0, section_);
         setToolTip(QString("[%1]\n%2 entries — double click to inspect").arg(name_).arg(total_));
     }
-    QRectF boundingRect() const override { return QRectF(0, 0, width, height_); }
+    QRectF boundingRect() const override { return QRectF(0, 0, cardWidth, height_); }
     qreal height() const { return height_; }
     void paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) override {
         p->setRenderHint(QPainter::Antialiasing);
@@ -37,17 +37,17 @@ public:
 
         p->setPen(Qt::NoPen);
         p->setBrush(color_);
-        p->drawRoundedRect(QRectF(2, 2, width - 4, 49), 9, 9);
-        p->drawRect(QRectF(2, 37, width - 4, 14));
+        p->drawRoundedRect(QRectF(2, 2, cardWidth - 4, 49), 9, 9);
+        p->drawRect(QRectF(2, 37, cardWidth - 4, 14));
         QFont titleFont = p->font(); titleFont.setBold(true); titleFont.setPointSize(11);
         p->setFont(titleFont);
         p->setPen(QColor("#111723"));
         const QFontMetrics titleMetrics(titleFont);
-        p->drawText(QRectF(13, 5, width - 26, 25), Qt::AlignLeft | Qt::AlignVCenter,
-                    titleMetrics.elidedText(name_, Qt::ElideRight, int(width - 26)));
+        p->drawText(QRectF(13, 5, cardWidth - 26, 25), Qt::AlignLeft | Qt::AlignVCenter,
+                    titleMetrics.elidedText(name_, Qt::ElideRight, int(cardWidth - 26)));
         QFont small = titleFont; small.setBold(false); small.setPointSize(9);
         p->setFont(small);
-        p->drawText(QRectF(13, 28, width - 26, 19), Qt::AlignLeft | Qt::AlignVCenter,
+        p->drawText(QRectF(13, 28, cardWidth - 26, 19), Qt::AlignLeft | Qt::AlignVCenter,
                     category_ + "  ·  " + QString::number(total_) + " properties");
         const QFontMetrics fm(small);
         for (int i = 0; i < rows_.size(); ++i) {
@@ -61,7 +61,7 @@ public:
         }
         if (total_ > rows_.size()) {
             p->setPen(text_);
-            p->drawText(QRectF(12, height_ - 25, width - 24, 20), Qt::AlignCenter,
+            p->drawText(QRectF(12, height_ - 25, cardWidth - 24, 20), Qt::AlignCenter,
                         QString("+ %1 more properties").arg(total_ - rows_.size()));
         }
     }
@@ -129,7 +129,7 @@ void GraphView::display(const IniDocument& doc, int section) {
     auto edge = [&](int from, int to) {
         Card* a = cards.value(from, nullptr), *b = cards.value(to, nullptr);
         if (!a || !b) return;
-        const QPointF start(a->pos().x() + width, a->pos().y() + a->height() / 2);
+        const QPointF start(a->pos().x() + cardWidth, a->pos().y() + a->height() / 2);
         const QPointF end(b->pos().x(), b->pos().y() + b->height() / 2);
         QPainterPath path(start);
         path.cubicTo(start.x() + 75, start.y(), end.x() - 75, end.y(), end.x(), end.y());
@@ -142,7 +142,7 @@ void GraphView::display(const IniDocument& doc, int section) {
     scene_.setSceneRect(bounds);
     resetTransform();
     scale(0.92, 0.92);
-    centerOn(width / 2, cards[section]->height() / 2);
+    centerOn(cardWidth / 2, cards[section]->height() / 2);
 }
 
 void GraphView::wheelEvent(QWheelEvent* event) {
