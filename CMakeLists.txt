@@ -9,6 +9,7 @@ qt_add_executable(RA2NodeStudio
     modern/main.cpp
     modern/IniDocument.h modern/IniDocument.cpp
     modern/GraphView.h modern/GraphView.cpp
+    modern/GraphNeighborhood.h modern/GraphNeighborhood.cpp
     modern/MainWindow.h modern/MainWindow.cpp
     modern/ThemeStore.h modern/ThemeStore.cpp
 )
@@ -33,4 +34,13 @@ if(BUILD_TESTING)
     add_test(NAME ui_startup_smoke COMMAND RA2NodeStudio --smoke-test)
     set_tests_properties(ui_startup_smoke PROPERTIES ENVIRONMENT
         "QT_QPA_PLATFORM=offscreen;RA2_UI_PREVIEW_PATH=${CMAKE_BINARY_DIR}/ui-preview.png;RA2_THEME_PREVIEW_PATH=${CMAKE_BINARY_DIR}/theme-preview.png")
+endif()
+
+if(BUILD_TESTING)
+    add_executable(graph_neighborhood_tests
+        tests/graph_neighborhood_tests.cpp
+        modern/GraphNeighborhood.cpp modern/GraphNeighborhood.h
+        modern/IniDocument.cpp modern/IniDocument.h)
+    target_link_libraries(graph_neighborhood_tests PRIVATE Qt6::Core)
+    add_test(NAME graph_neighborhood_tests COMMAND graph_neighborhood_tests)
 endif()

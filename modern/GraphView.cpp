@@ -107,59 +107,80 @@ void GraphView::setColors(QHash<QString, QColor> colors, QColor background, QCol
     scene_.update();
 }
 
+void GraphView::setDepthLimits(int parentDepth, int childDepth) {
+    parentDepth_ = std::clamp(parentDepth, 0, 5);
+    childDepth_ = std::clamp(childDepth, 0, 5);
+}
+
 void GraphView::display(const IniDocument& doc, int section) {
     scene_.clear();
+    neighborhood_ = buildNeighborhood(doc, section, parentDepth_, childDepth_);
     if (section < 0 || section >= doc.sections().size()) {
         auto* note = scene_.addText("打开 INI 后，从左侧选择对象以查看引用关系");
         note->setDefaultTextColor(text_);
+        scene_.setSceneRect(-280, -100, 560, 200);
         return;
     }
-    // Only materialize the selected section and a bounded, deduplicated set of neighbors.
-    // The underlying reference index covers the whole document.
-    QVector<int> parents, children;
-    QSet<int> visited{section};
-    for (int id : doc.incoming(section)) {
-        if (parents.size() >= 14) break;
-        if (!visited.contains(id)) { parents.append(id); visited.insert(id); }
-    }
-    for (int id : doc.outgoing(section)) {
-        if (children.size() >= 14) break;
-        if (!visited.contains(id)) { children.append(id); visited.insert(id); }
-    }
+
+    // Scene geometry is built only for the bounded subgraph, never for the whole INI.
+    // BFS depth determines the column; rows in a column are vertically centered.
     QHash<int, Card*> cards;
-    auto create = [&](int id, qreal x, qreal y, bool focus) {
-        auto* item = new Card(doc, id, colors_.value(doc.category(id), QColor("#9aa4b2")), text_, cardBackground_, focus);
+    const auto addCard = [&](int id, qreal x, qreal y, bool focus) {
+        auto* item = new Card(doc, id, colors_.value(doc.category(id), QColor("#9aa4b2")),
+                              text_, cardBackground_, focus);
         scene_.addItem(item);
         item->setPos(x, y);
         cards.insert(id, item);
+        return item;
     };
-    create(section, 0, 0, true);
-    const qreal step = 285;
-    for (int i = 0; i < parents.size(); ++i)
-        create(parents[i], -450, (i - (parents.size() - 1) / 2.0) * step, false);
-    for (int i = 0; i < children.size(); ++i)
-        create(children[i], 450, (i - (children.size() - 1) / 2.0) * step, false);
+    Card* focus = addCard(section, 0, 0, true);
+    constexpr qreal columnGap = 445.0;
+    constexpr qreal rowGap = 22.0;
+    const auto placeColumns = [&](const QVector<GraphNeighborhood::Node>& nodes,
+                                  int side, int depthLimit) {
+        for (int depth = 1; depth <= depthLimit; ++depth) {
+            QVector<int> ids;
+            qreal height = 0;
+            for (const auto& node : nodes) {
+                if (node.depth != depth) continue;
+                ids.append(node.section);
+                const int count = doc.sections()[node.section].entries.size();
+                const qreal cardHeight = 69 + std::min(count, 8) * 24 + (count > 8 ? 21 : 0);
+                height += cardHeight;
+            }
+            if (ids.isEmpty()) continue;
+            height += (ids.size() - 1) * rowGap;
+            qreal y = focus->height() / 2 - height / 2;
+            const qreal x = side * columnGap * depth;
+            for (const int id : ids) {
+                Card* card = addCard(id, x, y, false);
+                y += card->height() + rowGap;
+            }
+        }
+    };
+    placeColumns(neighborhood_.parents, -1, parentDepth_);
+    placeColumns(neighborhood_.children, 1, childDepth_);
 
-    auto edge = [&](int from, int to) {
-        Card* a = cards.value(from, nullptr), *b = cards.value(to, nullptr);
-        if (!a || !b) return;
-        const QPointF start(a->pos().x() + cardWidth, a->pos().y() + a->height() / 2);
-        const QPointF end(b->pos().x(), b->pos().y() + b->height() / 2);
-        QPainterPath path(start);
-        path.cubicTo(start.x() + 75, start.y(), end.x() - 75, end.y(), end.x(), end.y());
-        auto* curve = scene_.addPath(path, QPen(colors_.value(doc.category(from), QColor("#8794a2")), 1.8));
-        curve->setZValue(-2);
-    };
-    for (int id : parents) edge(id, section);
-    for (int id : children) edge(section, id);
-    const QRectF bounds = scene_.itemsBoundingRect().adjusted(-110, -90, 110, 90);
+    for (const auto& edge : neighborhood_.edges) {
+        Card* from = cards.value(edge.from, nullptr);
+        Card* to = cards.value(edge.to, nullptr);
+        if (!from || !to) continue;
+        const QPointF start(from->pos().x() + cardWidth, from->pos().y() + from->height() / 2);
+        const QPointF finish(to->pos().x(), to->pos().y() + to->height() / 2);
+        QPainterPath curve(start);
+        curve.cubicTo(start.x() + 60, start.y(), finish.x() - 60, finish.y(),
+                      finish.x(), finish.y());
+        auto* line = scene_.addPath(
+            curve, QPen(colors_.value(doc.category(edge.from), QColor("#8794a2")), 1.65));
+        line->setZValue(-2);
+    }
+
+    const QRectF bounds = scene_.itemsBoundingRect().adjusted(-100, -80, 100, 80);
     scene_.setSceneRect(bounds);
     resetTransform();
     scale(0.92, 0.92);
-    // When only one or two cards exist, keep the complete small graph in view.
-    // Otherwise prioritize the selected card so large dependency fans stay readable.
     if (cards.size() <= 2) centerOn(scene_.itemsBoundingRect().center());
-    else centerOn(cardWidth / 2, cards[section]->height() / 2);
+    else centerOn(cardWidth / 2, focus->height() / 2);
 }
 
 void GraphView::fitGraph() {
