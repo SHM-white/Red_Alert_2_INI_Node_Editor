@@ -46,3 +46,7 @@ INI section and key ordering can be game-significant; sorting and reconstruction
 This is a substantial first-pass refactor, **not yet a full RA2/YR/Ares/Phobos-aware mod IDE**. Edges are inferred from exact referenced section-name tokens (including comma-separated lists), so special key syntax, inheritance, included files, unresolved external sections and game-specific typed references are not fully resolved. Category detection is heuristic. Graph covers only a bounded one-hop neighborhood. Deleted sections remove their associated line range. Undo snapshots can consume memory for very large files, and the parser currently runs on the UI thread.
 
 See docs/ROADMAP.md for remaining correctness work, benchmarks, multi-file workspaces and build packaging milestones.
+
+## GUI initialization smoke test
+
+The CTest suite also instantiates the full main window in an offscreen Qt backend, via `RA2NodeStudio --smoke-test`, to catch crashes during theme loading and three-pane UI construction on Windows and Linux. GUI controls still benefit from hands-on desktop interaction tests.
