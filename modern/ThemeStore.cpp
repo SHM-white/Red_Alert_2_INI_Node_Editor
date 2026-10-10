@@ -28,11 +28,11 @@ QStringList ThemeStore::nodeKeys() {
 }
 
 ThemeStore::ThemeStore(QSettings& settings) : settings_(settings) {
-    themes_.append(preset("night", "深空暗夜",
-        {"#101622", "#1b2636", "#253248", "#e6f0ff", "#a2b2c8", "#3b4c64", "#6ba7ff", "#111c2c"},
+    themes_.append(preset("night", "VS 深色",
+        {"#1e1e1e", "#252526", "#333337", "#dddddd", "#a1a1a6", "#444449", "#007acc", "#1e1e1e"},
         {"#79dcb7", "#f0c075", "#83bbf4", "#c7a7f5", "#ef8c9b", "#f3aecc", "#8cadf5", "#79cfc9", "#f1d785", "#b7c5df", "#acb8cb"}));
-    themes_.append(preset("light", "晨光浅色",
-        {"#eef2f8", "#ffffff", "#f7f9fc", "#202d41", "#627289", "#d5deec", "#346cc4", "#e8eef7"},
+    themes_.append(preset("light", "VS 浅色",
+        {"#f3f3f3", "#ffffff", "#fafafa", "#242424", "#636363", "#d2d2d2", "#0078d4", "#f3f3f3"},
         {"#3b9270", "#b47c2e", "#3e86c0", "#9362c4", "#c65368", "#bd588f", "#586cba", "#268f83", "#9e7b25", "#687eaa", "#707b8e"}));
     themes_.append(preset("ocean", "海洋青蓝",
         {"#0c202c", "#123141", "#1a4050", "#e5faff", "#a0c8d2", "#2e5a67", "#4cc5c8", "#0c2835"},
