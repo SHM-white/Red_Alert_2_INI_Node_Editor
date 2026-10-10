@@ -1,9 +1,9 @@
 name: Qt 6 desktop build
 on:
   push:
-    branches: [feature/qt6-node-editor-revival]
+    branches: [feature/qt6-node-editor-revival, feature/pr2-pr3-theme-layout-integration]
   pull_request:
-    branches: [main]
+    branches: [main, feature/qt6-node-editor-revival]
 jobs:
   build:
     strategy:

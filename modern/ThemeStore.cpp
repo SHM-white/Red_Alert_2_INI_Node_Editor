@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QSaveFile>
 #include <QUuid>
+#include <QRegularExpression>
 
 namespace {
 ThemeProfile preset(const QString& id, const QString& name, const QStringList& uiColors,
