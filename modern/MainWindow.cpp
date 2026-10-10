@@ -10,6 +10,8 @@
 #include <QJsonDocument>
 #include <QItemSelectionModel>
 #include <QToolButton>
+#include <QRegularExpressionValidator>
+#include <QFrame>
 #include <QApplication>
 #include <QCloseEvent>
 #include <QColorDialog>
@@ -399,56 +401,69 @@ void MainWindow::applyTheme() {
     const ThemeProfile current = themes_.byId(theme_->currentData().toString());
     const auto v = [&current](const QString& key) { return current.ui.value(key).name(); };
     const QString accentText = current.ui.value("accent").lightness() > 145 ? "#141923" : "#ffffff";
+    // VS-style flat square-edged visual language. A single QSS controls all widgets,
+    // including dialogs and scroll-area viewports, instead of mixing native rounding.
     const QString css = QString(R"(
-       QWidget { color:%4; font-family:'Segoe UI','Microsoft YaHei UI',sans-serif; font-size:13px; }
-       QMainWindow, QWidget#centralHost { background:%1; }
-       QMainWindow > QWidget, QMenuBar, QToolBar, QStatusBar { background:%1; }
-       QWidget#pane { background:%2; border:1px solid %6; border-radius:12px; }
-       QLabel#brand { color:%7; font-weight:800; font-size:18px; letter-spacing:1px; }
-       QLabel#subtle { color:%5; font-size:11px; }
-       QLabel#sectionTitle { color:%5; font-size:11px; font-weight:700; }
-       QLabel#inspectorTitle { color:%4; font-size:17px; font-weight:700; padding:4px; }
-       QLineEdit,QComboBox,QListView,QTableWidget,QPlainTextEdit {
-          background:%3; color:%4; border:1px solid %6; border-radius:10px;
-          selection-background-color:%7; selection-color:%9;
-       }
-       QLineEdit,QComboBox { padding:7px 9px; min-height:23px; }
-       QListView { outline:0; alternate-background-color:%2; }
-       QListView::item { min-height:28px; padding-left:10px; border-radius:7px; }
-       QListView::item:selected, QTableWidget::item:selected { background:%7; color:%9; }
-       QTableWidget { gridline-color:%6; alternate-background-color:%2; }
-       QHeaderView::section { background:%2; color:%5; border:0; padding:8px; }
-       QHeaderView { background:%2; }
-       QPushButton, QToolButton {
-          background:%3; color:%4; border:1px solid %6; border-radius:10px;
-          padding:7px 11px; font-weight:600;
-       }
-       QPushButton:hover, QToolButton:hover { background:%7; color:%9; }
-       QPushButton:pressed, QToolButton:pressed { background:%6; }
-       QPushButton:disabled, QToolButton:disabled { color:%5; }
-       QComboBox::drop-down { border:0; width:21px; }
-       QComboBox QAbstractItemView { background:%2; color:%4; border:1px solid %6; border-radius:10px; }
-       QTabWidget::pane { background:%2; border:1px solid %6; border-radius:12px; }
-       QTabBar::tab {
-           background:%3; color:%5; border:1px solid %6; border-radius:10px;
-           padding:8px 20px; margin-right:5px;
-       }
-       QTabBar::tab:selected { background:%7; color:%9; }
-       QToolBar { border:0; spacing:7px; padding:5px 8px; }
-       QToolBar::separator { background:%6; width:1px; margin:5px; }
-       QMenu { background:%2; color:%4; border:1px solid %6; border-radius:10px; padding:5px; }
-       QMenu::item { padding:7px 24px; border-radius:7px; }
-       QMenu::item:selected { background:%7; color:%9; }
-       QMenuBar::item { background:transparent; padding:5px 10px; border-radius:7px; }
-       QMenuBar::item:selected { background:%3; }
-       QScrollBar:vertical { background:%2; width:11px; }
-       QScrollBar::handle:vertical { background:%6; min-height:25px; border-radius:5px; }
-       QScrollBar:horizontal { background:%2; height:11px; }
-       QScrollBar::handle:horizontal { background:%6; min-width:25px; border-radius:5px; }
-       QSplitter::handle { background:transparent; }
-       QGroupBox { background:%2; border:1px solid %6; border-radius:12px; margin-top:12px; padding-top:10px; }
-       QGroupBox::title { subcontrol-origin:margin; left:12px; color:%5; padding:0 6px; }
-       QDialog, QMessageBox { background:%1; }
+      QWidget { color:%4; font-family:'Segoe UI','Microsoft YaHei UI',sans-serif; font-size:13px; }
+      QMainWindow, QWidget#centralHost, QDialog, QMessageBox { background:%1; }
+      QMenuBar, QToolBar, QStatusBar { background:%2; color:%4; }
+      QWidget#pane { background:%2; border:1px solid %6; border-radius:0px; }
+      QLabel#brand { color:%7; font-weight:700; font-size:17px; }
+      QLabel#subtle { color:%5; font-size:11px; }
+      QLabel#sectionTitle { color:%5; font-size:11px; font-weight:700; }
+      QLabel#inspectorTitle { color:%4; font-size:16px; font-weight:700; padding:3px 0; }
+      QLineEdit, QComboBox, QListView, QTableWidget, QPlainTextEdit {
+        background:%3; color:%4; border:1px solid %6; border-radius:0px;
+        selection-background-color:%7; selection-color:%9;
+      }
+      QLineEdit, QComboBox { padding:5px 7px; min-height:24px; }
+      QLineEdit:focus, QComboBox:focus, QPlainTextEdit:focus,
+      QListView:focus, QTableWidget:focus { border:1px solid %7; }
+      QListView { outline:0; alternate-background-color:%2; }
+      QListView::item { min-height:26px; padding-left:8px; border-radius:0px; }
+      QListView::item:hover { background:%2; }
+      QListView::item:selected, QTableWidget::item:selected { background:%7; color:%9; }
+      QTableWidget { gridline-color:%6; alternate-background-color:%2; }
+      QHeaderView { background:%2; }
+      QHeaderView::section { background:%2; color:%4; border:0; border-right:1px solid %6;
+        border-bottom:1px solid %6; padding:6px; }
+      QPushButton, QToolButton {
+        background:%3; color:%4; border:1px solid %6; border-radius:0px;
+        padding:5px 12px; min-height:23px; font-weight:400;
+      }
+      QPushButton:hover, QToolButton:hover { background:%7; color:%9; border-color:%7; }
+      QPushButton:pressed, QToolButton:pressed { background:%6; color:%4; }
+      QPushButton:disabled, QToolButton:disabled { color:%5; background:%2; }
+      QPushButton:focus, QToolButton:focus { border:1px solid %7; }
+      QComboBox::drop-down { border-left:1px solid %6; width:22px; background:%2; }
+      QComboBox QAbstractItemView { background:%2; color:%4; border:1px solid %6;
+        border-radius:0px; selection-background-color:%7; selection-color:%9; }
+      QTabWidget::pane { background:%2; border:1px solid %6; border-radius:0px; }
+      QTabBar::tab { background:%2; color:%5; border:1px solid %6; border-radius:0px;
+        border-bottom:0; padding:7px 18px; margin-right:0px; }
+      QTabBar::tab:selected { background:%3; color:%4; border-top:2px solid %7; padding-top:6px; }
+      QTabBar::tab:hover:!selected { background:%3; }
+      QToolBar { border:0; border-bottom:1px solid %6; spacing:5px; padding:4px 7px; }
+      QToolBar::separator { background:%6; width:1px; margin:4px; }
+      QMenu { background:%2; color:%4; border:1px solid %6; border-radius:0px; padding:3px; }
+      QMenu::item { padding:6px 25px; border-radius:0px; }
+      QMenu::item:selected { background:%7; color:%9; }
+      QMenuBar::item { background:transparent; padding:5px 10px; border-radius:0px; }
+      QMenuBar::item:selected { background:%3; }
+      QScrollBar:vertical { background:%2; width:12px; border:0; }
+      QScrollBar::handle:vertical { background:%6; min-height:26px; border-radius:0px; }
+      QScrollBar:horizontal { background:%2; height:12px; border:0; }
+      QScrollBar::handle:horizontal { background:%6; min-width:26px; border-radius:0px; }
+      QScrollBar::add-line, QScrollBar::sub-line { width:0px; height:0px; }
+      QSplitter::handle { background:%6; }
+      QGroupBox { background:%2; border:1px solid %6; border-radius:0px;
+        margin-top:14px; padding-top:8px; font-weight:600; }
+      QGroupBox::title { subcontrol-origin:margin; left:9px; color:%4; padding:0 5px; }
+      QScrollArea, QScrollArea > QWidget, QScrollArea > QWidget > QWidget {
+        background:%1; border:0; border-radius:0px;
+      }
+      QDialogButtonBox { background:%1; }
+      QToolTip { background:%2; color:%4; border:1px solid %6; }
     )").arg(v("background"), v("panel"), v("surface"), v("text"),
            v("muted"), v("border"), v("accent"), v("canvas"), accentText);
     qApp->setStyleSheet(css);

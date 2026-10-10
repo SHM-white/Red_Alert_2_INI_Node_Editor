@@ -29,45 +29,51 @@ public:
     QRectF boundingRect() const override { return QRectF(0, 0, cardWidth, height_); }
     qreal height() const { return height_; }
     void paint(QPainter* p, const QStyleOptionGraphicsItem*, QWidget*) override {
-        p->setRenderHint(QPainter::Antialiasing);
-        p->setPen(QPen(focused_ ? color_.lighter(125) : color_.darker(150), focused_ ? 2.5 : 1.2));
-        const QRectF outer = boundingRect().adjusted(1.5, 1.5, -1.5, -1.5);
-        QPainterPath clip;
-        clip.addRoundedRect(outer, 12, 12);
+        // Flat, squared VS-style section card. Category is an accent, never a full-color header.
+        const QRectF outer = boundingRect().adjusted(0.5, 0.5, -0.5, -0.5);
+        p->setRenderHint(QPainter::Antialiasing, false);
+        p->setPen(QPen(focused_ ? color_ : text_.darker(175), focused_ ? 2.0 : 1.0));
         p->setBrush(surface_);
-        p->drawPath(clip);
-        p->save();
-        p->setClipPath(clip);
+        p->drawRect(outer);
         p->setPen(Qt::NoPen);
         p->setBrush(color_);
-        p->drawRect(QRectF(2, 2, cardWidth - 4, 49));
-        p->restore();
-        QFont titleFont = p->font(); titleFont.setBold(true); titleFont.setPointSize(11);
+        p->drawRect(QRectF(2, 2, 5, height_ - 4));
+
+        QFont titleFont = p->font();
+        titleFont.setBold(true);
+        titleFont.setPointSize(10);
         p->setFont(titleFont);
-        p->setPen(color_.lightness() > 145 ? QColor("#141923") : QColor("#ffffff"));
+        p->setPen(text_);
         const QFontMetrics titleMetrics(titleFont);
-        p->drawText(QRectF(13, 5, cardWidth - 26, 25), Qt::AlignLeft | Qt::AlignVCenter,
-                    titleMetrics.elidedText(name_, Qt::ElideRight, int(cardWidth - 26)));
-        QFont small = titleFont; small.setBold(false); small.setPointSize(9);
+        p->drawText(QRectF(16, 8, cardWidth - 28, 22), Qt::AlignLeft | Qt::AlignVCenter,
+                    titleMetrics.elidedText(name_, Qt::ElideRight, int(cardWidth - 34)));
+        QFont small = titleFont;
+        small.setBold(false);
+        small.setPointSize(9);
         p->setFont(small);
-        p->drawText(QRectF(13, 28, cardWidth - 26, 19), Qt::AlignLeft | Qt::AlignVCenter,
-                    category_ + "  ·  " + QString::number(total_) + " properties");
+        p->setPen(color_);
+        p->drawText(QRectF(16, 31, cardWidth - 30, 18), Qt::AlignLeft | Qt::AlignVCenter,
+                    category_ + "  |  " + QString::number(total_) + " properties");
+        p->setPen(QPen(text_.darker(165), 1.0));
+        p->drawLine(QPointF(15, 54.5), QPointF(cardWidth - 9, 54.5));
+
         const QFontMetrics fm(small);
         for (int i = 0; i < rows_.size(); ++i) {
-            const qreal y = 60 + i * 24;
-            p->setPen(color_.lighter(140));
-            p->drawText(QRectF(12, y, 115, 19), Qt::AlignVCenter,
-                        fm.elidedText(rows_[i].first, Qt::ElideRight, 112));
+            const qreal y = 61 + i * 24;
+            p->setPen(color_);
+            p->drawText(QRectF(16, y, 110, 19), Qt::AlignVCenter,
+                        fm.elidedText(rows_[i].first, Qt::ElideRight, 110));
             p->setPen(text_);
-            p->drawText(QRectF(136, y, 143, 19), Qt::AlignVCenter,
-                        fm.elidedText(rows_[i].second, Qt::ElideRight, 141));
+            p->drawText(QRectF(137, y, 140, 19), Qt::AlignVCenter,
+                        fm.elidedText(rows_[i].second, Qt::ElideRight, 139));
         }
         if (total_ > rows_.size()) {
             p->setPen(text_);
-            p->drawText(QRectF(12, height_ - 25, cardWidth - 24, 20), Qt::AlignCenter,
-                        QString("+ %1 more properties").arg(total_ - rows_.size()));
+            p->drawText(QRectF(15, height_ - 25, cardWidth - 25, 20),
+                        Qt::AlignCenter, QString("+ %1 more properties").arg(total_ - rows_.size()));
         }
     }
+
 private:
     int section_ = -1, total_ = 0;
     QString name_, category_;
