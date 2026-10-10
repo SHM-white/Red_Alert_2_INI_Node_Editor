@@ -370,59 +370,204 @@ void MainWindow::createUi() {
 }
 
 QHash<QString, QColor> MainWindow::colors() const {
-    const bool light = theme_->currentIndex() == 1;
-    const QHash<QString, QColor> basic{
-        {"Infantry", QColor(light ? "#9bd4ae" : "#90d8a3")},
-        {"Vehicle", QColor(light ? "#e4ba82" : "#efba73")},
-        {"Aircraft", QColor(light ? "#91c2e5" : "#91c8ff")},
-        {"Building", QColor(light ? "#c4b2df" : "#c7a1ef")},
-        {"Weapon", QColor(light ? "#e99f9f" : "#f19496")},
-        {"Warhead", QColor(light ? "#dfa4ca" : "#e99ed4")},
-        {"Projectile", QColor(light ? "#9eaef0" : "#a2b8ff")},
-        {"Animation", QColor(light ? "#90d2c7" : "#89decf")},
-        {"Superweapon", QColor(light ? "#e3d28b" : "#f1d782")},
-        {"Registry", QColor(light ? "#b1c4d4" : "#a5b2ce")},
-        {"Other", QColor(light ? "#b9c1cb" : "#adb9ca")}
-    };
-    auto chosen = basic;
-    const QString prefix = "color/" + QString::number(theme_->currentIndex()) + "/";
-    for (auto it = chosen.begin(); it != chosen.end(); ++it) {
-        const QColor color(settings_.value(prefix + it.key()).toString());
-        if (color.isValid()) it.value() = color;
-    }
-    return chosen;
+    return themes_.byId(theme_->currentData().toString()).nodes;
+}
+
+void MainWindow::reloadThemeChoices(const QString& requested) {
+    const QString previous = requested.isEmpty()
+        ? (theme_->currentIndex() >= 0 ? theme_->currentData().toString() : QString())
+        : requested;
+    QSignalBlocker block(theme_);
+    theme_->clear();
+    for (const auto& t : themes_.all()) theme_->addItem(t.name, t.id);
+    int index = theme_->findData(previous);
+    if (index < 0) index = settings_.value("theme", 0).toInt();
+    if (index < 0 || index >= theme_->count()) index = 0;
+    theme_->setCurrentIndex(index);
+    settings_.setValue("themes/selected", theme_->currentData().toString());
+    applyTheme();
+}
+
+void MainWindow::updateCategoryCount() {
+    if (countInfo_) countInfo_->setText(
+        QString("当前显示 %1 / %2 个节").arg(proxy_->rowCount()).arg(model_->rowCount()));
 }
 
 void MainWindow::applyTheme() {
-    if (!theme_ || !graph_) return;
-    const int t = theme_->currentIndex();
-    const QString bg = t == 1 ? "#f2f5fa" : (t == 2 ? "#0e2431" : t == 3 ? "#1e171a" : "#151a22");
-    const QString panel = t == 1 ? "#ffffff" : (t == 2 ? "#123141" : t == 3 ? "#2b2025" : "#222935");
-    const QString text = t == 1 ? "#1e293b" : "#ebf1f9";
-    const QString accent = t == 1 ? "#3976ce" : (t == 2 ? "#55b7cb" : t == 3 ? "#dd7171" : "#729dea");
-    const QString border = t == 1 ? "#d7e0ec" : "#3b4656";
-    qApp->setStyleSheet(
-        QString("QMainWindow,QWidget{background:%1;color:%2;}"
-                "QMenuBar,QMenu,QToolBar,QStatusBar{background:%3;color:%2;}"
-                "QLineEdit,QListView,QTableWidget,QPlainTextEdit,QComboBox,QTabWidget::pane{"
-                "background:%3;color:%2;border:1px solid %4;border-radius:6px;}"
-                "QLineEdit{padding:7px;}"
-                "QPushButton{background:%3;color:%2;border:1px solid %4;border-radius:6px;padding:7px 12px;}"
-                "QPushButton:hover,QListView::item:selected,QTableWidget::item:selected{background:%5;color:white;}"
-                "QTabBar::tab{padding:9px 15px;background:%3;color:%2;}"
-                "QTabBar::tab:selected{border-bottom:2px solid %5;}"
-                "QHeaderView::section{background:%3;color:%2;padding:6px;border:none;}"
-                "QLabel#sectionTitle{font-size:14px;font-weight:700;}"
-                "QSplitter::handle{background:%4;}")
-            .arg(bg, text, panel, border, accent));
-    graph_->setColors(colors(), QColor(bg), QColor("#f4f7ff"));
+    if (!theme_ || !graph_ || theme_->currentIndex() < 0) return;
+    const ThemeProfile current = themes_.byId(theme_->currentData().toString());
+    const auto v = [&current](const QString& key) { return current.ui.value(key).name(); };
+    const QString accentText = current.ui.value("accent").lightness() > 145 ? "#141923" : "#ffffff";
+    const QString css = QString(R"(
+       QWidget { color:%4; font-family:'Segoe UI','Microsoft YaHei UI',sans-serif; font-size:13px; }
+       QMainWindow, QWidget#centralwidget { background:%1; }
+       QMainWindow > QWidget, QMenuBar, QToolBar, QStatusBar { background:%1; }
+       QWidget#pane { background:%2; border:1px solid %6; border-radius:12px; }
+       QLabel#brand { color:%7; font-weight:800; font-size:18px; letter-spacing:1px; }
+       QLabel#subtle { color:%5; font-size:11px; }
+       QLabel#sectionTitle { color:%5; font-size:11px; font-weight:700; }
+       QLabel#inspectorTitle { color:%4; font-size:17px; font-weight:700; padding:4px; }
+       QLineEdit,QComboBox,QListView,QTableWidget,QPlainTextEdit {
+          background:%3; color:%4; border:1px solid %6; border-radius:10px;
+          selection-background-color:%7; selection-color:%9;
+       }
+       QLineEdit,QComboBox { padding:7px 9px; min-height:23px; }
+       QListView { outline:0; alternate-background-color:%2; }
+       QListView::item { min-height:28px; padding-left:10px; border-radius:7px; }
+       QListView::item:selected, QTableWidget::item:selected { background:%7; color:%9; }
+       QTableWidget { gridline-color:%6; alternate-background-color:%2; }
+       QHeaderView::section { background:%2; color:%5; border:0; padding:8px; }
+       QHeaderView { background:%2; }
+       QPushButton, QToolButton {
+          background:%3; color:%4; border:1px solid %6; border-radius:10px;
+          padding:7px 11px; font-weight:600;
+       }
+       QPushButton:hover, QToolButton:hover { background:%7; color:%9; }
+       QPushButton:pressed, QToolButton:pressed { background:%6; }
+       QPushButton:disabled, QToolButton:disabled { color:%5; }
+       QComboBox::drop-down { border:0; width:21px; }
+       QComboBox QAbstractItemView { background:%2; color:%4; border:1px solid %6; border-radius:10px; }
+       QTabWidget::pane { background:%2; border:1px solid %6; border-radius:12px; }
+       QTabBar::tab {
+           background:%3; color:%5; border:1px solid %6; border-radius:10px;
+           padding:8px 20px; margin-right:5px;
+       }
+       QTabBar::tab:selected { background:%7; color:%9; }
+       QToolBar { border:0; spacing:7px; padding:5px 8px; }
+       QToolBar::separator { background:%6; width:1px; margin:5px; }
+       QMenu { background:%2; color:%4; border:1px solid %6; border-radius:10px; padding:5px; }
+       QMenu::item { padding:7px 24px; border-radius:7px; }
+       QMenu::item:selected { background:%7; color:%9; }
+       QMenuBar::item { background:transparent; padding:5px 10px; border-radius:7px; }
+       QMenuBar::item:selected { background:%3; }
+       QScrollBar:vertical { background:%2; width:11px; }
+       QScrollBar::handle:vertical { background:%6; min-height:25px; border-radius:5px; }
+       QScrollBar:horizontal { background:%2; height:11px; }
+       QScrollBar::handle:horizontal { background:%6; min-width:25px; border-radius:5px; }
+       QSplitter::handle { background:transparent; }
+       QDialog, QMessageBox { background:%1; }
+    )").arg(v("background"), v("panel"), v("surface"), v("text"),
+           v("muted"), v("border"), v("accent"), v("canvas"), accentText);
+    qApp->setStyleSheet(css);
+    graph_->setColors(current.nodes, current.ui.value("canvas"),
+                      current.ui.value("text"), current.ui.value("panel"));
     graph_->display(document_, current_);
     if (model_) {
         for (int i = 0; i < document_.sections().size(); ++i) {
             auto* item = model_->item(i);
-            if (item) item->setForeground(colors().value(document_.category(i)));
+            if (item) item->setForeground(current.nodes.value(document_.category(i)));
         }
     }
+}
+
+void MainWindow::editTheme() {
+    if (theme_->currentIndex() < 0) return;
+    ThemeProfile draft = themes_.byId(theme_->currentData().toString());
+    const bool editingCustom = !draft.builtIn;
+    QDialog dialog(this);
+    dialog.setWindowTitle(editingCustom ? "编辑自定义主题" : "从预设创建自定义主题");
+    dialog.resize(545, 700);
+    auto* root = new QVBoxLayout(&dialog);
+    auto* name = new QLineEdit(editingCustom ? draft.name : draft.name + " 自定义", &dialog);
+    auto* description = new QLabel("一套主题同时控制界面色板与所有节点类型颜色。预设不可覆盖，编辑会生成独立副本。");
+    description->setWordWrap(true);
+    root->addWidget(description);
+    auto* header = new QFormLayout;
+    header->addRow("主题名称", name);
+    root->addLayout(header);
+
+    auto* scroll = new QScrollArea(&dialog);
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    auto* content = new QWidget(scroll);
+    auto* palette = new QVBoxLayout(content);
+    auto addColorSection = [&](const QString& heading, const QStringList& keys,
+                               QHash<QString, QColor>* target, const QHash<QString, QString>& labels) {
+        auto* group = new QGroupBox(heading, content);
+        auto* form = new QFormLayout(group);
+        for (const QString& key : keys) {
+            auto* button = new QPushButton(group);
+            auto updateSwatch = [button, target, key] {
+                const QColor c = target->value(key);
+                const QString fg = c.lightness() > 145 ? "#171b24" : "#ffffff";
+                button->setText(c.name(QColor::HexRgb).toUpper());
+                button->setStyleSheet(QString("QPushButton{background:%1;color:%2;border:1px solid %1;"
+                                              "border-radius:10px;padding:7px 18px;}")
+                                              .arg(c.name(), fg));
+            };
+            updateSwatch();
+            connect(button, &QPushButton::clicked, &dialog, [&, key, target, updateSwatch] {
+                const QColor candidate = QColorDialog::getColor(
+                    target->value(key), &dialog, "选择 " + labels.value(key, key));
+                if (candidate.isValid()) { (*target)[key] = candidate; updateSwatch(); }
+            });
+            form->addRow(labels.value(key, key), button);
+        }
+        palette->addWidget(group);
+    };
+    const QHash<QString, QString> uiLabels{
+        {"background","主窗口背景"}, {"panel","侧栏 / 检查器底色"},
+        {"surface","控件和输入框底色"}, {"text","主要文字"}, {"muted","次要文字"},
+        {"border","边框"}, {"accent","强调色 / 选中"}, {"canvas","节点画布背景"}
+    };
+    const QHash<QString, QString> categoryLabels{
+        {"Infantry","步兵"}, {"Vehicle","载具"}, {"Aircraft","航空器"},
+        {"Building","建筑"}, {"Weapon","武器"}, {"Warhead","弹头"},
+        {"Projectile","弹体"}, {"Animation","动画"}, {"Superweapon","超级武器"},
+        {"Registry","类型索引"}, {"Other","其他"}
+    };
+    addColorSection("界面 / UI COLORS", ThemeStore::uiKeys(), &draft.ui, uiLabels);
+    addColorSection("节点分类 / NODE COLORS", ThemeStore::nodeKeys(), &draft.nodes, categoryLabels);
+    palette->addStretch();
+    scroll->setWidget(content);
+    root->addWidget(scroll, 1);
+    auto* actions = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel, &dialog);
+    connect(actions, &QDialogButtonBox::accepted, &dialog, [&] {
+        if (name->text().trimmed().isEmpty()) {
+            QMessageBox::warning(&dialog, "无效名称", "主题名称不能为空");
+            return;
+        }
+        dialog.accept();
+    });
+    connect(actions, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    root->addWidget(actions);
+    if (dialog.exec() != QDialog::Accepted) return;
+    draft.name = name->text().trimmed();
+    if (!editingCustom) draft.id.clear();
+    const QString id = draft.id;
+    if (!themes_.saveCustom(draft)) {
+        QMessageBox::warning(this, "保存失败", "主题无法保存"); return;
+    }
+    reloadThemeChoices(id.isEmpty() ? themes_.all().last().id : id);
+}
+
+void MainWindow::importTheme() {
+    const QString path = QFileDialog::getOpenFileName(this, "导入主题", QDir::homePath(), "JSON theme (*.json)");
+    if (path.isEmpty()) return;
+    QString id, error;
+    if (!themes_.importFile(path, &id, &error)) {
+        QMessageBox::warning(this, "导入失败", error);
+        return;
+    }
+    reloadThemeChoices(id);
+}
+void MainWindow::exportTheme() {
+    const QString path = QFileDialog::getSaveFileName(this, "导出主题",
+        QDir::homePath() + "/ra2-node-theme.json", "JSON theme (*.json)");
+    if (path.isEmpty()) return;
+    QString error;
+    if (!themes_.exportFile(theme_->currentData().toString(), path, &error))
+        QMessageBox::warning(this, "导出失败", error);
+}
+void MainWindow::deleteTheme() {
+    const QString id = theme_->currentData().toString();
+    if (themes_.byId(id).builtIn) {
+        QMessageBox::information(this, "内置主题", "内置主题不能删除，编辑它会自动生成自定义副本。");
+        return;
+    }
+    if (QMessageBox::question(this, "删除主题", "仅删除这套自定义配色，不会影响 INI 文件，确定吗？")
+        != QMessageBox::Yes) return;
+    if (themes_.deleteCustom(id)) reloadThemeChoices("night");
 }
 
 void MainWindow::refreshList(const QString& focus) {
@@ -440,6 +585,7 @@ void MainWindow::refreshList(const QString& focus) {
         item->setToolTip(document_.category(i) + " · " + QString::number(section.entries.size()) + " entries");
         model_->appendRow(item);
     }
+    updateCategoryCount();
     current_ = document_.indexOf(desired);
     if (current_ < 0 && !document_.sections().isEmpty()) current_ = 0;
     selectSection(current_);
@@ -475,6 +621,8 @@ void MainWindow::refreshDetails() {
         }
         properties_->resizeColumnToContents(0);
     }
+    if (sectionInfo_) sectionInfo_->setText(current_ < 0 ? "选择一个节查看属性" :
+        document_.sections()[current_].name + "  ·  " + document_.category(current_));
     graph_->display(document_, current_);
     int count = 0;
     for (const auto& s : document_.sections()) count += s.entries.size();
@@ -483,6 +631,7 @@ void MainWindow::refreshDetails() {
         .arg(current_ < 0 ? "No selection" : document_.sections()[current_].name));
 }
 void MainWindow::titleUpdate() {
+    if (fileInfo_) fileInfo_->setText(document_.path().isEmpty() ? "未打开文件" : document_.path());
     setWindowTitle(QString("RA2 Node Studio — %1%2")
         .arg(document_.path().isEmpty() ? "Untitled" : document_.path())
         .arg(history_.isClean() && !(source_ && source_->document()->isModified()) ? "" : " *"));
@@ -608,14 +757,23 @@ void MainWindow::deleteKey() {
 void MainWindow::setCategoryColor() {
     if (current_ < 0) return;
     const QString category = document_.category(current_);
-    const QColor initial = colors().value(category);
-    const QColor chosen = QColorDialog::getColor(initial, this, "配置 " + category + " 节点颜色");
-    if (chosen.isValid()) {
-        settings_.setValue("color/" + QString::number(theme_->currentIndex()) + "/" + category, chosen.name());
-        applyTheme();
-        refreshList();
+    ThemeProfile draft = themes_.byId(theme_->currentData().toString());
+    const QColor chosen = QColorDialog::getColor(
+        draft.nodes.value(category), this, "配置当前主题的 " + category + " 节点颜色");
+    if (!chosen.isValid()) return;
+    draft.nodes.insert(category, chosen);
+    if (draft.builtIn) {
+        draft.name += " 自定义";
+        draft.id.clear();
     }
+    const QString id = draft.id;
+    if (themes_.saveCustom(draft))
+        reloadThemeChoices(id.isEmpty() ? themes_.all().last().id : id);
 }
+
 void MainWindow::closeEvent(QCloseEvent* event) {
-    if (maybeSave()) event->accept(); else event->ignore();
+    if (maybeSave()) {
+        settings_.setValue("window/geometry", saveGeometry());
+        event->accept();
+    } else event->ignore();
 }
