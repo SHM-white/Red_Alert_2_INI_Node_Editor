@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=RA2 Node Studio
+Comment=Visual INI node editor for Red Alert 2 mods
+Exec=ra2-node-studio
+Icon=ra2-node-studio
+Terminal=false
+Categories=Development;Utility;TextEditor;

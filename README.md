@@ -62,3 +62,9 @@ The center pane's graph header now provides independent **父节点最大深度*
 Graph traversal uses bounded, cycle-safe BFS. Each depth column can include up to **14** nodes, and each side can include up to **64** nodes total. These limits are distinct from depth; on dense mods, some deeper nodes may be omitted to stay responsive. In cyclic graphs a section may appear once on each side, because parent and child traversals have independent visited sets; this preserves both directed views. Drawn edges reflect the spanning discovery tree, not every possible shortcut or cyclic link.
 
 graph_neighborhood_tests covers independent depth settings, 0-depth hiding, multi-hop oriented edges, cycle handling, breadth/total caps and invalid selections. The offscreen UI test exercises the controls against a fixture and verifies the relation model updates.
+
+## Debian/Ubuntu / WSL packages
+
+Linux release artifacts now include a native `amd64.deb` installer and a FUSE-free `portable.tar.gz` in addition to the original AppImage. Install using `sudo apt install ./ra2-node-studio_0.2.0_amd64.deb`, launch with `ra2-node-studio`, and uninstall using `sudo apt remove ra2-node-studio`.
+
+If an AppImage fails with `No suitable fusermount binary found`, use `APPIMAGE_EXTRACT_AND_RUN=1 ./RA2NodeStudio-v0.2.0-Linux-x86_64.AppImage` as a temporary workaround, or choose the DEB/tarball. WSL also needs WSLg/X11 to display the actual window. See [cross-platform packaging instructions](docs/CROSS_PLATFORM_RELEASE.md).
