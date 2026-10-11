@@ -53,3 +53,23 @@ On WSL the editor additionally requires WSLg or an X11 display server; check `DI
 The Linux pipeline constructs the DEB and portable tarball from the **same Qt-deployed AppDir** as the AppImage. It checks DEB metadata and contents, installs the package using apt on a clean Ubuntu runner, and executes `QT_QPA_PLATFORM=offscreen ra2-node-studio --smoke-test` through its installed launcher. Packaging files live under `packaging/linux/`.
 
 Pull requests run the same compilation and packaging jobs but **cannot modify the Release**. On merge, the existing release workflow can attach the new Linux assets to the existing `v0.2.0` release. All build targets must pass before publishing.
+
+## Runtime dependency fix (WSL / minimal Debian)
+
+A package that is installed on a developer machine can still fail to launch on a minimal
+Debian/WSL instance. The Qt 6 app executable directly requires `libOpenGL.so.0`
+(provided by `libopengl0`). Its dynamically loaded Qt graphics libraries also require
+`libEGL.so.1` (`libegl1`), `libX11-xcb.so.1` (`libx11-xcb1`), and other system libraries.
+The DEB now declares these explicit runtime dependencies so `apt` installs them automatically.
+
+For older DEBs already installed before the correction, the immediate fix is:
+
+```bash
+sudo apt update
+sudo apt install libopengl0 libegl1 libx11-xcb1 libgpg-error0 zlib1g
+ra2-node-studio
+```
+
+CI tests dependency declarations directly and installs/runs the DEB inside a minimal
+Ubuntu 22.04 Docker image in addition to the regular full-host smoke test. This prevents
+accidentally relying on shared libraries preinstalled on GitHub's desktop runner.

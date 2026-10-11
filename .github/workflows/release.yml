@@ -145,6 +145,23 @@ jobs:
           deb="dist/ra2-node-studio_${version}_amd64.deb"
           dpkg-deb --info "$deb"
           dpkg-deb --contents "$deb" | grep '/opt/ra2-node-studio/AppRun'
+          # These are required by the Qt/OpenGL binaries but absent on minimal WSL/Debian.
+          # CI runners may already have them, so an install smoke-test alone misses omissions.
+          for dependency in libopengl0 libegl1 libx11-xcb1 libgpg-error0 zlib1g; do
+            dpkg-deb -f "$deb" Depends | tr ',' '\n' | grep -Eq "^[[:space:]]*${dependency}([[:space:]]|$)" || {
+              echo "Missing runtime dependency in DEB: $dependency" >&2
+              exit 1
+            }
+          done
+          readelf -d AppDir/AppRun.wrapped | grep -q 'libOpenGL.so.0'
+          # Test on a deliberately minimal Ubuntu image, not just a full CI desktop.
+          docker run --rm --volume "$PWD/dist:/packages:ro" ubuntu:22.04 \
+            /bin/bash -euc '
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                /packages/ra2-node-studio_*.deb
+              QT_QPA_PLATFORM=offscreen ra2-node-studio --smoke-test
+            '
           sudo apt-get update
           sudo apt-get install -y "./$deb"
           export QT_QPA_PLATFORM=offscreen
