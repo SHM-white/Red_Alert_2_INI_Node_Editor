@@ -97,3 +97,25 @@ ra2-node-studio
 The package test checks the `Recommends` metadata and verifies the font
 package on a fresh Ubuntu container, while the UI smoke test ensures the
 Windows-specific font rule is not applied on Linux.
+
+## WSLg window title rendering (Chinese titlebar mojibake)
+
+If menu text and dialog contents render normally but the **native window title**
+appears as illegible squares, check:
+
+```bash
+xprop WM_NAME _NET_WM_NAME
+```
+
+Click the affected dialog. If `_NET_WM_NAME(UTF8_STRING)` contains the correct
+Chinese title, the application sent valid Unicode and this is a limitation of
+the X11/WSLg window-decoration rendering path, not the INI encoding or the
+Linux CJK font fallback.
+
+The application uses a **WSL-only ASCII fallback for native dialog titles**
+(e.g. `Create Custom Theme`), while leaving the dialog controls, user data,
+menus and messages in Chinese. Full Chinese dialog titles remain on ordinary
+Linux desktops, macOS and Windows.
+
+WSL is detected from `WSL_DISTRO_NAME` / `WSL_INTEROP` or the Microsoft kernel
+release marker. The behavior is covered by `platform_window_title_tests`.
