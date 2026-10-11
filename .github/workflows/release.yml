@@ -154,6 +154,7 @@ jobs:
             }
           done
           readelf -d AppDir/AppRun.wrapped | grep -q 'libOpenGL.so.0'
+          dpkg-deb --contents "$deb" | grep '/usr/plugins/platforms/libqoffscreen.so'
           # Test on a deliberately minimal Ubuntu image, not just a full CI desktop.
           docker run --rm --volume "$PWD/dist:/packages:ro" ubuntu:22.04 \
             /bin/bash -euc '
@@ -161,6 +162,9 @@ jobs:
               DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 /packages/ra2-node-studio_*.deb
               QT_QPA_PLATFORM=offscreen ra2-node-studio --smoke-test
+              # Exercise the normal XCB/GLX backend too; WSLg often uses this path.
+              DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb xauth
+              xvfb-run -a env QT_QPA_PLATFORM=xcb ra2-node-studio --smoke-test
             '
           sudo apt-get update
           sudo apt-get install -y "./$deb"

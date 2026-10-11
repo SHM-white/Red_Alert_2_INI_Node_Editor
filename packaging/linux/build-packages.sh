@@ -19,6 +19,16 @@ fi
 if ! find "$appdir/usr" -name 'libQt6Core.so*' -print -quit | grep -q .; then
   echo "AppDir does not contain the deployed Qt runtime" >&2; exit 1
 fi
+# The linuxdeploy Qt plugin normally deploys xcb only. Include the Qt offscreen
+# platform plugin as well, so headless CI and remote/WSL checks are self-contained.
+if [[ -z "${QT_ROOT_DIR:-}" || ! -f "$QT_ROOT_DIR/plugins/platforms/libqoffscreen.so" ]]; then
+  echo "Qt offscreen platform plugin not found under QT_ROOT_DIR" >&2
+  exit 1
+fi
+install -d -m 0755 "$appdir/usr/plugins/platforms"
+install -m 0755 "$QT_ROOT_DIR/plugins/platforms/libqoffscreen.so" \
+  "$appdir/usr/plugins/platforms/libqoffscreen.so"
+
 mkdir -p "$dist"
 tar -C "$appdir" -czf "$dist/RA2NodeStudio-$tag-Linux-x86_64-portable.tar.gz" .
 
