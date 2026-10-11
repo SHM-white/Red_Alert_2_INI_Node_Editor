@@ -44,3 +44,10 @@ if(BUILD_TESTING)
     target_link_libraries(graph_neighborhood_tests PRIVATE Qt6::Core)
     add_test(NAME graph_neighborhood_tests COMMAND graph_neighborhood_tests)
 endif()
+
+if(BUILD_TESTING)
+    add_executable(platform_window_title_tests
+        tests/platform_window_title_tests.cpp modern/PlatformWindowTitle.h)
+    target_link_libraries(platform_window_title_tests PRIVATE Qt6::Core)
+    add_test(NAME platform_window_title_tests COMMAND platform_window_title_tests)
+endif()

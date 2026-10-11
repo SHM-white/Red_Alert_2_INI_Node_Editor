@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "PlatformWindowTitle.h"
 #include <QAction>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -121,7 +122,7 @@ void MainWindow::createUi() {
     });
     const auto openFile = add(file, "打开 INI...", QKeySequence::Open, [this] {
         const QString path = QFileDialog::getOpenFileName(
-            this, "打开 INI", QDir::homePath(), "INI / map (*.ini *.map *.mpr);;所有文件 (*)");
+            this, PlatformWindowTitle::dialogTitle("打开 INI", "Open INI"), QDir::homePath(), "INI / map (*.ini *.map *.mpr);;所有文件 (*)");
         if (!path.isEmpty()) openPath(path);
     });
     const auto saveFile = add(file, "保存", QKeySequence::Save, [this] { save(); });
@@ -564,7 +565,9 @@ void MainWindow::editTheme() {
     ThemeProfile draft = themes_.byId(theme_->currentData().toString());
     const bool editingCustom = !draft.builtIn;
     QDialog dialog(this);
-    dialog.setWindowTitle(editingCustom ? "编辑自定义主题" : "从预设创建自定义主题");
+    dialog.setWindowTitle(editingCustom
+        ? PlatformWindowTitle::dialogTitle("编辑自定义主题", "Edit Custom Theme")
+        : PlatformWindowTitle::dialogTitle("从预设创建自定义主题", "Create Custom Theme"));
     dialog.resize(520, 690);
     dialog.setMinimumSize(440, 460);
     auto* root = new QVBoxLayout(&dialog);
@@ -627,7 +630,8 @@ void MainWindow::editTheme() {
             });
             connect(pick, &QPushButton::clicked, &dialog, [&, key, target, redraw] {
                 const QColor selected = QColorDialog::getColor(
-                    target->value(key), &dialog, "选择 " + labels.value(key, key));
+                    target->value(key), &dialog, PlatformWindowTitle::dialogTitle(
+                         "选择 " + labels.value(key, key), "Choose " + key + " Color"));
                 if (selected.isValid()) {
                     (*target)[key] = selected;
                     redraw();
@@ -662,7 +666,7 @@ void MainWindow::editTheme() {
     actions->addButton("取消", QDialogButtonBox::RejectRole);
     connect(actions, &QDialogButtonBox::accepted, &dialog, [&] {
         if (name->text().trimmed().isEmpty()) {
-            QMessageBox::warning(&dialog, "无效名称", "主题名称不能为空");
+            QMessageBox::warning(&dialog, PlatformWindowTitle::dialogTitle("无效名称", "Invalid Name"), "主题名称不能为空");
             return;
         }
         dialog.accept();
@@ -684,36 +688,36 @@ void MainWindow::editTheme() {
     if (!editingCustom) draft.id.clear();
     const QString id = draft.id;
     if (!themes_.saveCustom(draft)) {
-        QMessageBox::warning(this, "保存失败", "主题无法保存"); return;
+        QMessageBox::warning(this, PlatformWindowTitle::dialogTitle("保存失败", "Save Failed"), "主题无法保存"); return;
     }
     reloadThemeChoices(id.isEmpty() ? themes_.all().last().id : id);
 }
 
 void MainWindow::importTheme() {
-    const QString path = QFileDialog::getOpenFileName(this, "导入主题", QDir::homePath(), "JSON theme (*.json)");
+    const QString path = QFileDialog::getOpenFileName(this, PlatformWindowTitle::dialogTitle("导入主题", "Import Theme"), QDir::homePath(), "JSON theme (*.json)");
     if (path.isEmpty()) return;
     QString id, error;
     if (!themes_.importFile(path, &id, &error)) {
-        QMessageBox::warning(this, "导入失败", error);
+        QMessageBox::warning(this, PlatformWindowTitle::dialogTitle("导入失败", "Import Failed"), error);
         return;
     }
     reloadThemeChoices(id);
 }
 void MainWindow::exportTheme() {
-    const QString path = QFileDialog::getSaveFileName(this, "导出主题",
+    const QString path = QFileDialog::getSaveFileName(this, PlatformWindowTitle::dialogTitle("导出主题", "Export Theme"),
         QDir::homePath() + "/ra2-node-theme.json", "JSON theme (*.json)");
     if (path.isEmpty()) return;
     QString error;
     if (!themes_.exportFile(theme_->currentData().toString(), path, &error))
-        QMessageBox::warning(this, "导出失败", error);
+        QMessageBox::warning(this, PlatformWindowTitle::dialogTitle("导出失败", "Export Failed"), error);
 }
 void MainWindow::deleteTheme() {
     const QString id = theme_->currentData().toString();
     if (themes_.byId(id).builtIn) {
-        QMessageBox::information(this, "内置主题", "内置主题不能删除，编辑它会自动生成自定义副本。");
+        QMessageBox::information(this, PlatformWindowTitle::dialogTitle("内置主题", "Built-in Theme"), "内置主题不能删除，编辑它会自动生成自定义副本。");
         return;
     }
-    if (QMessageBox::question(this, "删除主题", "仅删除这套自定义配色，不会影响 INI 文件，确定吗？")
+    if (QMessageBox::question(this, PlatformWindowTitle::dialogTitle("删除主题", "Delete Theme"), "仅删除这套自定义配色，不会影响 INI 文件，确定吗？")
         != QMessageBox::Yes) return;
     if (themes_.deleteCustom(id)) reloadThemeChoices("night");
 }
@@ -814,7 +818,7 @@ bool MainWindow::applySourceIfNeeded() {
 bool MainWindow::maybeSave() {
     if (views_->currentIndex() == 1) applySourceIfNeeded();
     if (history_.isClean()) return true;
-    const auto result = QMessageBox::warning(this, "未保存更改",
+    const auto result = QMessageBox::warning(this, PlatformWindowTitle::dialogTitle("未保存更改", "Unsaved Changes"),
         "当前文件存在未保存的修改，是否保存？",
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
         QMessageBox::Save);
@@ -829,7 +833,7 @@ void MainWindow::openPath(const QString& path) {
         IniDocument::Encoding::System : IniDocument::Encoding::Utf8;
     IniDocument next;
     if (!next.load(path, selectedEncoding, &error)) {
-        QMessageBox::critical(this, "读取失败", error);
+        QMessageBox::critical(this, PlatformWindowTitle::dialogTitle("读取失败", "Open Failed"), error);
         return;
     }
     document_ = std::move(next);
@@ -841,7 +845,7 @@ bool MainWindow::save(bool as) {
     if (views_->currentIndex() == 1) applySourceIfNeeded();
     QString output = document_.path();
     if (as || output.isEmpty()) {
-        output = QFileDialog::getSaveFileName(this, "保存 INI", output.isEmpty() ?
+        output = QFileDialog::getSaveFileName(this, PlatformWindowTitle::dialogTitle("保存 INI", "Save INI"), output.isEmpty() ?
             QDir::homePath() + "/rules.ini" : output,
             "INI files (*.ini);;All files (*)");
     }
@@ -861,7 +865,7 @@ void MainWindow::mutation(const QString& label, const std::function<bool()>& act
         ? document_.sections()[current_].name : QString();
     const QStringList before = document_.lines();
     if (!action()) {
-        QMessageBox::warning(this, "操作未完成", "名称冲突、目标不存在或名称包含无效字符。");
+        QMessageBox::warning(this, PlatformWindowTitle::dialogTitle("操作未完成", "Operation Failed"), "名称冲突、目标不存在或名称包含无效字符。");
         refreshDetails();
         return;
     }
@@ -873,7 +877,7 @@ void MainWindow::mutation(const QString& label, const std::function<bool()>& act
 }
 void MainWindow::addSection() {
     bool ok = false;
-    QString name = QInputDialog::getText(this, "新建节", "节名（不含方括号）", QLineEdit::Normal, "", &ok);
+    QString name = QInputDialog::getText(this, PlatformWindowTitle::dialogTitle("新建节", "New Section"), "节名（不含方括号）", QLineEdit::Normal, "", &ok);
     if (ok && !name.trimmed().isEmpty())
         mutation("新增节 " + name, [this, name] { return document_.addSection(name); }, name.trimmed());
 }
@@ -881,27 +885,27 @@ void MainWindow::renameSection() {
     if (current_ < 0) return;
     const QString old = document_.sections()[current_].name;
     bool ok = false;
-    const QString name = QInputDialog::getText(this, "重命名节", "新名称", QLineEdit::Normal, old, &ok);
+    const QString name = QInputDialog::getText(this, PlatformWindowTitle::dialogTitle("重命名节", "Rename Section"), "新名称", QLineEdit::Normal, old, &ok);
     if (ok && name != old)
         mutation("重命名节 " + old, [this, name] { return document_.renameSection(current_, name); }, name.trimmed());
 }
 void MainWindow::deleteSection() {
     if (current_ < 0) return;
     const QString name = document_.sections()[current_].name;
-    if (QMessageBox::question(this, "确认删除", "删除整个节 [" + name + "] 及其中的属性？") != QMessageBox::Yes) return;
+    if (QMessageBox::question(this, PlatformWindowTitle::dialogTitle("确认删除", "Confirm Delete"), "删除整个节 [" + name + "] 及其中的属性？") != QMessageBox::Yes) return;
     mutation("删除节 " + name, [this] { return document_.deleteSection(current_); });
 }
 void MainWindow::addKey() {
-    if (current_ < 0) { QMessageBox::information(this, "提示", "请先选中一个节"); return; }
+    if (current_ < 0) { QMessageBox::information(this, PlatformWindowTitle::dialogTitle("提示", "Notice"), "请先选中一个节"); return; }
     bool ok = false;
-    const QString key = QInputDialog::getText(this, "新增属性", "键名", QLineEdit::Normal, "", &ok);
+    const QString key = QInputDialog::getText(this, PlatformWindowTitle::dialogTitle("新增属性", "Add Property"), "键名", QLineEdit::Normal, "", &ok);
     if (!ok || key.trimmed().isEmpty()) return;
     // Avoid using the upsert operation to silently overwrite an existing value.
     for (const auto& entry : document_.sections()[current_].entries)
         if (entry.key.compare(key.trimmed(), Qt::CaseInsensitive) == 0) {
-            QMessageBox::warning(this, "属性已存在", "请选择不同的键名"); return;
+            QMessageBox::warning(this, PlatformWindowTitle::dialogTitle("属性已存在", "Property Already Exists"), "请选择不同的键名"); return;
         }
-    const QString value = QInputDialog::getText(this, "属性值", key + " =", QLineEdit::Normal, "", &ok);
+    const QString value = QInputDialog::getText(this, PlatformWindowTitle::dialogTitle("属性值", "Property Value"), key + " =", QLineEdit::Normal, "", &ok);
     if (ok) mutation("新增属性 " + key, [this, key, value] { return document_.setKey(current_, key, value); });
 }
 void MainWindow::deleteKey() {
@@ -914,7 +918,8 @@ void MainWindow::setCategoryColor() {
     const QString category = document_.category(current_);
     ThemeProfile draft = themes_.byId(theme_->currentData().toString());
     const QColor chosen = QColorDialog::getColor(
-        draft.nodes.value(category), this, "配置当前主题的 " + category + " 节点颜色");
+        draft.nodes.value(category), this, PlatformWindowTitle::dialogTitle(
+            "配置当前主题的 " + category + " 节点颜色", "Set " + category + " Color"));
     if (!chosen.isValid()) return;
     draft.nodes.insert(category, chosen);
     if (draft.builtIn) {
