@@ -53,6 +53,7 @@ Maintainer: RA2 Node Studio Contributors <noreply@github.com>
 Homepage: https://github.com/SHM-white/Red_Alert_2_INI_Node_Editor
 Installed-Size: $size
 Depends: libc6 (>= 2.35), libstdc++6, libgcc-s1, libgl1, libglx0, libopengl0, libegl1, libx11-6, libx11-xcb1, libxcb1, libxkbcommon0, libfontconfig1, libfreetype6, libdbus-1-3, libgpg-error0, zlib1g
+Recommends: fonts-noto-cjk
 Description: Visual INI node editor for Red Alert 2 mods
  Qt 6 graphical editor with indexed node dependencies and themes.
  Qt shared libraries and plugins are included under /opt/ra2-node-studio.

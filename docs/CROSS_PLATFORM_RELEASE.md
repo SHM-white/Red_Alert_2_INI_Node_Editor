@@ -73,3 +73,27 @@ ra2-node-studio
 CI tests dependency declarations directly and installs/runs the DEB inside a minimal
 Ubuntu 22.04 Docker image in addition to the regular full-host smoke test. This prevents
 accidentally relying on shared libraries preinstalled on GitHub's desktop runner.
+
+## Chinese UI font fallback (Linux / WSL)
+
+On Windows, the editor retains the Segoe UI / Microsoft YaHei UI typography.
+On Linux and macOS, it no longer forces those Windows font names. Instead it
+uses Qt's system application font, allowing Linux Fontconfig to choose installed
+CJK-capable fallback fonts for Chinese labels.
+
+The Debian package now **recommends** `fonts-noto-cjk` rather than requiring it.
+Ordinary `apt install ./ra2-node-studio_*.deb` installs recommended fonts by default;
+minimal or English-only systems can opt out with `--no-install-recommends`.
+If existing WSL installations show square placeholder glyphs, run:
+
+```bash
+sudo apt update
+sudo apt install fonts-noto-cjk fonts-wqy-microhei fontconfig
+fc-cache -fv
+fc-match 'sans:lang=zh-cn'
+ra2-node-studio
+```
+
+The package test checks the `Recommends` metadata and verifies the font
+package on a fresh Ubuntu container, while the UI smoke test ensures the
+Windows-specific font rule is not applied on Linux.

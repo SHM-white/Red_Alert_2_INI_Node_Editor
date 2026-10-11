@@ -68,3 +68,12 @@ graph_neighborhood_tests covers independent depth settings, 0-depth hiding, mult
 Linux release artifacts now include a native `amd64.deb` installer and a FUSE-free `portable.tar.gz` in addition to the original AppImage. Install using `sudo apt install ./ra2-node-studio_0.2.0_amd64.deb`, launch with `ra2-node-studio`, and uninstall using `sudo apt remove ra2-node-studio`.
 
 If an AppImage fails with `No suitable fusermount binary found`, use `APPIMAGE_EXTRACT_AND_RUN=1 ./RA2NodeStudio-v0.2.0-Linux-x86_64.AppImage` as a temporary workaround, or choose the DEB/tarball. WSL also needs WSLg/X11 to display the actual window. See [cross-platform packaging instructions](docs/CROSS_PLATFORM_RELEASE.md).
+
+## Linux / WSL Chinese UI fonts
+
+Linux/macOS now use Qt's system UI font and native font fallback instead of
+forcing Windows font family names. The Debian package has an optional
+`Recommends: fonts-noto-cjk` to improve Chinese character display on fresh
+WSL/Debian installations. If Chinese text appears as squares, install
+`fonts-noto-cjk` and refresh Fontconfig (`fc-cache -fv`). See
+[Linux packaging and font notes](docs/CROSS_PLATFORM_RELEASE.md).
