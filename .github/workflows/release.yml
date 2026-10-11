@@ -1,6 +1,12 @@
 name: Build and publish cross-platform binaries
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/release.yml'
+      - 'packaging/linux/**'
+      - 'docs/CROSS_PLATFORM_RELEASE.md'
   push:
     tags:
       - "v*"
@@ -48,10 +54,10 @@ jobs:
 
     runs-on: ${{ matrix.runner }}
     steps:
-      - name: Check out exact release tag
+      - name: Check out PR head or exact release tag
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || env.RELEASE_TAG }}
 
       - name: Install Qt 6.8.3
         uses: jurplel/install-qt-action@v4
@@ -79,11 +85,11 @@ jobs:
           New-Item -ItemType Directory -Force dist | Out-Null
           Compress-Archive -Path "build\Release\*" -DestinationPath "dist\RA2NodeStudio-$env:RELEASE_TAG-Windows-x64.zip" -CompressionLevel Optimal
 
-      - name: Check out AppImage metadata
+      - name: Check out Linux packaging tools and metadata
         if: matrix.kind == 'linux'
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
           path: _deployment
           sparse-checkout: packaging
 
@@ -122,6 +128,58 @@ jobs:
           mv "$image" "dist/RA2NodeStudio-${RELEASE_TAG}-Linux-x86_64.AppImage"
           chmod +x dist/*.AppImage
 
+      - name: Package Linux Debian installer and portable tarball
+        if: matrix.kind == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash _deployment/packaging/linux/build-packages.sh \
+            "$PWD/AppDir" "$RELEASE_TAG" "$PWD/dist" "$PWD/_deployment/packaging"
+
+      - name: Validate DEB install and FUSE-free launcher
+        if: matrix.kind == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(printf '%s' "$RELEASE_TAG" | sed 's/^v//')
+          deb="dist/ra2-node-studio_${version}_amd64.deb"
+          dpkg-deb --info "$deb"
+          # Optional Chinese UI glyphs: recommended but never a hard dependency.
+          dpkg-deb -f "$deb" Recommends | grep -Eq '(^|,[[:space:]]*)fonts-noto-cjk([[:space:],]|$)'
+          if dpkg-deb -f "$deb" Depends | grep -q 'fonts-noto-cjk'; then
+            echo "fonts-noto-cjk must remain optional (Recommends, not Depends)" >&2
+            exit 1
+          fi
+          dpkg-deb --contents "$deb" | grep '/opt/ra2-node-studio/AppRun'
+          # These are required by the Qt/OpenGL binaries but absent on minimal WSL/Debian.
+          # CI runners may already have them, so an install smoke-test alone misses omissions.
+          for dependency in libopengl0 libegl1 libx11-xcb1 libgpg-error0 zlib1g; do
+            dpkg-deb -f "$deb" Depends | tr ',' '\n' | grep -Eq "^[[:space:]]*${dependency}([[:space:]]|$)" || {
+              echo "Missing runtime dependency in DEB: $dependency" >&2
+              exit 1
+            }
+          done
+          readelf -d AppDir/AppRun.wrapped | grep -q 'libOpenGL.so.0'
+          dpkg-deb --contents "$deb" | grep '/usr/plugins/platforms/libqoffscreen.so'
+          # Test on a deliberately minimal Ubuntu image, not just a full CI desktop.
+          docker run --rm --volume "$PWD/dist:/packages:ro" ubuntu:22.04 \
+            /bin/bash -euc '
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y \
+                /packages/ra2-node-studio_*.deb
+              # apt installs Recommends by default; ensure Chinese glyphs exist.
+              dpkg -s fonts-noto-cjk | grep -qx "Status: install ok installed"
+              QT_QPA_PLATFORM=offscreen ra2-node-studio --smoke-test
+              # Exercise the normal XCB/GLX backend too; WSLg often uses this path.
+              DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb xauth
+              xvfb-run -a env QT_QPA_PLATFORM=xcb ra2-node-studio --smoke-test
+            '
+          sudo apt-get update
+          sudo apt-get install -y "./$deb"
+          export QT_QPA_PLATFORM=offscreen
+          /usr/bin/ra2-node-studio --smoke-test
+          dpkg-query -W -f='${Status}\n' ra2-node-studio | grep -qx 'install ok installed'
+
       - name: Package macOS app with bundled Qt
         if: matrix.kind == 'macos'
         shell: bash
@@ -146,6 +204,7 @@ jobs:
 
   publish:
     name: Publish only after all four builds pass
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
     permissions:
@@ -165,10 +224,13 @@ jobs:
           set -euo pipefail
           test -s "dist/RA2NodeStudio-${RELEASE_TAG}-Windows-x64.zip"
           test -s "dist/RA2NodeStudio-${RELEASE_TAG}-Linux-x86_64.AppImage"
+          version=$(printf '%s' "$RELEASE_TAG" | sed 's/^v//')
+          test -s "dist/ra2-node-studio_${version}_amd64.deb"
+          test -s "dist/RA2NodeStudio-${RELEASE_TAG}-Linux-x86_64-portable.tar.gz"
           test -s "dist/RA2NodeStudio-${RELEASE_TAG}-macOS-arm64.zip"
           test -s "dist/RA2NodeStudio-${RELEASE_TAG}-macOS-x86_64.zip"
           ls -lah dist
-      - name: Attach Windows, Linux and macOS packages to release
+      - name: Attach Windows, Linux DEB/AppImage/portable and macOS packages to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}

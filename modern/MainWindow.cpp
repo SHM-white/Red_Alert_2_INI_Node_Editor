@@ -465,8 +465,8 @@ void MainWindow::applyTheme() {
     const QString accentText = current.ui.value("accent").lightness() > 145 ? "#141923" : "#ffffff";
     // VS-style flat square-edged visual language. A single QSS controls all widgets,
     // including dialogs and scroll-area viewports, instead of mixing native rounding.
-    const QString css = QString(R"(
-      QWidget { color:%4; font-family:'Segoe UI','Microsoft YaHei UI',sans-serif; font-size:13px; }
+    QString css = QString(R"(
+      QWidget { color:%4; PLATFORM_FONT_RULE font-size:13px; }
       QMainWindow, QWidget#centralHost, QDialog, QMessageBox { background:%1; }
       QMenuBar, QToolBar, QStatusBar { background:%2; color:%4; }
       QWidget#pane { background:%2; border:1px solid %6; border-radius:0px; }
@@ -530,6 +530,15 @@ void MainWindow::applyTheme() {
       QToolTip { background:%2; color:%4; border:1px solid %6; }
     )").arg(v("background"), v("panel"), v("surface"), v("text"),
            v("muted"), v("border"), v("accent"), accentText);
+#ifdef Q_OS_WIN
+    // Keep the Windows desktop look; Chinese glyphs fall back to Microsoft YaHei.
+    css.replace("PLATFORM_FONT_RULE", "font-family:'Segoe UI','Microsoft YaHei UI',sans-serif;");
+#else
+    // Linux uses QApplication's system UI font and Fontconfig's CJK fallback.
+    // A Windows-only font family in QSS overrides that fallback and can show tofu.
+    // macOS also keeps its native UI font.
+    css.replace("PLATFORM_FONT_RULE", "");
+#endif
     qApp->setStyleSheet(css);
     // Theme changes recolor nodes without jumping the user's graph viewport.
     const bool hasGraph = current_ >= 0 && current_ < document_.sections().size();
@@ -959,6 +968,13 @@ bool MainWindow::smokeTestUi() {
     theme_->setCurrentIndex(light);
     if (!check(qApp->styleSheet().contains("border-radius:0px"), "square style applied")) return false;
     if (!check(!qApp->styleSheet().contains("border-radius:12px"), "no rounded style rules")) return false;
+#ifdef Q_OS_WIN
+    if (!check(qApp->styleSheet().contains("font-family:'Segoe UI'"),
+               "Windows UI font family preserved")) return false;
+#else
+    if (!check(!qApp->styleSheet().contains("font-family:'Segoe UI'"),
+               "non-Windows uses system fonts and native fallback")) return false;
+#endif
     // Verify controls trigger actual BFS model rebuild, separately per direction.
     categoryFilter_->setCurrentIndex(0);
     document_.setLines({"[Grand]", "ref=Unit", "[Unit]", "Primary=W1",
