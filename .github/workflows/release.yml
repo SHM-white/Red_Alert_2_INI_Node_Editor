@@ -168,7 +168,7 @@ jobs:
               DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 /packages/ra2-node-studio_*.deb
               # apt installs Recommends by default; ensure Chinese glyphs exist.
-              dpkg-query -W -f='\${Status}\n' fonts-noto-cjk | grep -qx "install ok installed"
+              dpkg-query -W -f='${Status}\n' fonts-noto-cjk | grep -qx "install ok installed"
               QT_QPA_PLATFORM=offscreen ra2-node-studio --smoke-test
               # Exercise the normal XCB/GLX backend too; WSLg often uses this path.
               DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb xauth
